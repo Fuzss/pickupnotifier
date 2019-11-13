@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[${loader_version},)"
+
+[[mods]]
+    modId="${mod_id}"
+    displayName="${mod_name}"
+    description="${mod_description}"
+    version="${mod_version}"
+    displayURL="${mod_url}"
+    authors="${mod_author}"
+
+[[dependencies.pickupnotifier]]
+    modId="forge"
+    mandatory=true
+    versionRange="[${forge_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.pickupnotifier]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[${mc_version},)"
+    ordering="NONE"
+    side="BOTH"
