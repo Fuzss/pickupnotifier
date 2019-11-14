@@ -22,10 +22,10 @@ public class DisplayEntry {
     private int count;
     private MutableFloat fade;
 
-    public DisplayEntry(ItemStack stack, int count, MutableFloat life) {
+    public DisplayEntry(ItemStack stack, MutableFloat life) {
         this.stack = stack;
         this.name = new TextComponentString(stack.getItem().getItemStackDisplayName(stack));
-        this.count = count;
+        this.count = stack.getCount();
         this.fade = life;
     }
 

@@ -9,9 +9,9 @@ public class PickUpEntry {
     private final int count;
     private MutableFloat life;
 
-    public PickUpEntry(ItemStack stack, int count, int time) {
+    public PickUpEntry(ItemStack stack, int time) {
         this.itemStack = stack;
-        this.count = count;
+        this.count = stack.getCount();
         this.life = new MutableFloat(time);
     }
 

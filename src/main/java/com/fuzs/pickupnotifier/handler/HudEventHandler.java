@@ -49,10 +49,9 @@ public class HudEventHandler {
         List<String> blacklist = Lists.newArrayList(ConfigBuildHandler.generalConfig.blacklist);
         boolean blacklisted = resourcelocation != null && (blacklist.contains(resourcelocation.toString())
                 || blacklist.contains(resourcelocation.getResourceDomain()));
-        int count = evt.getStack().getCount();
-        if (!blacklisted && count > 0) {
+        if (!blacklisted && evt.getStack().getCount() > 0) {
             synchronized (this.pickups) {
-                this.pickups.add(new PickUpEntry(evt.getStack(), count, ConfigBuildHandler.generalConfig.displayTime));
+                this.pickups.add(new PickUpEntry(evt.getStack(), ConfigBuildHandler.generalConfig.displayTime));
                 this.dirty = true;
             }
         }
@@ -82,7 +81,7 @@ public class HudEventHandler {
                     displayEntry.get().addCount(pickUpEntry.getCount());
                     displayEntry.get().setFade(pickUpEntry.getLife());
                 } else if (this.displays.size() < length) {
-                    this.displays.add(new DisplayEntry(pickUpEntry.getItemStack(), pickUpEntry.getCount(), pickUpEntry.getLife()));
+                    this.displays.add(new DisplayEntry(pickUpEntry.getItemStack(), pickUpEntry.getLife()));
                 }
             }
             Collections.reverse(this.displays);
