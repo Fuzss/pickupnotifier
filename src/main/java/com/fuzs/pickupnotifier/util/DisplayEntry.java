@@ -24,15 +24,15 @@ public class DisplayEntry {
     private int count;
     private MutableFloat fade;
 
-    public DisplayEntry(Item item, int count, MutableFloat life) {
-        this.stack = new ItemStack(item);
-        this.name = item.getName();
-        this.count = count;
+    public DisplayEntry(ItemStack stack, MutableFloat life) {
+        this.stack = stack;
+        this.name = stack.getItem().getName();
+        this.count = stack.getCount();
         this.fade = life;
     }
 
-    public boolean compareItem(Item item) {
-        return this.stack.getItem() == item;
+    public boolean compareItem(ItemStack stack) {
+        return this.stack.getItem() == stack.getItem();
     }
 
     public void addCount(int i) {

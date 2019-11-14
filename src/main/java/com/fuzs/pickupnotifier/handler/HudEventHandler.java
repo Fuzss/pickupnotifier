@@ -48,10 +48,9 @@ public class HudEventHandler {
         ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(evt.getStack().getItem());
         boolean blacklisted = resourcelocation != null && (ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.toString())
                 || ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.getNamespace()));
-        int count = evt.getStack().getCount();
-        if (!blacklisted && count > 0) {
+        if (!blacklisted && evt.getStack().getCount() > 0) {
             synchronized (this.pickups) {
-                this.pickups.add(new PickUpEntry(evt.getStack().getItem(), count, ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
+                this.pickups.add(new PickUpEntry(evt.getStack(), ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
                 this.dirty = true;
             }
         }
@@ -76,12 +75,12 @@ public class HudEventHandler {
             List<PickUpEntry> pickupsCopy = Lists.newArrayList(this.pickups);
             Collections.reverse(pickupsCopy);
             for (PickUpEntry pickUpEntry : pickupsCopy) {
-                Optional<DisplayEntry> displayEntry = this.displays.stream().filter(it -> it.compareItem(pickUpEntry.getItem())).findFirst();
+                Optional<DisplayEntry> displayEntry = this.displays.stream().filter(it -> it.compareItem(pickUpEntry.getItemStack())).findFirst();
                 if (displayEntry.isPresent()) {
                     displayEntry.get().addCount(pickUpEntry.getCount());
                     displayEntry.get().setFade(pickUpEntry.getLife());
                 } else if (this.displays.size() < length) {
-                    this.displays.add(new DisplayEntry(pickUpEntry.getItem(), pickUpEntry.getCount(), pickUpEntry.getLife()));
+                    this.displays.add(new DisplayEntry(pickUpEntry.getItemStack(), pickUpEntry.getLife()));
                 }
             }
             Collections.reverse(this.displays);

@@ -1,22 +1,20 @@
 package com.fuzs.pickupnotifier.util;
 
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
 public class PickUpEntry {
 
-    private final Item item;
-    private final int count;
+    private final ItemStack itemStack;
     private MutableFloat life;
 
-    public PickUpEntry(Item stack, int count, int time) {
-        this.item = stack;
-        this.count = count;
+    public PickUpEntry(ItemStack stack, int time) {
+        this.itemStack = stack;
         this.life = new MutableFloat(time);
     }
 
-    public Item getItem() {
-        return this.item;
+    public ItemStack getItemStack() {
+        return this.itemStack;
     }
 
     public MutableFloat getLife() {
@@ -32,7 +30,7 @@ public class PickUpEntry {
     }
 
     public int getCount() {
-        return this.count;
+        return this.itemStack.getCount();
     }
 
 }
