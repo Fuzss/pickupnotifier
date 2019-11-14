@@ -32,9 +32,11 @@ public class HudEventHandler {
         if (evt.phase != TickEvent.Phase.END || this.mc.isGamePaused()) {
             return;
         }
-        this.pickups.forEach(it -> it.tick(evt.renderTickTime));
-        if (this.pickups.removeIf(PickUpEntry::isDead)) {
-            this.dirty = true;
+        synchronized (this.pickups) {
+            this.pickups.forEach(it -> it.tick(evt.renderTickTime));
+            if (this.pickups.removeIf(PickUpEntry::isDead)) {
+                this.dirty = true;
+            }
         }
 
     }
@@ -48,8 +50,10 @@ public class HudEventHandler {
                 || ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.getNamespace()));
         int count = evt.getStack().getCount();
         if (!blacklisted && count > 0) {
-            this.pickups.add(new PickUpEntry(evt.getStack().getItem(), count, ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
-            this.dirty = true;
+            synchronized (this.pickups) {
+                this.pickups.add(new PickUpEntry(evt.getStack().getItem(), count, ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
+                this.dirty = true;
+            }
         }
 
     }

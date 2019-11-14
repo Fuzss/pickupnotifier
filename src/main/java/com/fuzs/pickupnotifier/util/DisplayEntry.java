@@ -96,7 +96,6 @@ public class DisplayEntry {
                 GlStateManager.enableDepthTest();
                 RenderHelper.enableGUIStandardItemLighting();
                 GlStateManager.disableLighting();
-                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 int j = flag ? posX + textWidth + MARGIN : posX;
                 mc.getItemRenderer().renderItemAndEffectIntoGUI(this.stack, j, posY);
                 GlStateManager.enableLighting();

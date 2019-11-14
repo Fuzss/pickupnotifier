@@ -20,7 +20,7 @@ public class PickUpNotifier {
     public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.NAME);
 
     public PickUpNotifier() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigBuildHandler.SPEC, MODID + ".toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigBuildHandler.SPEC, MODID + ".toml");
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
     }
 
