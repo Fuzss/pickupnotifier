@@ -1,31 +1,56 @@
 package com.fuzs.pickupnotifier;
 
-import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
 import com.fuzs.pickupnotifier.handler.HudEventHandler;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@Mod(
+        modid = PickUpNotifier.MODID,
+        name = PickUpNotifier.NAME,
+        version = PickUpNotifier.VERSION,
+        acceptedMinecraftVersions = PickUpNotifier.RANGE,
+        clientSideOnly = PickUpNotifier.CLIENT,
+        dependencies = PickUpNotifier.DEPENDENCIES,
+        certificateFingerprint = PickUpNotifier.FINGERPRINT
+)
+@Mod.EventBusSubscriber(modid = PickUpNotifier.MODID)
 @SuppressWarnings({"WeakerAccess", "unused"})
-@Mod(PickUpNotifier.MODID)
 public class PickUpNotifier {
 
     public static final String MODID = "pickupnotifier";
     public static final String NAME = "Pick Up Notifier";
+    public static final String VERSION = "@VERSION@";
+    public static final String RANGE = "[1.12.2]";
+    public static final boolean CLIENT = true;
+    public static final String DEPENDENCIES = "required-after:forge@[14.23.5.2816,)";
+    public static final String FINGERPRINT = "@FINGERPRINT@";
+
     public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.NAME);
 
-    public PickUpNotifier() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigBuildHandler.SPEC, MODID + ".toml");
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientSetup);
+    @EventHandler
+    public void onPostInit(FMLPostInitializationEvent evt) {
+        MinecraftForge.EVENT_BUS.register(new HudEventHandler());
     }
 
-    private void onClientSetup(final FMLClientSetupEvent evt) {
-        MinecraftForge.EVENT_BUS.register(new HudEventHandler());
+    @EventHandler
+    public void onFingerprintViolation(FMLFingerprintViolationEvent evt) {
+        LOGGER.warn("Invalid fingerprint detected! The file " + evt.getSource().getName() + " may have been tampered with. This version will NOT be supported by the author!");
+    }
+
+    @SubscribeEvent
+    public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent evt) {
+        if (evt.getModID().equals(PickUpNotifier.MODID)) {
+            ConfigManager.sync(PickUpNotifier.MODID, Config.Type.INSTANCE);
+        }
     }
 
 }

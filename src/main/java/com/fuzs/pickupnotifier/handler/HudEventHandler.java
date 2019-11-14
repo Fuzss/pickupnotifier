@@ -4,14 +4,14 @@ import com.fuzs.pickupnotifier.util.DisplayEntry;
 import com.fuzs.pickupnotifier.util.PickUpEntry;
 import com.fuzs.pickupnotifier.util.PositionPreset;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.Optional;
 
 public class HudEventHandler {
 
-    private final Minecraft mc = Minecraft.getInstance();
+    private final Minecraft mc = Minecraft.getMinecraft();
 
     private final List<PickUpEntry> pickups = Lists.newArrayList();
     private final List<DisplayEntry> displays = Lists.newArrayList();
@@ -46,12 +46,13 @@ public class HudEventHandler {
     public void onItemPickup(PlayerEvent.ItemPickupEvent evt) {
 
         ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(evt.getStack().getItem());
-        boolean blacklisted = resourcelocation != null && (ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.toString())
-                || ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.getNamespace()));
+        List<String> blacklist = Lists.newArrayList(ConfigBuildHandler.generalConfig.blacklist);
+        boolean blacklisted = resourcelocation != null && (blacklist.contains(resourcelocation.toString())
+                || blacklist.contains(resourcelocation.getResourceDomain()));
         int count = evt.getStack().getCount();
         if (!blacklisted && count > 0) {
             synchronized (this.pickups) {
-                this.pickups.add(new PickUpEntry(evt.getStack().getItem(), count, ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
+                this.pickups.add(new PickUpEntry(evt.getStack(), count, ConfigBuildHandler.generalConfig.displayTime));
                 this.dirty = true;
             }
         }
@@ -66,22 +67,22 @@ public class HudEventHandler {
             return;
         }
 
-        float scale = ConfigBuildHandler.GENERAL_CONFIG.scale.get() / 6.0F;
-        int scaledWidth = (int) (evt.getWindow().getScaledWidth() / scale);
-        int scaledHeight = (int) (evt.getWindow().getScaledHeight() / scale);
+        float scale = ConfigBuildHandler.generalConfig.scale / 6.0F;
+        int scaledWidth = (int) (evt.getResolution().getScaledWidth() / scale);
+        int scaledHeight = (int) (evt.getResolution().getScaledHeight() / scale);
 
         if (this.dirty) {
             this.displays.clear();
-            int length = (int) (scaledHeight * ConfigBuildHandler.GENERAL_CONFIG.displayHeight.get().floatValue() / DisplayEntry.HEIGHT) - 1;
+            int length = (int) (scaledHeight * ConfigBuildHandler.generalConfig.displayHeight / DisplayEntry.HEIGHT) - 1;
             List<PickUpEntry> pickupsCopy = Lists.newArrayList(this.pickups);
             Collections.reverse(pickupsCopy);
             for (PickUpEntry pickUpEntry : pickupsCopy) {
-                Optional<DisplayEntry> displayEntry = this.displays.stream().filter(it -> it.compareItem(pickUpEntry.getItem())).findFirst();
+                Optional<DisplayEntry> displayEntry = this.displays.stream().filter(it -> it.compareItem(pickUpEntry.getItemStack())).findFirst();
                 if (displayEntry.isPresent()) {
                     displayEntry.get().addCount(pickUpEntry.getCount());
                     displayEntry.get().setFade(pickUpEntry.getLife());
                 } else if (this.displays.size() < length) {
-                    this.displays.add(new DisplayEntry(pickUpEntry.getItem(), pickUpEntry.getCount(), pickUpEntry.getLife()));
+                    this.displays.add(new DisplayEntry(pickUpEntry.getItemStack(), pickUpEntry.getCount(), pickUpEntry.getLife()));
                 }
             }
             Collections.reverse(this.displays);
@@ -92,21 +93,21 @@ public class HudEventHandler {
             return;
         }
 
-        PositionPreset position = ConfigBuildHandler.GENERAL_CONFIG.position.get();
+        PositionPreset position = ConfigBuildHandler.generalConfig.position;
         boolean bottom = position.isBottom();
-        int x = ConfigBuildHandler.GENERAL_CONFIG.xOffset.get();
-        int y = ConfigBuildHandler.GENERAL_CONFIG.yOffset.get();
+        int x = ConfigBuildHandler.generalConfig.xOffset;
+        int y = ConfigBuildHandler.generalConfig.yOffset;
         int offset = position.getY(DisplayEntry.HEIGHT, scaledHeight, y);
         int totalFade = (int) (this.displays.stream().mapToDouble(DisplayEntry::getFade).average().orElse(0.0) * this.displays.size() * DisplayEntry.HEIGHT);
         offset += bottom ? totalFade : -totalFade;
-        GlStateManager.scalef(scale, scale, 1.0F);
+        GlStateManager.scale(scale, scale, 1.0F);
 
         for (DisplayEntry entry : this.displays) {
             entry.render(this.mc, position.getX(entry.getTotalWidth(this.mc), scaledWidth, x), offset);
             offset += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;
         }
 
-        GlStateManager.scalef(1.0F / scale, 1.0F / scale, 1.0F);
+        GlStateManager.scale(1.0F / scale, 1.0F / scale, 1.0F);
 
     }
 

@@ -1,16 +1,14 @@
 package com.fuzs.pickupnotifier.util;
 
 import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.Item;
+import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
@@ -24,15 +22,15 @@ public class DisplayEntry {
     private int count;
     private MutableFloat fade;
 
-    public DisplayEntry(Item item, int count, MutableFloat life) {
-        this.stack = new ItemStack(item);
-        this.name = item.getName();
+    public DisplayEntry(ItemStack stack, int count, MutableFloat life) {
+        this.stack = stack;
+        this.name = new TextComponentString(stack.getItem().getItemStackDisplayName(stack));
         this.count = count;
         this.fade = life;
     }
 
-    public boolean compareItem(Item item) {
-        return this.stack.getItem() == item;
+    public boolean compareItem(ItemStack item) {
+        return this.stack.getItem() == item.getItem();
     }
 
     public void addCount(int i) {
@@ -40,16 +38,16 @@ public class DisplayEntry {
     }
 
     private ITextComponent getNameComponent() {
-        if (ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored()) {
-            return new StringTextComponent(this.count + "x ").appendSibling(this.name);
+        if (ConfigBuildHandler.generalConfig.position.isMirrored()) {
+            return new TextComponentString(this.count + "x ").appendSibling(this.name);
         } else {
-            return this.name.shallowCopy().appendText(" x" + this.count);
+            return this.name.createCopy().appendText(" x" + this.count);
         }
     }
 
     public float getFade() {
-        return 1.0F - Math.min(1.0F, this.fade.floatValue() / Math.min(ConfigBuildHandler.GENERAL_CONFIG.fadeTime.get(),
-                ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
+        return 1.0F - Math.min(1.0F, this.fade.floatValue() / Math.min(ConfigBuildHandler.generalConfig.fadeTime,
+                ConfigBuildHandler.generalConfig.displayTime));
     }
 
     public void setFade(MutableFloat life) {
@@ -60,47 +58,43 @@ public class DisplayEntry {
 
     private String getNameString() {
         Style style;
-        if (!ConfigBuildHandler.GENERAL_CONFIG.ignoreRarity.get() && this.stack.getRarity() != Rarity.COMMON) {
-            style = new Style().setColor(this.stack.getRarity().color);
+        if (!ConfigBuildHandler.generalConfig.ignoreRarity && this.stack.getItem().getForgeRarity(this.stack) != EnumRarity.COMMON) {
+            style = new Style().setColor(this.stack.getItem().getForgeRarity(this.stack).getColor());
         } else {
-            style = new Style().setColor(ConfigBuildHandler.GENERAL_CONFIG.color.get().getChatColor());
+            style = new Style().setColor(ConfigBuildHandler.generalConfig.color.getChatColor());
         }
         return this.getNameComponent().setStyle(style).getFormattedText();
     }
 
     private int getTextWidth(Minecraft mc) {
-        String s = this.getNameComponent().getString();
+        String s = this.getNameComponent().getUnformattedText();
         return mc.fontRenderer.getStringWidth(TextFormatting.getTextWithoutFormattingCodes(s));
     }
 
     public int getTotalWidth(Minecraft mc) {
         int length = this.getTextWidth(mc);
-        return ConfigBuildHandler.GENERAL_CONFIG.showSprite.get() ? length + MARGIN + 16 : length;
+        return ConfigBuildHandler.generalConfig.showSprite ? length + MARGIN + 16 : length;
     }
 
     public void render(Minecraft mc, int posX, int posY) {
-        boolean flag = ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored();
+        boolean flag = ConfigBuildHandler.generalConfig.position.isMirrored();
         int i = flag ? posX : posX + 16 + MARGIN;
         int textWidth = this.getTextWidth(mc);
-        int opacity = mc.gameSettings.func_216839_a(0);
-        if (opacity != 0) {
-            AbstractGui.fill(i - 2, posY + 3 - 2, i + textWidth + 2, posY + 3 + mc.fontRenderer.FONT_HEIGHT + 2, opacity);
-        }
-        int alpha = ConfigBuildHandler.GENERAL_CONFIG.fade.get() ? 255 - (int) (255 * this.getFade()) : 255;
+        int alpha = ConfigBuildHandler.generalConfig.fade ? 255 - (int) (255 * this.getFade()) : 255;
         if (alpha > 0) {
             GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (alpha << 24));
             GlStateManager.disableBlend();
-            if (ConfigBuildHandler.GENERAL_CONFIG.showSprite.get()) {
-                GlStateManager.enableDepthTest();
+            if (ConfigBuildHandler.generalConfig.showSprite) {
+                GlStateManager.enableDepth();
                 RenderHelper.enableGUIStandardItemLighting();
                 GlStateManager.disableLighting();
                 int j = flag ? posX + textWidth + MARGIN : posX;
-                mc.getItemRenderer().renderItemAndEffectIntoGUI(this.stack, j, posY);
+                mc.getRenderItem().renderItemAndEffectIntoGUI(this.stack, j, posY);
                 GlStateManager.enableLighting();
                 RenderHelper.disableStandardItemLighting();
-                GlStateManager.disableDepthTest();
+                GlStateManager.disableDepth();
             }
         }
     }
