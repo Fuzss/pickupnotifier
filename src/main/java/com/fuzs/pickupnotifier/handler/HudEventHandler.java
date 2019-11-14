@@ -4,13 +4,13 @@ import com.fuzs.pickupnotifier.util.DisplayEntry;
 import com.fuzs.pickupnotifier.util.PickUpEntry;
 import com.fuzs.pickupnotifier.util.PositionPreset;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collections;
@@ -67,8 +67,8 @@ public class HudEventHandler {
         }
 
         float scale = ConfigBuildHandler.GENERAL_CONFIG.scale.get() / 6.0F;
-        int scaledWidth = (int) (evt.getWindow().getScaledWidth() / scale);
-        int scaledHeight = (int) (evt.getWindow().getScaledHeight() / scale);
+        int scaledWidth = (int) (this.mc.mainWindow.getScaledWidth() / scale);
+        int scaledHeight = (int) (this.mc.mainWindow.getScaledHeight() / scale);
 
         if (this.dirty) {
             this.displays.clear();
