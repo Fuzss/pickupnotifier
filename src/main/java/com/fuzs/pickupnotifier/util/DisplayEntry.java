@@ -1,15 +1,16 @@
 package com.fuzs.pickupnotifier.util;
 
 import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Rarity;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
@@ -40,9 +41,9 @@ public class DisplayEntry {
 
     private ITextComponent getNameComponent() {
         if (ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored()) {
-            return new TextComponentString(this.count + "x ").appendSibling(this.name);
+            return new StringTextComponent(this.count + "x ").appendSibling(this.name);
         } else {
-            return this.name.createCopy().appendText(" x" + this.count);
+            return this.name.shallowCopy().appendText(" x" + this.count);
         }
     }
 
@@ -59,7 +60,7 @@ public class DisplayEntry {
 
     private String getNameString() {
         Style style;
-        if (!ConfigBuildHandler.GENERAL_CONFIG.ignoreRarity.get() && this.stack.getRarity() != EnumRarity.COMMON) {
+        if (!ConfigBuildHandler.GENERAL_CONFIG.ignoreRarity.get() && this.stack.getRarity() != Rarity.COMMON) {
             style = new Style().setColor(this.stack.getRarity().color);
         } else {
             style = new Style().setColor(ConfigBuildHandler.GENERAL_CONFIG.color.get().getChatColor());
@@ -81,6 +82,10 @@ public class DisplayEntry {
         boolean flag = ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored();
         int i = flag ? posX : posX + 16 + MARGIN;
         int textWidth = this.getTextWidth(mc);
+        int opacity = mc.gameSettings.func_216839_a(0);
+        if (opacity != 0) {
+            AbstractGui.fill(i - 2, posY + 3 - 2, i + textWidth + 2, posY + 3 + mc.fontRenderer.FONT_HEIGHT + 2, opacity);
+        }
         int alpha = ConfigBuildHandler.GENERAL_CONFIG.fade.get() ? 255 - (int) (255 * this.getFade()) : 255;
         if (alpha > 0) {
             GlStateManager.enableBlend();
