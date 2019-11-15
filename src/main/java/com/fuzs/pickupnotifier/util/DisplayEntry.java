@@ -39,7 +39,7 @@ public class DisplayEntry {
     }
 
     private ITextComponent getNameComponent() {
-        if (ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored()) {
+        if (ConfigBuildHandler.DISPLAY_CONFIG.position.get().isMirrored()) {
             return new StringTextComponent(this.count + "x ").appendSibling(this.name);
         } else {
             return this.name.shallowCopy().appendText(" x" + this.count);
@@ -47,7 +47,7 @@ public class DisplayEntry {
     }
 
     public float getFade() {
-        return 1.0F - Math.min(1.0F, this.fade.floatValue() / Math.min(ConfigBuildHandler.GENERAL_CONFIG.fadeTime.get(),
+        return 1.0F - Math.min(1.0F, this.fade.floatValue() / Math.min(ConfigBuildHandler.GENERAL_CONFIG.moveTime.get(),
                 ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
     }
 
@@ -78,7 +78,7 @@ public class DisplayEntry {
     }
 
     public void render(Minecraft mc, int posX, int posY, float alpha) {
-        boolean mirrored = ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored();
+        boolean mirrored = ConfigBuildHandler.DISPLAY_CONFIG.position.get().isMirrored();
         boolean sprite = ConfigBuildHandler.GENERAL_CONFIG.showSprite.get();
         int i = mirrored || !sprite ? posX : posX + 16 + MARGIN;
         int textWidth = this.getTextWidth(mc);
@@ -86,7 +86,7 @@ public class DisplayEntry {
         if (opacity != 0) {
             AbstractGui.fill(i - 2, posY + 3 - 2, i + textWidth + 2, posY + 3 + mc.fontRenderer.FONT_HEIGHT + 2, opacity);
         }
-        int k = ConfigBuildHandler.GENERAL_CONFIG.fadeForce.get() || !sprite ? 255 - (int) (255 * alpha) : 255;
+        int k = ConfigBuildHandler.GENERAL_CONFIG.moveFadeForce.get() || !sprite ? 255 - (int) (255 * alpha) : 255;
         if (k > 0) {
             GlStateManager.enableBlend();
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
