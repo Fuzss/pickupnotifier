@@ -18,7 +18,7 @@ public class ConfigBuildHandler {
         public final ForgeConfigSpec.ConfigValue<List<String>> blacklist;
         public final ForgeConfigSpec.IntValue displayTime;
         public final ForgeConfigSpec.IntValue fadeTime;
-        public final ForgeConfigSpec.BooleanValue fade;
+        public final ForgeConfigSpec.BooleanValue fadeForce;
         public final ForgeConfigSpec.BooleanValue showSprite;
         public final ForgeConfigSpec.EnumValue<TextColor> color;
         public final ForgeConfigSpec.BooleanValue ignoreRarity;
@@ -33,7 +33,7 @@ public class ConfigBuildHandler {
             this.blacklist = ConfigBuildHandler.BUILDER.comment("Disable specific items or content from whole mods from showing. Enter as either \"modid:item\" or \"modid\".").define("Blacklist", Lists.newArrayList("examplemod", "examplemod:exampleitem"));
             this.displayTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks each item entry will be shown for.").defineInRange("Display Time", 80, 0, Integer.MAX_VALUE);
             this.fadeTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks it takes for an item entry to move out of the screen. Value cannot be larger than \"Display Time\".").defineInRange("Fade Time", 20, 0, Integer.MAX_VALUE);
-            this.fade = ConfigBuildHandler.BUILDER.comment("Should outdated item entries fade away instead of simply vanishing. Only the name will fade.").define("Fade", false);
+            this.fadeForce = ConfigBuildHandler.BUILDER.comment("Force outdated item entry names to always fade away instead of simply vanishing, even when sprites are shown.").define("Force Fade", false);
             this.showSprite = ConfigBuildHandler.BUILDER.comment("Show a small sprite next to the name of each item.").define("Draw Sprites", true);
             this.color = ConfigBuildHandler.BUILDER.comment("Color of the item name text.").defineEnum("Text Color", TextColor.WHITE);
             this.ignoreRarity = ConfigBuildHandler.BUILDER.comment("Ignore rarity of items and always use color specified in \"Text Color\" instead.").define("Ignore Rarity", false);

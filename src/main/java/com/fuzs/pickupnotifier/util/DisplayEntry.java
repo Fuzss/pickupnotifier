@@ -76,21 +76,22 @@ public class DisplayEntry {
         return ConfigBuildHandler.GENERAL_CONFIG.showSprite.get() ? length + MARGIN + 16 : length;
     }
 
-    public void render(Minecraft mc, int posX, int posY) {
-        boolean flag = ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored();
-        int i = flag ? posX : posX + 16 + MARGIN;
+    public void render(Minecraft mc, int posX, int posY, float alpha) {
+        boolean mirrored = ConfigBuildHandler.GENERAL_CONFIG.position.get().isMirrored();
+        boolean sprite = ConfigBuildHandler.GENERAL_CONFIG.showSprite.get();
+        int i = mirrored || !sprite ? posX : posX + 16 + MARGIN;
         int textWidth = this.getTextWidth(mc);
-        int alpha = ConfigBuildHandler.GENERAL_CONFIG.fade.get() ? 255 - (int) (255 * this.getFade()) : 255;
-        if (alpha > 0) {
+        int k = ConfigBuildHandler.GENERAL_CONFIG.fadeForce.get() || !sprite ? 255 - (int) (255 * alpha) : 255;
+        if (k > 0) {
             GlStateManager.enableBlend();
             GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (alpha << 24));
+            mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (k << 24));
             GlStateManager.disableBlend();
             if (ConfigBuildHandler.GENERAL_CONFIG.showSprite.get()) {
                 GlStateManager.enableDepthTest();
                 RenderHelper.enableGUIStandardItemLighting();
                 GlStateManager.disableLighting();
-                int j = flag ? posX + textWidth + MARGIN : posX;
+                int j = mirrored ? posX + textWidth + MARGIN : posX;
                 mc.getItemRenderer().renderItemAndEffectIntoGUI(this.stack, j, posY);
                 GlStateManager.enableLighting();
                 RenderHelper.disableStandardItemLighting();
