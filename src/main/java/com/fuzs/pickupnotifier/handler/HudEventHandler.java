@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -94,16 +95,22 @@ public class HudEventHandler {
 
         PositionPreset position = ConfigBuildHandler.generalConfig.position;
         boolean bottom = position.isBottom();
-        int x = ConfigBuildHandler.generalConfig.xOffset;
-        int y = ConfigBuildHandler.generalConfig.yOffset;
+        int x = (int) (ConfigBuildHandler.generalConfig.xOffset / scale);
+        int y = (int) (ConfigBuildHandler.generalConfig.yOffset / scale);
         int offset = position.getY(DisplayEntry.HEIGHT, scaledHeight, y);
         int totalFade = (int) (this.displays.stream().mapToDouble(DisplayEntry::getFade).average().orElse(0.0) * this.displays.size() * DisplayEntry.HEIGHT);
-        offset += bottom ? totalFade : -totalFade;
+        int offsetFade = offset + (bottom ? totalFade : -totalFade);
         GlStateManager.scale(scale, scale, 1.0F);
 
         for (DisplayEntry entry : this.displays) {
-            entry.render(this.mc, position.getX(entry.getTotalWidth(this.mc), scaledWidth, x), offset);
-            offset += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;
+            if (bottom) {
+                if (offsetFade < offset + DisplayEntry.HEIGHT) {
+                    entry.render(this.mc, position.getX(entry.getTotalWidth(this.mc), scaledWidth, x), offsetFade, MathHelper.clamp((float) (offsetFade - offset) / DisplayEntry.HEIGHT, 0.0F, 1.0F));
+                }
+            } else if (offsetFade > offset - DisplayEntry.HEIGHT) {
+                entry.render(this.mc, position.getX(entry.getTotalWidth(this.mc), scaledWidth, x), offsetFade, MathHelper.clamp((float) (offsetFade - offset) / -DisplayEntry.HEIGHT, 0.0F, 1.0F));
+            }
+            offsetFade += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;
         }
 
         GlStateManager.scale(1.0F / scale, 1.0F / scale, 1.0F);

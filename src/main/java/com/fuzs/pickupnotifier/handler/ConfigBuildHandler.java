@@ -25,9 +25,9 @@ public class ConfigBuildHandler {
         @Config.Comment("Amount of ticks it takes for an item entry to move out of the screen. Value cannot be larger than \"Display Time\".")
         @Config.RangeInt(min = 0)
         public int fadeTime = 20;
-        @Config.Name("Fade")
-        @Config.Comment("Should outdated item entries fade away instead of simply vanishing. Only the name will fade.")
-        public boolean fade = false;
+        @Config.Name("Force Fade")
+        @Config.Comment("Force outdated item entry names to always fade away instead of simply vanishing, even when sprites are shown.")
+        public boolean fadeForce = false;
         @Config.Name("Draw Sprites")
         @Config.Comment("Show a small sprite next to the name of each item.")
         public boolean showSprite = true;
