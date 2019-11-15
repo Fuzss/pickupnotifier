@@ -38,7 +38,7 @@ public class DisplayEntry {
     }
 
     private ITextComponent getNameComponent() {
-        if (ConfigBuildHandler.generalConfig.position.isMirrored()) {
+        if (ConfigBuildHandler.displayConfig.position.isMirrored()) {
             return new TextComponentString(this.count + "x ").appendSibling(this.name);
         } else {
             return this.name.createCopy().appendText(" x" + this.count);
@@ -46,7 +46,7 @@ public class DisplayEntry {
     }
 
     public float getFade() {
-        return 1.0F - Math.min(1.0F, this.fade.floatValue() / Math.min(ConfigBuildHandler.generalConfig.fadeTime,
+        return 1.0F - Math.min(1.0F, this.fade.floatValue() / Math.min(ConfigBuildHandler.generalConfig.moveTime,
                 ConfigBuildHandler.generalConfig.displayTime));
     }
 
@@ -77,11 +77,11 @@ public class DisplayEntry {
     }
 
     public void render(Minecraft mc, int posX, int posY, float alpha) {
-        boolean mirrored = ConfigBuildHandler.generalConfig.position.isMirrored();
+        boolean mirrored = ConfigBuildHandler.displayConfig.position.isMirrored();
         boolean sprite = ConfigBuildHandler.generalConfig.showSprite;
         int i = mirrored || !sprite ? posX : posX + 16 + MARGIN;
         int textWidth = this.getTextWidth(mc);
-        int k = ConfigBuildHandler.generalConfig.fadeForce || !sprite ? 255 - (int) (255 * alpha) : 255;
+        int k = ConfigBuildHandler.generalConfig.moveFadeForce || !sprite ? 255 - (int) (255 * alpha) : 255;
         if (k > 0) {
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
