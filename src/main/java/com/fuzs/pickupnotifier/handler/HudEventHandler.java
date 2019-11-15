@@ -66,17 +66,18 @@ public class HudEventHandler {
             return;
         }
 
-        float scale = ConfigBuildHandler.GENERAL_CONFIG.scale.get() / 6.0F;
+        float scale = ConfigBuildHandler.DISPLAY_CONFIG.scale.get() / 6.0F;
         int scaledWidth = (int) (this.mc.mainWindow.getScaledWidth() / scale);
         int scaledHeight = (int) (this.mc.mainWindow.getScaledHeight() / scale);
 
         if (this.dirty) {
             this.displays.clear();
-            int length = (int) (scaledHeight * ConfigBuildHandler.GENERAL_CONFIG.displayHeight.get().floatValue() / DisplayEntry.HEIGHT) - 1;
+            int length = (int) (scaledHeight * ConfigBuildHandler.DISPLAY_CONFIG.height.get().floatValue() / DisplayEntry.HEIGHT) - 1;
             List<PickUpEntry> pickupsCopy = Lists.newArrayList(this.pickups);
             Collections.reverse(pickupsCopy);
             for (PickUpEntry pickUpEntry : pickupsCopy) {
-                Optional<DisplayEntry> displayEntry = this.displays.stream().filter(it -> it.compareItem(pickUpEntry.getItemStack())).findFirst();
+                Optional<DisplayEntry> displayEntry = ConfigBuildHandler.GENERAL_CONFIG.combineEntries.get() ? this.displays
+                        .stream().filter(it -> it.compareItem(pickUpEntry.getItemStack())).findFirst() : Optional.empty();
                 if (displayEntry.isPresent()) {
                     displayEntry.get().addCount(pickUpEntry.getCount());
                     displayEntry.get().setFade(pickUpEntry.getLife());
@@ -92,12 +93,12 @@ public class HudEventHandler {
             return;
         }
 
-        PositionPreset position = ConfigBuildHandler.GENERAL_CONFIG.position.get();
+        PositionPreset position = ConfigBuildHandler.DISPLAY_CONFIG.position.get();
         boolean bottom = position.isBottom();
-        int x = (int) (ConfigBuildHandler.GENERAL_CONFIG.xOffset.get() / scale);
-        int y = (int) (ConfigBuildHandler.GENERAL_CONFIG.yOffset.get() / scale);
+        int x = (int) (ConfigBuildHandler.DISPLAY_CONFIG.xOffset.get() / scale);
+        int y = (int) (ConfigBuildHandler.DISPLAY_CONFIG.yOffset.get() / scale);
         int offset = position.getY(DisplayEntry.HEIGHT, scaledHeight, y);
-        int totalFade = (int) (this.displays.stream().mapToDouble(DisplayEntry::getFade).average().orElse(0.0) * this.displays.size() * DisplayEntry.HEIGHT);
+        int totalFade = ConfigBuildHandler.GENERAL_CONFIG.move.get () ? (int) (this.displays.stream().mapToDouble(DisplayEntry::getFade).average().orElse(0.0) * this.displays.size() * DisplayEntry.HEIGHT) : 0;
         int offsetFade = offset + (bottom ? totalFade : -totalFade);
         GlStateManager.scalef(scale, scale, 1.0F);
 
