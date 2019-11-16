@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -15,9 +16,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +37,7 @@ public class HudEventHandler {
         if (evt.phase != TickEvent.Phase.END || this.mc.isGamePaused()) {
             return;
         }
+        
         synchronized (this.pickups) {
             this.pickups.forEach(it -> it.tick(evt.renderTickTime));
             if (this.pickups.removeIf(PickUpEntry::isDead)) {
@@ -51,31 +51,19 @@ public class HudEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onEntityItemPickup(EntityItemPickupEvent evt) {
 
-        if (ConfigBuildHandler.generalConfig.logEverything) {
-            EntityItem item = evt.getItem();
-            EntityPlayer player = evt.getEntityPlayer();
-            // requires additional checks as it might actually not be possible for the item to be picked up
-            boolean owner = item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName());
-            if (owner && (player.inventory.getFirstEmptyStack() != -1 || player.inventory.getSlotFor(item.getItem()) != -1)) {
-                this.addPickUpEntry(item.getItem());
-            }
-        }
-
-    }
-
-    @SuppressWarnings("unused")
-    @SubscribeEvent
-    public void onItemPickup(PlayerEvent.ItemPickupEvent evt) {
-
-        if (!ConfigBuildHandler.generalConfig.logEverything) {
-            this.addPickUpEntry(evt.getStack());
+        EntityItem item = evt.getItem();
+        EntityPlayer player = evt.getEntityPlayer();
+        // requires additional checks as it might actually not be possible for the item to be picked up
+        boolean owner = item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName());
+        if (owner && (player.inventory.getFirstEmptyStack() != -1 || player.inventory.getSlotFor(item.getEntityItem()) != -1)) {
+            this.addPickUpEntry(item.getEntityItem());
         }
 
     }
 
     private void addPickUpEntry(ItemStack stack) {
 
-        ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        ResourceLocation resourcelocation = Item.REGISTRY.getNameForObject(stack.getItem());
         List<String> blacklist = Lists.newArrayList(ConfigBuildHandler.generalConfig.blacklist);
         boolean blacklisted = resourcelocation != null && (blacklist.contains(resourcelocation.toString())
                 || blacklist.contains(resourcelocation.getResourceDomain()));

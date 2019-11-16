@@ -58,8 +58,8 @@ public class DisplayEntry {
 
     private String getNameString() {
         Style style;
-        if (!ConfigBuildHandler.generalConfig.ignoreRarity && this.stack.getItem().getForgeRarity(this.stack) != EnumRarity.COMMON) {
-            style = new Style().setColor(this.stack.getItem().getForgeRarity(this.stack).getColor());
+        if (!ConfigBuildHandler.generalConfig.ignoreRarity && this.stack.getRarity() != EnumRarity.COMMON) {
+            style = new Style().setColor(this.stack.getRarity().rarityColor);
         } else {
             style = new Style().setColor(ConfigBuildHandler.generalConfig.color.getChatColor());
         }
@@ -68,7 +68,7 @@ public class DisplayEntry {
 
     private int getTextWidth(Minecraft mc) {
         String s = this.getNameComponent().getUnformattedText();
-        return mc.fontRenderer.getStringWidth(TextFormatting.getTextWithoutFormattingCodes(s));
+        return mc.fontRendererObj.getStringWidth(TextFormatting.getTextWithoutFormattingCodes(s));
     }
 
     public int getTotalWidth(Minecraft mc) {
@@ -85,7 +85,7 @@ public class DisplayEntry {
         if (k > 0) {
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (k << 24));
+            mc.fontRendererObj.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (k << 24));
             GlStateManager.disableBlend();
             if (sprite) {
                 GlStateManager.enableDepth();
