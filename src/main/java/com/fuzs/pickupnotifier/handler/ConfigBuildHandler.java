@@ -45,6 +45,9 @@ public class ConfigBuildHandler {
         @Config.Name("Move Force Fade")
         @Config.Comment("Force moving item entry names to slowly fade even when sprites are shown instead of simply vanishing.")
         public boolean moveFadeForce = false;
+        @Config.Name("Log Everything")
+        @Config.Comment("Show entries for every item picked up, even the ones not going into the player inventory, e. g. when directly collected by backpacks.")
+        public boolean logEverything = false;
 
     }
 
