@@ -25,6 +25,7 @@ public class ConfigBuildHandler {
         public final ForgeConfigSpec.BooleanValue move;
         public final ForgeConfigSpec.IntValue moveTime;
         public final ForgeConfigSpec.BooleanValue moveFadeForce;
+        public final ForgeConfigSpec.BooleanValue logEverything;
 
         private GeneralConfig(String name) {
             BUILDER.push(name);
@@ -37,6 +38,7 @@ public class ConfigBuildHandler {
             this.move = ConfigBuildHandler.BUILDER.comment("Make outdated entries slowly move out of the screen instead of disappearing instantly.").define("Move Out Of Screen", true);
             this.moveTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks it takes for an item entry to move out of the screen. Value cannot be larger than \"Display Time\".").defineInRange("Move Time", 20, 0, Integer.MAX_VALUE);
             this.moveFadeForce = ConfigBuildHandler.BUILDER.comment("Force moving item entry names to slowly fade even when sprites are shown instead of simply vanishing.").define("Move Force Fade", false);
+            this.logEverything = ConfigBuildHandler.BUILDER.comment("Show entries for every item picked up, even the ones not going into the player inventory, e. g. when directly collected by backpacks.").define("Log Everything", false);
             BUILDER.pop();
         }
 
