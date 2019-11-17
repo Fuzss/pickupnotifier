@@ -6,9 +6,14 @@ import com.fuzs.pickupnotifier.util.PositionPreset;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -43,15 +48,40 @@ public class HudEventHandler {
     }
 
     @SuppressWarnings("unused")
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public void onEntityItemPickup(EntityItemPickupEvent evt) {
+
+        if (ConfigBuildHandler.GENERAL_CONFIG.logEverything.get()) {
+            EntityItem item = evt.getItem();
+            EntityPlayer player = evt.getEntityPlayer();
+            // requires additional checks as it might actually not be possible for the item to be picked up
+            boolean owner = item.getOwnerId() == null || item.lifespan - item.getAge() <= 200 || item.getOwnerId().equals(player.getUniqueID());
+            if (owner && (player.inventory.getFirstEmptyStack() != -1 || player.inventory.getSlotFor(item.getItem()) != -1)) {
+                this.addPickUpEntry(item.getItem());
+            }
+        }
+
+    }
+
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public void onItemPickup(PlayerEvent.ItemPickupEvent evt) {
 
-        ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(evt.getStack().getItem());
+        if (!ConfigBuildHandler.GENERAL_CONFIG.logEverything.get()) {
+            this.addPickUpEntry(evt.getStack());
+        }
+
+    }
+
+    private void addPickUpEntry(ItemStack stack) {
+
+        ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(stack.getItem());
         boolean blacklisted = resourcelocation != null && (ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.toString())
                 || ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.getNamespace()));
-        if (!blacklisted && evt.getStack().getCount() > 0) {
+
+        if (!stack.isEmpty() && stack.getCount() > 0 && !blacklisted) {
             synchronized (this.pickups) {
-                this.pickups.add(new PickUpEntry(evt.getStack(), ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
+                this.pickups.add(new PickUpEntry(stack.copy(), ConfigBuildHandler.GENERAL_CONFIG.displayTime.get()));
                 this.dirty = true;
             }
         }
