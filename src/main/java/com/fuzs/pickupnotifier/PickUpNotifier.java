@@ -28,7 +28,7 @@ public class PickUpNotifier {
     public static final String MODID = "pickupnotifier";
     public static final String NAME = "Pick Up Notifier";
     public static final String VERSION = "@VERSION@";
-    public static final String RANGE = "[1.11, 1.11.2]";
+    public static final String RANGE = "[1.11, 1.12.2]";
     public static final boolean CLIENT = true;
     public static final String FINGERPRINT = "@FINGERPRINT@";
 
