@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
         version = PickUpNotifier.VERSION,
         acceptedMinecraftVersions = PickUpNotifier.RANGE,
         clientSideOnly = PickUpNotifier.CLIENT,
-        dependencies = PickUpNotifier.DEPENDENCIES,
         certificateFingerprint = PickUpNotifier.FINGERPRINT
 )
 @Mod.EventBusSubscriber(modid = PickUpNotifier.MODID)
@@ -31,7 +30,6 @@ public class PickUpNotifier {
     public static final String VERSION = "@VERSION@";
     public static final String RANGE = "[1.12.2]";
     public static final boolean CLIENT = true;
-    public static final String DEPENDENCIES = "required-after:forge@[14.23.5.2816,)";
     public static final String FINGERPRINT = "@FINGERPRINT@";
 
     public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.NAME);

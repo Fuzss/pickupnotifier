@@ -10,8 +10,9 @@ public class ItemDisplayEntry extends DisplayEntry {
 
     private final ItemStack stack;
 
+    @SuppressWarnings("deprecation")
     public ItemDisplayEntry(ItemStack stack) {
-        super(new TextComponentString(stack.getItem().getItemStackDisplayName(stack)), stack.getCount(), stack.getItem().getForgeRarity(stack));
+        super(new TextComponentString(stack.getItem().getItemStackDisplayName(stack)), stack.getCount(), stack.getRarity());
         this.stack = stack.copy();
     }
 

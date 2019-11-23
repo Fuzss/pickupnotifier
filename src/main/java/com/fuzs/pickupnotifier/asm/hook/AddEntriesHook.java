@@ -7,6 +7,7 @@ import com.fuzs.pickupnotifier.util.ItemDisplayEntry;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -61,7 +62,7 @@ public class AddEntriesHook {
 
         synchronized (PICK_UPS) {
             float scale = ConfigBuildHandler.displayConfig.scale / 6.0F;
-            int scaledHeight = (int) (Minecraft.getMinecraft().displayHeight / scale);
+            int scaledHeight = (int) (new ScaledResolution(Minecraft.getMinecraft()).getScaledHeight() / scale);
             int length = (int) (scaledHeight * ConfigBuildHandler.displayConfig.height / DisplayEntry.HEIGHT) - 1;
 
             Optional<DisplayEntry> displayEntryOptional = ConfigBuildHandler.generalConfig.combineEntries ? PICK_UPS

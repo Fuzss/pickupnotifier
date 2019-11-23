@@ -8,7 +8,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.IRarity;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
 @SuppressWarnings("WeakerAccess")
@@ -18,11 +17,11 @@ public abstract class DisplayEntry {
     private static final int MARGIN = 4;
 
     protected final ITextComponent name;
-    private final IRarity rarity;
+    private final EnumRarity rarity;
     protected int count;
     private final MutableFloat life;
 
-    protected DisplayEntry(ITextComponent name, int count, IRarity rarity) {
+    protected DisplayEntry(ITextComponent name, int count, EnumRarity rarity) {
         this.name = name;
         this.count = Math.min(count, ConfigBuildHandler.generalConfig.maxCount);
         this.rarity = rarity;
@@ -77,7 +76,7 @@ public abstract class DisplayEntry {
     private Style getStyle() {
 
         if (!ConfigBuildHandler.generalConfig.ignoreRarity && this.rarity != EnumRarity.COMMON) {
-            return new Style().setColor(this.rarity.getColor());
+            return new Style().setColor(this.rarity.rarityColor);
         } else {
             return new Style().setColor(ConfigBuildHandler.generalConfig.color.getChatColor());
         }
