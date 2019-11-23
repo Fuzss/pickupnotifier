@@ -4,7 +4,7 @@ import com.fuzs.pickupnotifier.asm.LoadingPlugin;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 @SuppressWarnings("WeakerAccess")
 public class MethodSignature {
