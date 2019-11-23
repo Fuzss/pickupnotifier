@@ -34,6 +34,9 @@ minecraft {
 
 jar {
     archiveName "${mod_name.replaceAll("\\s", "")}-v${mod_version}-${mc_version}.jar" // use archiveFileName in the future
+    manifest {
+        attributes('FMLCorePluginContainsFMLMod': 'true', 'FMLCorePlugin': 'com.fuzs.pickupnotifier.asm.LoadingPlugin')
+    }
 }
 
 processResources {
