@@ -1,7 +1,7 @@
 package com.fuzs.pickupnotifier;
 
 import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
-import com.fuzs.pickupnotifier.handler.HudEventHandler;
+import com.fuzs.pickupnotifier.handler.DrawEntriesHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -25,7 +25,7 @@ public class PickUpNotifier {
     }
 
     private void onClientSetup(final FMLClientSetupEvent evt) {
-        MinecraftForge.EVENT_BUS.register(new HudEventHandler());
+        MinecraftForge.EVENT_BUS.register(new DrawEntriesHandler());
     }
 
 }

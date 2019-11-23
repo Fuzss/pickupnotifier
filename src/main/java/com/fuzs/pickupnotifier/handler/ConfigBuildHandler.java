@@ -24,22 +24,26 @@ public class ConfigBuildHandler {
         public final ForgeConfigSpec.IntValue displayTime;
         public final ForgeConfigSpec.BooleanValue move;
         public final ForgeConfigSpec.IntValue moveTime;
-        public final ForgeConfigSpec.BooleanValue moveFadeForce;
-        public final ForgeConfigSpec.BooleanValue logEverything;
+        public final ForgeConfigSpec.BooleanValue fadeAway;
+        public final ForgeConfigSpec.IntValue maxCount;
+        public final ForgeConfigSpec.BooleanValue displayExperience;
 
         private GeneralConfig(String name) {
+
             BUILDER.push(name);
             this.blacklist = ConfigBuildHandler.BUILDER.comment("Disable specific items or content from whole mods from showing. Enter as either \"modid:item\" or \"modid\".").define("Blacklist", Lists.newArrayList("examplemod", "examplemod:exampleitem"));
-            this.showSprite = ConfigBuildHandler.BUILDER.comment("Show a small sprite next to the name of each item.").define("Draw Sprites", true);
-            this.color = ConfigBuildHandler.BUILDER.comment("Color of the item name text.").defineEnum("Text Color", TextColor.WHITE);
+            this.showSprite = ConfigBuildHandler.BUILDER.comment("Show a small sprite next to the name of each entry showing its contents.").define("Draw Sprites", true);
+            this.color = ConfigBuildHandler.BUILDER.comment("Color of the entry name text.").defineEnum("Text Color", TextColor.WHITE);
             this.ignoreRarity = ConfigBuildHandler.BUILDER.comment("Ignore rarity of items and always use color specified in \"Text Color\" instead.").define("Ignore Rarity", false);
-            this.combineEntries = ConfigBuildHandler.BUILDER.comment("Combine entries for equal items instead of showing each one individually.").define("Combine Entries", true);
-            this.displayTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks each item entry will be shown for.").defineInRange("Display Time", 80, 0, Integer.MAX_VALUE);
-            this.move = ConfigBuildHandler.BUILDER.comment("Make outdated entries slowly move out of the screen instead of disappearing instantly.").define("Move Out Of Screen", true);
-            this.moveTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks it takes for an item entry to move out of the screen. Value cannot be larger than \"Display Time\".").defineInRange("Move Time", 20, 0, Integer.MAX_VALUE);
-            this.moveFadeForce = ConfigBuildHandler.BUILDER.comment("Force moving item entry names to slowly fade even when sprites are shown instead of simply vanishing.").define("Move Force Fade", false);
-            this.logEverything = ConfigBuildHandler.BUILDER.comment("Show entries for every item picked up, even the ones not going into the player inventory, e. g. when directly collected by backpacks.").define("Log Everything", false);
+            this.combineEntries = ConfigBuildHandler.BUILDER.comment("Combine entries of the same type instead of showing each one individually.").define("Combine Entries", true);
+            this.displayTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks each entry will be shown for. Set to 0 to only remove entries when space for new ones is needed.").defineInRange("Display Time", 80, 0, Integer.MAX_VALUE);
+            this.move = ConfigBuildHandler.BUILDER.comment("Make outdated entries slowly move out of the screen instead of disappearing in place.").define("Move Out Of Screen", true);
+            this.moveTime = ConfigBuildHandler.BUILDER.comment("Amount of ticks it takes for an entry to move out of the screen. Value cannot be larger than \"Display Time\".").defineInRange("Move Time", 20, 0, Integer.MAX_VALUE);
+            this.fadeAway = ConfigBuildHandler.BUILDER.comment("Make outdated entry names slowly fade away instead of simply vanishing.").define("Fade Away", true);
+            this.maxCount = ConfigBuildHandler.BUILDER.comment("Maximum count number displayed. Setting this to 0 will prevent the count from being displayed at all.").defineInRange("Maximum Amount", 9999, 0, Integer.MAX_VALUE);
+            this.displayExperience = ConfigBuildHandler.BUILDER.comment("Include experience orbs the player has collected as part of the list of entries.").define("Display Experience", true);
             BUILDER.pop();
+
         }
 
     }
@@ -53,13 +57,15 @@ public class ConfigBuildHandler {
         public final ForgeConfigSpec.IntValue scale;
 
         private DisplayConfig(String name) {
+
             BUILDER.push(name);
-            this.position = ConfigBuildHandler.BUILDER.comment("Screen corner for item entries to be drawn in.").defineEnum("Screen Corner", PositionPreset.BOTTOM_RIGHT);
+            this.position = ConfigBuildHandler.BUILDER.comment("Screen corner for entry list to be drawn in.").defineEnum("Screen Corner", PositionPreset.BOTTOM_RIGHT);
             this.xOffset = ConfigBuildHandler.BUILDER.comment("Offset on x-axis from screen border.").defineInRange("X-Offset", 8, 0, Integer.MAX_VALUE);
             this.yOffset = ConfigBuildHandler.BUILDER.comment("Offset on y-axis from screen border.").defineInRange("Y-Offset", 4, 0, Integer.MAX_VALUE);
-            this.height = ConfigBuildHandler.BUILDER.comment("Percentage of relative screen height item entries are allowed to fill at max.").defineInRange("Maximum Height", 0.5, 0.0, 1.0);
-            this.scale = ConfigBuildHandler.BUILDER.comment("Scale of item entries. A lower scale will make room for more rows to show. Works in tandem with \"GUI Scale\" option in \"Video Settings\".").defineInRange("Custom Scale", 4, 1, 24);
+            this.height = ConfigBuildHandler.BUILDER.comment("Percentage of relative screen height entries are allowed to fill at max.").defineInRange("Maximum Height", 0.5, 0.0, 1.0);
+            this.scale = ConfigBuildHandler.BUILDER.comment("Scale of entries. A lower scale will make room for more rows to show. Works in tandem with \"GUI Scale\" option in \"Video Settings\".").defineInRange("Custom Scale", 4, 1, 24);
             BUILDER.pop();
+
         }
 
     }
