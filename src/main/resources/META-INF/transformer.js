@@ -21,7 +21,7 @@ function initializeCoreMod() {
                     obfName: "func_147246_a",
                     name: "handleCollectItem",
                     desc: "(Lnet/minecraft/network/play/server/SPacketCollectItem;)V",
-                    patch: patchSPacketCollectItemHandleCollectItem
+                    patch: patchNetHandlerPlayClientHandleCollectItem
                 }, classNode, "NetHandlerPlayClient");
                 return classNode;
             }
@@ -55,7 +55,7 @@ function patch(entry, classNode, name) {
     }
 }
 
-function patchSPacketCollectItemHandleCollectItem(method, obfuscated) {
+function patchNetHandlerPlayClientHandleCollectItem(method, obfuscated) {
     var getAmount = obfuscated ? "func_191208_c" : "getAmount";
     var setCount = obfuscated ? "func_190920_e" : "setCount";
     var foundNode = null;
