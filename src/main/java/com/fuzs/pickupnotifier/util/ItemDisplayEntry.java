@@ -18,7 +18,8 @@ public class ItemDisplayEntry extends DisplayEntry {
 
     @Override
     public boolean canCombine(DisplayEntry entry) {
-        return entry instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) entry).stack.getItem();
+        return entry instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) entry).stack.getItem() && ((ItemDisplayEntry) entry)
+                .stack.getItem().getItemStackDisplayName(((ItemDisplayEntry) entry).stack).equals(this.name.getUnformattedComponentText());
     }
 
     @Override
