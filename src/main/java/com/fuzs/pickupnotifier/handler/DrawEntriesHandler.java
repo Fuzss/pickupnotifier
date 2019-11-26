@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class DrawEntriesHandler {
 
@@ -15,14 +16,22 @@ public class DrawEntriesHandler {
 
     @SuppressWarnings("unused")
     @SubscribeEvent
-    public void onRenderGameOverlayText(RenderGameOverlayEvent.Text evt) {
+    public void onRenderTick(TickEvent.RenderTickEvent evt) {
+
+        if (evt.phase != TickEvent.Phase.END || this.mc.isGamePaused()) {
+            return;
+        }
 
         if (!AddEntriesHook.PICK_UPS.isEmpty() && !this.mc.isGamePaused() && ConfigBuildHandler.generalConfig.displayTime != 0) {
-            synchronized (AddEntriesHook.PICK_UPS) {
-                AddEntriesHook.PICK_UPS.forEach(it -> it.tick(evt.getPartialTicks()));
-                AddEntriesHook.PICK_UPS.removeIf(DisplayEntry::isDead);
-            }
+            AddEntriesHook.PICK_UPS.forEach(it -> it.tick(evt.renderTickTime));
+            AddEntriesHook.PICK_UPS.removeIf(DisplayEntry::isDead);
         }
+
+    }
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
+    public void onRenderGameOverlayText(RenderGameOverlayEvent.Text evt) {
 
         if (AddEntriesHook.PICK_UPS.isEmpty()) {
             return;
@@ -41,18 +50,16 @@ public class DrawEntriesHandler {
         int renderY = offset + (bottom ? totalFade : -totalFade);
         GlStateManager.scale(scale, scale, 1.0F);
 
-        synchronized (AddEntriesHook.PICK_UPS) {
-            for (DisplayEntry entry : AddEntriesHook.PICK_UPS) {
-                int renderX = position.getX(entry.getTotalWidth(this.mc), scaledWidth, posX);
-                if (bottom) {
-                    if (renderY < offset + DisplayEntry.HEIGHT) {
-                        entry.render(this.mc, renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
-                    }
-                } else if (renderY > offset - DisplayEntry.HEIGHT) {
-                    entry.render(this.mc, renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / -DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
+        for (DisplayEntry entry : AddEntriesHook.PICK_UPS) {
+            int renderX = position.getX(entry.getTotalWidth(this.mc), scaledWidth, posX);
+            if (bottom) {
+                if (renderY < offset + DisplayEntry.HEIGHT) {
+                    entry.render(this.mc, renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
                 }
-                renderY += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;
+            } else if (renderY > offset - DisplayEntry.HEIGHT) {
+                entry.render(this.mc, renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / -DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
             }
+            renderY += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;
         }
 
         GlStateManager.scale(1.0F / scale, 1.0F / scale, 1.0F);
