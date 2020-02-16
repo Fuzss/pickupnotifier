@@ -1,7 +1,7 @@
 package com.fuzs.pickupnotifier.util;
 
 import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.item.Rarity;
@@ -111,13 +111,15 @@ public abstract class DisplayEntry {
 
         int k = ConfigBuildHandler.GENERAL_CONFIG.fadeAway.get() ? 255 - (int) (255 * alpha) : 255;
         if (k >= 5) { // prevents a bug where names would appear once at the end with full alpha
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.pushMatrix();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
             mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (k << 24));
-            GlStateManager.disableBlend();
+            RenderSystem.disableBlend();
             if (sprite) {
                 this.renderSprite(mc, mirrored ? posX + textWidth + MARGIN : posX, posY);
             }
+            RenderSystem.popMatrix();
         }
 
     }

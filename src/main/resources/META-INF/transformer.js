@@ -6,6 +6,7 @@ var FieldInsnNode = Java.type('org.objectweb.asm.tree.FieldInsnNode');
 var MethodInsnNode = Java.type('org.objectweb.asm.tree.MethodInsnNode');
 var TypeInsnNode = Java.type('org.objectweb.asm.tree.TypeInsnNode');
 var JumpInsnNode = Java.type('org.objectweb.asm.tree.JumpInsnNode');
+var LdcInsnNode = Java.type('org.objectweb.asm.tree.LdcInsnNode');
 var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
 var FrameNode = Java.type('org.objectweb.asm.tree.FrameNode');
 
@@ -17,12 +18,12 @@ function initializeCoreMod() {
                 'name': 'net.minecraft.client.network.play.ClientPlayNetHandler'
             },
             'transformer': function(classNode) {
-                patch({
+                patch([{
                     obfName: "func_147246_a",
                     name: "handleCollectItem",
                     desc: "(Lnet/minecraft/network/play/server/SCollectItemPacket;)V",
                     patch: patchClientPlayNetHandlerHandleCollectItem
-                }, classNode, "ClientPlayNetHandler");
+                }], classNode, "ClientPlayNetHandler");
                 return classNode;
             }
         }
@@ -40,18 +41,20 @@ function findMethod(methods, entry) {
     return null;
 }
 
-function patch(entry, classNode, name) {
-    var method = findMethod(classNode.methods, entry);
-    var flag;
+function patch(entries, classNode, name) {
     log("Patching " + name + "...");
-    if (method !== null) {
-        var obfuscated = method.name.equals(entry.obfName);
-        flag = entry.patch(method, obfuscated);
-    }
-    if (flag) {
-        log("Patching " + name + " was successful");
-    } else {
-        log("Patching " + name + " failed");
+    for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i];
+        var method = findMethod(classNode.methods, entry);
+        if (method !== null) {
+            var obfuscated = method.name.equals(entry.obfName);
+            var flag = entry.patch(method, obfuscated);
+        }
+        if (flag) {
+            log("Patching " + name + "#" + entry.name + " was successful");
+        } else {
+            log("Patching " + name + "#" + entry.name + " failed");
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 package com.fuzs.pickupnotifier.util;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
@@ -22,13 +22,12 @@ public class ItemDisplayEntry extends DisplayEntry {
     @Override
     protected void renderSprite(Minecraft mc, int posX, int posY) {
 
-        GlStateManager.enableDepthTest();
-        RenderHelper.enableGUIStandardItemLighting();
-        GlStateManager.disableLighting();
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableLighting();
         mc.getItemRenderer().renderItemAndEffectIntoGUI(this.stack, posX, posY);
-        GlStateManager.enableLighting();
+        RenderSystem.enableLighting();
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableDepthTest();
+        RenderSystem.disableDepthTest();
 
     }
 

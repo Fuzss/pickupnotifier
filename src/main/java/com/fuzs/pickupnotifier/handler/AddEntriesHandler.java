@@ -58,7 +58,7 @@ public class AddEntriesHandler {
     private static void addEntry(DisplayEntry entry) {
 
         float scale = ConfigBuildHandler.DISPLAY_CONFIG.scale.get() / 6.0F;
-        int scaledHeight = (int) (Minecraft.getInstance().mainWindow.getScaledHeight() / scale);
+        int scaledHeight = (int) (Minecraft.getInstance().func_228018_at_().getScaledHeight() / scale);
         int length = (int) (scaledHeight * ConfigBuildHandler.DISPLAY_CONFIG.height.get().floatValue() / DisplayEntry.HEIGHT) - 1;
 
         Optional<DisplayEntry> duplicateOptional = ConfigBuildHandler.GENERAL_CONFIG.combineEntries.get() ?
