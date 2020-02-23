@@ -45,6 +45,8 @@ public class AddEntriesHook {
                 || blacklist.contains(resourcelocation.getResourceDomain()));
 
         if (!stack.isEmpty() && stack.getCount() > 0 && !blacklisted) {
+            stack = stack.copy();
+//            stack.removeSubCompound("ench");
             addEntry(new ItemDisplayEntry(stack));
         }
 
@@ -65,11 +67,10 @@ public class AddEntriesHook {
         int length = (int) (scaledHeight * ConfigBuildHandler.displayConfig.height / DisplayEntry.HEIGHT) - 1;
 
         Optional<DisplayEntry> duplicateOptional = ConfigBuildHandler.generalConfig.combineEntries ? PICK_UPS
-                .stream().filter(it -> it.canCombine(entry)).findFirst() : Optional.empty();
+                .stream().filter(it -> it.canMerge(entry)).findFirst() : Optional.empty();
         if (duplicateOptional.isPresent()) {
             DisplayEntry duplicate = duplicateOptional.get();
-            duplicate.addCount(entry.getCount());
-            duplicate.resetLife();
+            duplicate.merge(entry);
             // adding back to the end of the list
             PICK_UPS.remove(duplicate);
             PICK_UPS.add(duplicate);
