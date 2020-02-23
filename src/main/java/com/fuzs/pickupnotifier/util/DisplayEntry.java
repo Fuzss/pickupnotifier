@@ -16,13 +16,11 @@ public abstract class DisplayEntry {
     public static final int HEIGHT = 18;
     private static final int MARGIN = 4;
 
-    protected final ITextComponent name;
     private final EnumRarity rarity;
     protected int count;
     private final MutableFloat life;
 
-    protected DisplayEntry(ITextComponent name, int count, EnumRarity rarity) {
-        this.name = name;
+    protected DisplayEntry(int count, EnumRarity rarity) {
         this.count = Math.min(count, ConfigBuildHandler.GENERAL_CONFIG.maxCount.get());
         this.rarity = rarity;
         this.life = new MutableFloat(ConfigBuildHandler.GENERAL_CONFIG.displayTime.get());
@@ -40,15 +38,17 @@ public abstract class DisplayEntry {
         return this.count;
     }
 
-    public abstract boolean canCombine(DisplayEntry entry);
+    public abstract boolean canMerge(DisplayEntry entry);
 
     public final void addCount(int i) {
         this.count = Math.min(this.count + i, ConfigBuildHandler.GENERAL_CONFIG.maxCount.get());
     }
 
+    protected abstract ITextComponent getName();
+
     private ITextComponent getNameComponent() {
 
-        ITextComponent name = this.name.createCopy();
+        ITextComponent name = this.getName().createCopy();
         if (this.count <= 0) {
             return name;
         }
@@ -71,6 +71,13 @@ public abstract class DisplayEntry {
 
     public final void resetLife() {
         this.life.setValue(ConfigBuildHandler.GENERAL_CONFIG.displayTime.get());
+    }
+
+    public void merge(DisplayEntry entry) {
+
+        this.addCount(entry.getCount());
+        this.resetLife();
+
     }
 
     private Style getStyle() {
