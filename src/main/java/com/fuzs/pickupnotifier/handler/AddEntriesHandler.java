@@ -42,6 +42,8 @@ public class AddEntriesHandler {
                 || ConfigBuildHandler.GENERAL_CONFIG.blacklist.get().contains(resourcelocation.getNamespace()));
 
         if (!stack.isEmpty() && stack.getCount() > 0 && !blacklisted) {
+            stack = stack.copy();
+            stack.removeChildTag("Enchantments");
             addEntry(new ItemDisplayEntry(stack));
         }
 
@@ -62,11 +64,10 @@ public class AddEntriesHandler {
         int length = (int) (scaledHeight * ConfigBuildHandler.DISPLAY_CONFIG.height.get().floatValue() / DisplayEntry.HEIGHT) - 1;
 
         Optional<DisplayEntry> duplicateOptional = ConfigBuildHandler.GENERAL_CONFIG.combineEntries.get() ?
-                PICK_UPS.stream().filter(it -> it.canCombine(entry)).findFirst() : Optional.empty();
+                PICK_UPS.stream().filter(it -> it.canMerge(entry)).findFirst() : Optional.empty();
         if (duplicateOptional.isPresent()) {
             DisplayEntry duplicate = duplicateOptional.get();
-            duplicate.addCount(entry.getCount());
-            duplicate.resetLife();
+            duplicate.merge(entry);
             // adding back to the end of the list
             PICK_UPS.remove(duplicate);
             PICK_UPS.add(duplicate);

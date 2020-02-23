@@ -1,0 +1,12 @@
+{
+  "homepage": "https://www.curseforge.com/minecraft/mc-mods/pick-up-notifier",
+  "promos": {
+    "1.15.2-latest": "1.1.2",
+    "1.15.2-recommended": "1.1.2"
+  },
+  "1.15.2": {
+    "1.1.2": "Show display name of items when entries are not combined",
+    "1.1.1": "Performance improvements",
+    "1.1": "Re-written to work in multiplayer and to show experience"
+  }
+}

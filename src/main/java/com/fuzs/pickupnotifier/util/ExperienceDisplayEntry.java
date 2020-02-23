@@ -11,6 +11,8 @@ import net.minecraft.util.text.ITextComponent;
 
 public class ExperienceDisplayEntry extends DisplayEntry {
 
+    private final ITextComponent name;
+
     private static final ResourceLocation EXPERIENCE_ORB_TEXTURES = new ResourceLocation("textures/entity/experience_orb.png");
 
     public ExperienceDisplayEntry(ExperienceOrbEntity orb) {
@@ -18,11 +20,17 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     private ExperienceDisplayEntry(ITextComponent name, int count) {
-        super(name, count, Rarity.COMMON);
+        super(count, Rarity.COMMON);
+        this.name = name;
     }
 
     @Override
-    public boolean canCombine(DisplayEntry entry) {
+    protected ITextComponent getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean canMerge(DisplayEntry entry) {
         return entry instanceof ExperienceDisplayEntry;
     }
 
