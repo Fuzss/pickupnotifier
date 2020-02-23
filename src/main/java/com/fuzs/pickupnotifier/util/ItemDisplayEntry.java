@@ -1,9 +1,11 @@
 package com.fuzs.pickupnotifier.util;
 
+import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 
 public class ItemDisplayEntry extends DisplayEntry {
@@ -11,14 +13,19 @@ public class ItemDisplayEntry extends DisplayEntry {
     private final ItemStack stack;
 
     public ItemDisplayEntry(ItemStack stack) {
-        super(new TextComponentString(stack.getItem().getItemStackDisplayName(stack)), stack.getCount(), stack.getRarity());
-        this.stack = stack.copy();
+        super(stack.getCount(), stack.getRarity());
+        this.stack = stack;
     }
 
     @Override
-    public boolean canCombine(DisplayEntry entry) {
-        return entry instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) entry).stack.getItem() && ((ItemDisplayEntry) entry)
-                .stack.getItem().getItemStackDisplayName(((ItemDisplayEntry) entry).stack).equals(this.name.getUnformattedComponentText());
+    protected ITextComponent getName() {
+        return ConfigBuildHandler.generalConfig.combineEntries ? new TextComponentString(this.stack.getItem().getItemStackDisplayName(stack)) : new TextComponentString(this.stack.getDisplayName());
+    }
+
+    @Override
+    public boolean canMerge(DisplayEntry entry) {
+        return super.canMerge(entry) && entry instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) entry).stack.getItem()
+                && ((ItemDisplayEntry) entry).stack.getItem().getItemStackDisplayName(((ItemDisplayEntry) entry).stack).equals(this.getName().getUnformattedComponentText());
     }
 
     @Override
