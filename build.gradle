@@ -28,7 +28,6 @@ ext {
     author = "${mod_author}"
     description = "${mod_description}"
     url = "${mod_url}"
-    json = "${mod_json}"
     loader = "${loader_version.replaceAll("\\..*", "")}"
     forge = "${forge_version}"
     mc = "${mc_version}"
@@ -67,7 +66,6 @@ processResources {
     inputs.property "mod_name", project.ext.name
     inputs.property "mod_version", project.version
     inputs.property "mod_url", project.ext.url
-    inputs.property "mod_json", project.ext.json
     inputs.property "mod_description", project.ext.description
     inputs.property "mod_author", project.ext.author
     inputs.property "loader_version", project.ext.loader
@@ -85,7 +83,6 @@ processResources {
                 'mod_name': project.ext.name,
                 'mod_version': project.version,
                 'mod_url': project.ext.url,
-                'mod_json': project.ext.json,
                 'mod_description': project.ext.description,
                 'mod_author': project.ext.author,
                 'loader_version': project.ext.loader,
