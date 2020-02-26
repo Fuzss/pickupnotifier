@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 public class ClassTransformer implements IClassTransformer, Opcodes {
 
     private static final Map<String, Function<byte[], byte[]>> TRANSFORMABLES = new HashMap<String, Function<byte[], byte[]>>(){{
-        put("net.minecraft.client.network.NetHandlerPlayClient", ClassTransformer::transformNetHandlerPlayClient);
+        put("net.minecraft.client.particle.ParticleItemPickup", ClassTransformer::transformParticleItemPickup);
     }};
 
     @Override
@@ -32,27 +32,19 @@ public class ClassTransformer implements IClassTransformer, Opcodes {
 
     }
 
-    private static byte[] transformNetHandlerPlayClient(byte[] basicClass) {
+    private static byte[] transformParticleItemPickup(byte[] basicClass) {
 
-        MethodSignature signature = new MethodSignature("net/minecraft/client/network/NetHandlerPlayClient", "handleCollectItem", "func_147246_a", "(Lnet/minecraft/network/play/server/SPacketCollectItem;)V");
-        MethodSignature hook = new MethodSignature(Type.getInternalName(AddEntriesHook.class), "onEntityPickup", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/EntityLivingBase;)V");
-        MethodSignature getAmount = new MethodSignature("net/minecraft/network/play/server/SPacketCollectItem", "getAmount", "func_191208_c", "()I");
-        MethodSignature setCount = new MethodSignature("net/minecraft/item/ItemStack", "setCount", "func_190920_e", "(I)V");
+        MethodSignature signature = new MethodSignature("net/minecraft/client/particle/ParticleItemPickup", "<init>", "<init>", "(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;F)V");
+        MethodSignature hook = new MethodSignature(Type.getInternalName(AddEntriesHook.class), "onEntityPickup", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V");
 
-        Predicate<AbstractInsnNode> filter = (AbstractInsnNode node) -> {
-            if (node.getOpcode() == INVOKEVIRTUAL && node instanceof MethodInsnNode && getAmount.matches((MethodInsnNode) node)) {
-                node = ClassTransformerUtil.getNthNode(node, 1);
-                return node.getOpcode() == INVOKEVIRTUAL && node instanceof MethodInsnNode && setCount.matches((MethodInsnNode) node);
-            }
-            return false;
-        };
+        Predicate<AbstractInsnNode> filter = (AbstractInsnNode node) -> node instanceof InsnNode && node.getOpcode() == RETURN;
 
         BiConsumer<MethodNode, AbstractInsnNode> insert = (MethodNode method, AbstractInsnNode node) -> {
             InsnList insnList = new InsnList();
             insnList.add(new VarInsnNode(ALOAD, 2));
             insnList.add(new VarInsnNode(ALOAD, 3));
             insnList.add(hook.genInsnNode());
-            method.instructions.insertBefore(ClassTransformerUtil.getNthNode(node, 4), insnList);
+            method.instructions.insertBefore(node, insnList);
         };
 
         return ClassTransformerUtil.transformBasicClass(basicClass, signature, filter, insert);

@@ -9,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.item.ItemStack;
@@ -25,7 +24,7 @@ public class AddEntriesHook {
 
     // accessed by asm transformer bundled with this mod
     @SuppressWarnings("unused")
-    public static void onEntityPickup(Entity entity, EntityLivingBase livingentity) {
+    public static void onEntityPickup(Entity entity, Entity livingentity) {
 
         if (livingentity instanceof EntityPlayerSP) {
             if (entity instanceof EntityItem) {
