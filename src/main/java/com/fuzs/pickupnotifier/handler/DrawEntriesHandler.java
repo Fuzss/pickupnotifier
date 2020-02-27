@@ -30,7 +30,7 @@ public class DrawEntriesHandler {
     }
 
     @SuppressWarnings("unused")
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled = true)
     public void onRenderGameOverlayText(RenderGameOverlayEvent.Text evt) {
 
         if (AddEntriesHook.PICK_UPS.isEmpty()) {
