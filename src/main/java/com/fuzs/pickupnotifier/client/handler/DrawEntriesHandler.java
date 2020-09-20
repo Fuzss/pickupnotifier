@@ -1,8 +1,9 @@
-package com.fuzs.pickupnotifier.handler;
+package com.fuzs.pickupnotifier.client.handler;
 
 import com.fuzs.pickupnotifier.asm.hook.AddEntriesHook;
-import com.fuzs.pickupnotifier.util.DisplayEntry;
-import com.fuzs.pickupnotifier.util.PositionPreset;
+import com.fuzs.pickupnotifier.client.util.DisplayEntry;
+import com.fuzs.pickupnotifier.client.util.PositionPreset;
+import com.fuzs.pickupnotifier.config.ConfigBuildHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;

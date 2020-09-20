@@ -1,6 +1,7 @@
 package com.fuzs.pickupnotifier;
 
-import com.fuzs.pickupnotifier.handler.DrawEntriesHandler;
+import com.fuzs.pickupnotifier.asm.hook.AddEntriesHook;
+import com.fuzs.pickupnotifier.client.handler.DrawEntriesHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -37,6 +38,7 @@ public class PickUpNotifier {
     @EventHandler
     public void onPostInit(FMLPostInitializationEvent evt) {
         MinecraftForge.EVENT_BUS.register(new DrawEntriesHandler());
+        AddEntriesHook.sync();
     }
 
     @EventHandler
@@ -48,6 +50,7 @@ public class PickUpNotifier {
     public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent evt) {
         if (evt.getModID().equals(PickUpNotifier.MODID)) {
             ConfigManager.sync(PickUpNotifier.MODID, Config.Type.INSTANCE);
+            AddEntriesHook.sync();
         }
     }
 

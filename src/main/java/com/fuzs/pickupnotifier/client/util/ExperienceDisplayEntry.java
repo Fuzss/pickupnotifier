@@ -1,4 +1,4 @@
-package com.fuzs.pickupnotifier.util;
+package com.fuzs.pickupnotifier.client.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;

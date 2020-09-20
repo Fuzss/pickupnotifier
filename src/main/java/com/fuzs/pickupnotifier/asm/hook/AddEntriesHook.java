@@ -1,34 +1,44 @@
 package com.fuzs.pickupnotifier.asm.hook;
 
-import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
-import com.fuzs.pickupnotifier.util.DisplayEntry;
-import com.fuzs.pickupnotifier.util.ExperienceDisplayEntry;
-import com.fuzs.pickupnotifier.util.ItemDisplayEntry;
+import com.fuzs.pickupnotifier.client.util.DisplayEntry;
+import com.fuzs.pickupnotifier.client.util.ExperienceDisplayEntry;
+import com.fuzs.pickupnotifier.client.util.ItemDisplayEntry;
+import com.fuzs.pickupnotifier.config.ConfigBuildHandler;
+import com.fuzs.pickupnotifier.config.EntryCollectionBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.projectile.EntitySpectralArrow;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class AddEntriesHook {
 
     public static final List<DisplayEntry> PICK_UPS = Lists.newArrayList();
+    private static final Set<Item> BLACKLIST = Sets.newHashSet();
 
     // accessed by asm transformer bundled with this mod
     @SuppressWarnings("unused")
     public static void onEntityPickup(Entity entity, Entity livingentity) {
 
-        if (livingentity instanceof EntityPlayerSP) {
+        if (livingentity == Minecraft.getMinecraft().player) {
             if (entity instanceof EntityItem) {
                 addItemEntry(((EntityItem) entity).getItem());
+            } else if (entity instanceof EntityTippedArrow) {
+                addItemEntry(new ItemStack(Items.ARROW));
+            } else if (entity instanceof EntitySpectralArrow) {
+                addItemEntry(new ItemStack(Items.SPECTRAL_ARROW));
             } else if (entity instanceof EntityXPOrb) {
                 addExperienceEntry((EntityXPOrb) entity);
             }
@@ -38,14 +48,8 @@ public class AddEntriesHook {
 
     private static void addItemEntry(ItemStack stack) {
 
-        ResourceLocation resourcelocation = ForgeRegistries.ITEMS.getKey(stack.getItem());
-        List<String> blacklist = Lists.newArrayList(ConfigBuildHandler.generalConfig.blacklist);
-        boolean blacklisted = resourcelocation != null && (blacklist.contains(resourcelocation.toString())
-                || blacklist.contains(resourcelocation.getResourceDomain()));
-
-        if (!stack.isEmpty() && stack.getCount() > 0 && !blacklisted) {
+        if (!stack.isEmpty() && stack.getCount() > 0 && !BLACKLIST.contains(stack.getItem())) {
             stack = stack.copy();
-//            stack.removeSubCompound("ench");
             addEntry(new ItemDisplayEntry(stack));
         }
 
@@ -80,6 +84,14 @@ public class AddEntriesHook {
             PICK_UPS.add(entry);
         }
 
+    }
+
+    public static void sync() {
+
+        EntryCollectionBuilder<Item> builder = new EntryCollectionBuilder<>(ForgeRegistries.ITEMS);
+        BLACKLIST.clear();
+        List<String> blacklist = Lists.newArrayList(ConfigBuildHandler.generalConfig.blacklist);
+        BLACKLIST.addAll(builder.buildEntrySet(blacklist));
     }
 
 }

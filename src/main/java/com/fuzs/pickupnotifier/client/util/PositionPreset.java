@@ -1,4 +1,4 @@
-package com.fuzs.pickupnotifier.util;
+package com.fuzs.pickupnotifier.client.util;
 
 @SuppressWarnings("unused")
 public enum PositionPreset {
@@ -8,9 +8,9 @@ public enum PositionPreset {
     BOTTOM_LEFT(0, 1, false),
     BOTTOM_RIGHT(1, 1, false);
 
-    private int x;
-    private int y;
-    private boolean shift;
+    private final int x;
+    private final int y;
+    private final boolean shift;
 
     PositionPreset(int x, int y, boolean potionShift) {
         this.x = x;

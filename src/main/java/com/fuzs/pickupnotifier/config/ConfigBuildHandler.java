@@ -1,8 +1,8 @@
-package com.fuzs.pickupnotifier.handler;
+package com.fuzs.pickupnotifier.config;
 
 import com.fuzs.pickupnotifier.PickUpNotifier;
-import com.fuzs.pickupnotifier.util.PositionPreset;
-import com.fuzs.pickupnotifier.util.TextColor;
+import com.fuzs.pickupnotifier.client.util.PositionPreset;
+import com.fuzs.pickupnotifier.client.util.TextColor;
 import net.minecraftforge.common.config.Config;
 
 @SuppressWarnings("WeakerAccess")
@@ -17,8 +17,8 @@ public class ConfigBuildHandler {
     public static class GeneralConfig {
 
         @Config.Name("Blacklist")
-        @Config.Comment("Disable specific items or content from whole mods from showing. Enter as either \"modid:item\" or \"modid\".")
-        public String[] blacklist = new String[]{"examplemod", "examplemod:exampleitem"};
+        @Config.Comment({"Disable specific items or content from whole mods from showing.", "Format for every entry is \"<namespace>:<path>\". Path may use single asterisk as wildcard parameter."})
+        public String[] blacklist = new String[0];
         @Config.Name("Draw Sprites")
         @Config.Comment("Show a small sprite next to the name of each entry showing its contents.")
         public boolean showSprite = true;

@@ -1,6 +1,6 @@
-package com.fuzs.pickupnotifier.util;
+package com.fuzs.pickupnotifier.client.util;
 
-import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
+import com.fuzs.pickupnotifier.config.ConfigBuildHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
