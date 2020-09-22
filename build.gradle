@@ -12,8 +12,6 @@ apply plugin: 'net.minecraftforge.gradle'
 
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-import net.minecraftforge.gradle.common.task.SignJar
-
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
@@ -125,7 +123,7 @@ jar {
 }
 
 // seems to work ok for now, but Forge currently doesn't use the key anyways
-task signJar(type: SignJar, dependsOn: jar) {
+task signJar(type: net.minecraftforge.gradle.common.task.SignJar, dependsOn: jar) {
 
     onlyIf {
         project.hasProperty('keyStore')

@@ -11,90 +11,135 @@ var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
 var FrameNode = Java.type('org.objectweb.asm.tree.FrameNode');
 
 function initializeCoreMod() {
+
     return {
-        'client_play_net_handler_patch': {
+
+        'item_pickup_particle_patch': {
             'target': {
                 'type': 'CLASS',
-                'name': 'net.minecraft.client.network.play.ClientPlayNetHandler'
+                'name': 'net.minecraft.client.particle.ItemPickupParticle'
             },
             'transformer': function(classNode) {
-                patch([{
-                    obfName: "func_147246_a",
-                    name: "handleCollectItem",
-                    desc: "(Lnet/minecraft/network/play/server/SCollectItemPacket;)V",
-                    patch: patchClientPlayNetHandlerHandleCollectItem
-                }], classNode, "ClientPlayNetHandler");
+                patchMethod([{
+                    obfName: "<init>",
+                    name: "<init>",
+                    desc: "(Lnet/minecraft/client/renderer/entity/EntityRendererManager;Lnet/minecraft/client/renderer/RenderTypeBuffers;Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V",
+                    patches: [patchItemPickupParticleConstructor]
+                }], classNode, "ItemPickupParticle");
                 return classNode;
             }
         }
     };
 }
 
+function patchMethod(entries, classNode, name) {
+
+    log("Patching " + name + "...");
+    for (var i = 0; i < entries.length; i++) {
+
+        var entry = entries[i];
+        var method = findMethod(classNode.methods, entry);
+        var flag = !!method;
+        if (flag) {
+
+            var obfuscated = !method.name.equals(entry.name);
+            for (var j = 0; j < entry.patches.length; j++) {
+
+                var patch = entry.patches[j];
+                if (!patchInstructions(method, patch.filter, patch.action, obfuscated)) {
+
+                    flag = false;
+                }
+            }
+        }
+
+        log("Patching " + name + "#" + entry.name + (flag ? " was successful" : " failed"));
+    }
+}
+
 function findMethod(methods, entry) {
-    var length = methods.length;
-    for (var i = 0; i < length; i++) {
+
+    for (var i = 0; i < methods.length; i++) {
+
         var method = methods[i];
         if ((method.name.equals(entry.obfName) || method.name.equals(entry.name)) && method.desc.equals(entry.desc)) {
+
             return method;
         }
     }
-    return null;
 }
 
-function patch(entries, classNode, name) {
-    log("Patching " + name + "...");
-    for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-        var method = findMethod(classNode.methods, entry);
-        if (method !== null) {
-            var obfuscated = method.name.equals(entry.obfName);
-            var flag = entry.patch(method, obfuscated);
-        }
-        if (flag) {
-            log("Patching " + name + "#" + entry.name + " was successful");
-        } else {
-            log("Patching " + name + "#" + entry.name + " failed");
-        }
-    }
-}
+function patchInstructions(method, filter, action, obfuscated) {
 
-function patchClientPlayNetHandlerHandleCollectItem(method, obfuscated) {
-    var getAmount = obfuscated ? "func_191208_c" : "getAmount";
-    var setCount = obfuscated ? "func_190920_e" : "setCount";
-    var foundNode = null;
     var instructions = method.instructions.toArray();
-    var length = instructions.length;
-    for (var i = 0; i < length; i++) {
-        var node = instructions[i];
-        if (node instanceof MethodInsnNode && node.getOpcode().equals(Opcodes.INVOKEVIRTUAL) && node.owner.equals("net/minecraft/network/play/server/SCollectItemPacket") && node.name.equals(getAmount) && node.desc.equals("()I")) {
-            var nextNode = node.getNext();
-            if (nextNode instanceof MethodInsnNode && nextNode.getOpcode().equals(Opcodes.INVOKEVIRTUAL) && nextNode.owner.equals("net/minecraft/item/ItemStack") && nextNode.name.equals(setCount) && nextNode.desc.equals("(I)V")) {
-                foundNode = node;
-                break;
-            }
+    for (var i = 0; i < instructions.length; i++) {
+
+        var node = filter(instructions[i], obfuscated);
+        if (!!node) {
+
+            break;
         }
     }
-    if (foundNode != null) {
-        var insnList = new InsnList();
-        insnList.add(new VarInsnNode(Opcodes.ALOAD, 2));
-        insnList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-        insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/fuzs/pickupnotifier/handler/AddEntriesHandler", "onEntityPickup", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/LivingEntity;)V", false));
-        method.instructions.insertBefore(getNthNode(foundNode, 4), insnList);
+
+    if (!!node) {
+
+        action(node, method.instructions, obfuscated);
         return true;
     }
 }
 
+var patchItemPickupParticleConstructor = {
+    filter: function(node, obfuscated) {
+        if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.RETURN)) {
+            return  node;
+        }
+    },
+    action: function(node, instructions, obfuscated) {
+        var insnList = new InsnList();
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 4));
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 5));
+        insnList.add(generateHook("onEntityPickup", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V"));
+        instructions.insertBefore(node, insnList);
+    }
+};
+
+function matchesMethod(node, owner, name, desc) {
+
+    return node instanceof MethodInsnNode && matchesNode(node, owner, name, desc);
+}
+
+function matchesField(node, owner, name, desc) {
+
+    return node instanceof FieldInsnNode && matchesNode(node, owner, name, desc);
+}
+
+function matchesNode(node, owner, name, desc) {
+
+    return node.owner.equals(owner) && node.name.equals(name) && node.desc.equals(desc);
+}
+
+function generateHook(name, desc) {
+
+    return new MethodInsnNode(Opcodes.INVOKESTATIC, "com/fuzs/pickupnotifier/asm/AddEntriesHandler", name, desc, false);
+}
+
 function getNthNode(node, n) {
+
     for (var i = 0; i < Math.abs(n); i++) {
+
         if (n < 0) {
+
             node = node.getPrevious();
         } else {
+
             node = node.getNext();
         }
     }
+
     return node;
 }
 
-function log(s) {
-    print("[Pick Up Notifier Transformer]: " + s);
+function log(message) {
+
+    print("[Pick Up Notifier Transformer]: " + message);
 }

@@ -1,4 +1,4 @@
-package com.fuzs.pickupnotifier.util;
+package com.fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -11,26 +11,30 @@ import net.minecraft.util.text.ITextComponent;
 
 public class ExperienceDisplayEntry extends DisplayEntry {
 
-    private final ITextComponent name;
-
     private static final ResourceLocation EXPERIENCE_ORB_TEXTURES = new ResourceLocation("textures/entity/experience_orb.png");
 
+    private final ITextComponent name;
+
     public ExperienceDisplayEntry(ExperienceOrbEntity orb) {
+
         this(orb.getName(), orb.xpValue);
     }
 
     private ExperienceDisplayEntry(ITextComponent name, int count) {
+
         super(count, Rarity.COMMON);
         this.name = name;
     }
 
     @Override
     protected ITextComponent getName() {
+
         return this.name;
     }
 
     @Override
     public boolean canMerge(DisplayEntry entry) {
+
         return entry instanceof ExperienceDisplayEntry;
     }
 
@@ -50,7 +54,6 @@ public class ExperienceDisplayEntry extends DisplayEntry {
         RenderSystem.color4f(r, g, b, 1.0F);
         AbstractGui.blit(posX, posY, x, y, 16, 16, 64, 64);
         RenderSystem.disableBlend();
-
     }
 
     /**
@@ -60,32 +63,36 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     private int getTextureForCount() {
 
         if (this.count >= 2477) {
+
             return 10;
         } else if (this.count >= 1237) {
+
             return 9;
         } else if (this.count >= 617) {
+
             return 8;
         } else if (this.count >= 307) {
+
             return 7;
         } else if (this.count >= 149) {
+
             return 6;
         } else if (this.count >= 73) {
+
             return 5;
         } else if (this.count >= 37) {
+
             return 4;
         } else if (this.count >= 17) {
+
             return 3;
         } else if (this.count >= 7) {
+
             return 2;
         } else {
+
             return this.count >= 3 ? 1 : 0;
         }
-
-    }
-
-    @Override
-    public ExperienceDisplayEntry copy() {
-        return new ExperienceDisplayEntry(this.name, this.count);
     }
 
 }

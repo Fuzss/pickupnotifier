@@ -1,6 +1,6 @@
-package com.fuzs.pickupnotifier.util;
+package com.fuzs.pickupnotifier.client.gui.entry;
 
-import com.fuzs.pickupnotifier.handler.ConfigBuildHandler;
+import com.fuzs.pickupnotifier.config.ConfigValueHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
@@ -12,17 +12,20 @@ public class ItemDisplayEntry extends DisplayEntry {
     private final ItemStack stack;
 
     public ItemDisplayEntry(ItemStack stack) {
+
         super(stack.getCount(), stack.getRarity());
         this.stack = stack;
     }
 
     @Override
     protected ITextComponent getName() {
-        return ConfigBuildHandler.GENERAL_CONFIG.combineEntries.get() ? this.stack.getItem().getName() : this.stack.getDisplayName();
+
+        return ConfigValueHolder.getGeneralConfig().combineEntries ? this.stack.getItem().getName() : this.stack.getDisplayName();
     }
 
     @Override
     public boolean canMerge(DisplayEntry entry) {
+
         return entry instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) entry).stack.getItem();
     }
 
@@ -35,12 +38,6 @@ public class ItemDisplayEntry extends DisplayEntry {
         RenderSystem.enableLighting();
         RenderHelper.disableStandardItemLighting();
         RenderSystem.disableDepthTest();
-
-    }
-
-    @Override
-    public ItemDisplayEntry copy() {
-        return new ItemDisplayEntry(this.stack);
     }
 
 }
