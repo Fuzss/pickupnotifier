@@ -1,21 +1,18 @@
 package com.fuzs.pickupnotifier.client.gui.entry;
 
 import com.fuzs.pickupnotifier.config.ConfigValueHolder;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.Rarity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 import org.apache.commons.lang3.mutable.MutableFloat;
-
-import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class DisplayEntry {
+    
+    protected final Minecraft mc = Minecraft.getInstance(); 
 
     public static final int HEIGHT = 18;
     private static final int MARGIN = 4;
@@ -55,21 +52,21 @@ public abstract class DisplayEntry {
 
     protected abstract ITextComponent getName();
 
-    private ITextComponent getNameComponent() {
+    private IFormattableTextComponent getFormattedName() {
 
-        ITextComponent name = this.getName().shallowCopy();
+        IFormattableTextComponent name = new StringTextComponent("").append(this.getName());
         if (this.count <= 0) {
 
             return name;
-        }
+        } else if (ConfigValueHolder.getDisplayConfig().position.isMirrored()) {
 
-        if (ConfigValueHolder.getDisplayConfig().position.isMirrored()) {
-
-            return new StringTextComponent(this.count + "x ").appendSibling(name);
+            name = new StringTextComponent(this.count + "x ").append(name);
         } else {
 
-            return name.appendText(" x" + this.count);
+            name.appendString(" x" + this.count);
         }
+
+        return name.setStyle(this.getStyle());
     }
 
     public final float getRelativeLife() {
@@ -98,40 +95,31 @@ public abstract class DisplayEntry {
 
         if (!ConfigValueHolder.getGeneralConfig().ignoreRarity && this.rarity != Rarity.COMMON) {
 
-            return new Style().setColor(this.rarity.color);
+            return Style.EMPTY.setFormatting(this.rarity.color);
         } else {
 
-            return new Style().setColor(ConfigValueHolder.getGeneralConfig().textColor);
+            return Style.EMPTY.setFormatting(ConfigValueHolder.getGeneralConfig().textColor);
         }
     }
 
-    private String getNameString() {
+    public int getTotalWidth() {
 
-        return this.getNameComponent().setStyle(this.getStyle()).getFormattedText();
+        int width = this.mc.fontRenderer.func_238414_a_(this.getFormattedName());
+        return ConfigValueHolder.getGeneralConfig().showSprite ? width + MARGIN + 16 : width;
     }
 
-    private int getTextWidth(FontRenderer fontRenderer) {
-
-        String name = this.getNameComponent().getString();
-        return fontRenderer.getStringWidth(Objects.requireNonNull(TextFormatting.getTextWithoutFormattingCodes(name)));
-    }
-
-    public int getTotalWidth(FontRenderer fontRenderer) {
-
-        int length = this.getTextWidth(fontRenderer);
-        return ConfigValueHolder.getGeneralConfig().showSprite ? length + MARGIN + 16 : length;
-    }
-
-    public final void render(Minecraft mc, int posX, int posY, float alpha) {
+    @SuppressWarnings("deprecation")
+    public final void render(MatrixStack matrixstack, int posX, int posY, float alpha) {
 
         boolean mirrored = ConfigValueHolder.getDisplayConfig().position.isMirrored();
         boolean sprite = ConfigValueHolder.getGeneralConfig().showSprite;
         int i = mirrored || !sprite ? posX : posX + 16 + MARGIN;
-        int textWidth = this.getTextWidth(mc.fontRenderer);
-        int opacity = mc.gameSettings.getChatBackgroundColor(0);
+
+        int textWidth = this.mc.fontRenderer.func_238414_a_(this.getFormattedName());
+        int opacity = this.mc.gameSettings.getChatBackgroundColor(0);
         if (opacity != 0) {
 
-            AbstractGui.fill(i - 2, posY + 3 - 2, i + textWidth + 2, posY + 3 + mc.fontRenderer.FONT_HEIGHT + 2, opacity);
+            AbstractGui.fill(matrixstack, i - 2, posY + 3 - 2, i + textWidth + 2, posY + 3 + this.mc.fontRenderer.FONT_HEIGHT + 2, opacity);
         }
 
         int fadeTime = ConfigValueHolder.getGeneralConfig().fadeAway ? 255 - (int) (255 * alpha) : 255;
@@ -141,17 +129,17 @@ public abstract class DisplayEntry {
             RenderSystem.pushMatrix();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (fadeTime << 24));
+            this.mc.fontRenderer.func_238407_a_(matrixstack, this.getFormattedName(), i, posY + 3, 16777215 + (fadeTime << 24));
             RenderSystem.disableBlend();
             if (sprite) {
 
-                this.renderSprite(mc, mirrored ? posX + textWidth + MARGIN : posX, posY);
+                this.renderSprite(matrixstack, mirrored ? posX + textWidth + MARGIN : posX, posY);
             }
 
             RenderSystem.popMatrix();
         }
     }
 
-    protected abstract void renderSprite(Minecraft mc, int posX, int posY);
+    protected abstract void renderSprite(MatrixStack matrixstack, int posX, int posY);
 
 }

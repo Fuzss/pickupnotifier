@@ -32,7 +32,7 @@ public class DrawEntriesHandler {
         }
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "deprecation"})
     @SubscribeEvent
     public void onRenderGameOverlayText(RenderGameOverlayEvent.Text evt) {
 
@@ -56,16 +56,16 @@ public class DrawEntriesHandler {
         RenderSystem.scalef(scale, scale, 1.0F);
         for (DisplayEntry entry : PICK_UPS) {
 
-            int renderX = position.getX(entry.getTotalWidth(this.mc.fontRenderer), scaledWidth, posX);
+            int renderX = position.getX(entry.getTotalWidth(), scaledWidth, posX);
             if (bottom) {
 
                 if (renderY < offset + DisplayEntry.HEIGHT) {
 
-                    entry.render(this.mc, renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
+                    entry.render(evt.getMatrixStack(), renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
                 }
             } else if (renderY > offset - DisplayEntry.HEIGHT) {
 
-                entry.render(this.mc, renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / -DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
+                entry.render(evt.getMatrixStack(), renderX, renderY, move ? MathHelper.clamp((float) (renderY - offset) / -DisplayEntry.HEIGHT, 0.0F, 1.0F) : entry.getRelativeLife());
             }
 
             renderY += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;

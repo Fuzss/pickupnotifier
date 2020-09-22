@@ -17,6 +17,7 @@ import net.minecraft.item.Items;
 
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 public class AddEntriesHandler {
 
     /**

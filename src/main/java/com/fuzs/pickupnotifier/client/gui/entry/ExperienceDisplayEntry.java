@@ -1,5 +1,6 @@
 package com.fuzs.pickupnotifier.client.gui.entry;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -38,8 +39,9 @@ public class ExperienceDisplayEntry extends DisplayEntry {
         return entry instanceof ExperienceDisplayEntry;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    protected void renderSprite(Minecraft mc, int posX, int posY) {
+    protected void renderSprite(MatrixStack matrixstack, int posX, int posY) {
 
         int i = this.getTextureForCount();
         int x = i % 4 * 16;
@@ -49,10 +51,10 @@ public class ExperienceDisplayEntry extends DisplayEntry {
         float g = 1.0F;
         float b = (MathHelper.sin(color + 4.1887903F) + 1.0F) * 0.1F;
 
-        mc.getTextureManager().bindTexture(EXPERIENCE_ORB_TEXTURES);
+        this.mc.getTextureManager().bindTexture(EXPERIENCE_ORB_TEXTURES);
         RenderSystem.enableBlend();
         RenderSystem.color4f(r, g, b, 1.0F);
-        AbstractGui.blit(posX, posY, x, y, 16, 16, 64, 64);
+        AbstractGui.blit(matrixstack, posX, posY, x, y, 16, 16, 64, 64);
         RenderSystem.disableBlend();
     }
 
