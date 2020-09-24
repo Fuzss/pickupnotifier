@@ -129,7 +129,7 @@ public abstract class DisplayEntry {
             RenderSystem.pushMatrix();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            this.mc.fontRenderer.func_238407_a_(matrixstack, this.getFormattedName(), i, posY + 3, 16777215 + (fadeTime << 24));
+            AbstractGui.drawString(matrixstack, this.mc.fontRenderer, this.getFormattedName(), i, posY + 3, 16777215 + (fadeTime << 24));
             RenderSystem.disableBlend();
             if (sprite) {
 

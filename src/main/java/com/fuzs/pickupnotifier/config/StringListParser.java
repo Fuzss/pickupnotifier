@@ -83,8 +83,8 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
     private List<T> getListFromRegistry(String namespace, String path) {
 
         List<T> entries = this.activeRegistry.getEntries().stream()
-                .filter(entry -> entry.getKey().getNamespace().equals(namespace))
-                .filter(entry -> entry.getKey().getPath().matches(path.replace("*", "[a-z0-9/._-]*")))
+                .filter(entry -> entry.getKey().func_240901_a_().getNamespace().equals(namespace))
+                .filter(entry -> entry.getKey().func_240901_a_().getPath().matches(path.replace("*", "[a-z0-9/._-]*")))
                 .map(Map.Entry::getValue).collect(Collectors.toList());
 
         if (entries.isEmpty()) {

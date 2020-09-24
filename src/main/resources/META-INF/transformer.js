@@ -23,7 +23,7 @@ function initializeCoreMod() {
                 patchMethod([{
                     obfName: "<init>",
                     name: "<init>",
-                    desc: "(Lnet/minecraft/client/renderer/entity/EntityRendererManager;Lnet/minecraft/client/renderer/RenderTypeBuffers;Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V",
+                    desc: "(Lnet/minecraft/client/renderer/entity/EntityRendererManager;Lnet/minecraft/client/renderer/RenderTypeBuffers;Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V",
                     patches: [patchItemPickupParticleConstructor]
                 }], classNode, "ItemPickupParticle");
                 return classNode;
