@@ -23,7 +23,7 @@ function initializeCoreMod() {
                 patchMethod([{
                     obfName: "<init>",
                     name: "<init>",
-                    desc: "(Lnet/minecraft/client/renderer/entity/EntityRendererManager;Lnet/minecraft/client/renderer/RenderTypeBuffers;Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V",
+                    desc: "(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;F)V",
                     patches: [patchItemPickupParticleConstructor]
                 }], classNode, "ItemPickupParticle");
                 return classNode;
@@ -96,8 +96,8 @@ var patchItemPickupParticleConstructor = {
     },
     action: function(node, instructions, obfuscated) {
         var insnList = new InsnList();
-        insnList.add(new VarInsnNode(Opcodes.ALOAD, 4));
-        insnList.add(new VarInsnNode(Opcodes.ALOAD, 5));
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 3));
         insnList.add(generateHook("onEntityPickup", "(Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/Entity;)V"));
         instructions.insertBefore(node, insnList);
     }

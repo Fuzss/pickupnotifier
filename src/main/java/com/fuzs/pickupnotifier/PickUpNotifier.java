@@ -34,7 +34,7 @@ public class PickUpNotifier {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigSyncManager::onModConfig);
 
         // Forge doesn't like this being a lambda
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> new DistExecutor.SafeRunnable() {
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> new Runnable() {
 
             @Override
             public void run() {

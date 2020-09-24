@@ -4,7 +4,7 @@ import com.fuzs.pickupnotifier.client.gui.PositionPreset;
 import com.fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import com.fuzs.pickupnotifier.client.util.PickUpCollector;
 import com.fuzs.pickupnotifier.config.ConfigValueHolder;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -53,7 +53,7 @@ public class DrawEntriesHandler {
         int totalFade = move ? (int) (PICK_UPS.getTotalFade() * DisplayEntry.HEIGHT) : 0;
         int renderY = offset + (bottom ? totalFade : -totalFade);
 
-        RenderSystem.scalef(scale, scale, 1.0F);
+        GlStateManager.scalef(scale, scale, 1.0F);
         for (DisplayEntry entry : PICK_UPS) {
 
             int renderX = position.getX(entry.getTotalWidth(this.mc.fontRenderer), scaledWidth, posX);
@@ -71,7 +71,7 @@ public class DrawEntriesHandler {
             renderY += bottom ? -DisplayEntry.HEIGHT : DisplayEntry.HEIGHT;
         }
 
-        RenderSystem.scalef(1.0F / scale, 1.0F / scale, 1.0F);
+        GlStateManager.scalef(1.0F / scale, 1.0F / scale, 1.0F);
     }
 
 }

@@ -17,7 +17,7 @@ public class ConfigSyncManager {
 
     }
 
-    public static void onModConfig(final ModConfig.Reloading evt) {
+    public static void onModConfig(final ModConfig.ConfigReloading evt) {
 
         if (evt.getConfig().getModId().equals(PickUpNotifier.MODID)) {
 

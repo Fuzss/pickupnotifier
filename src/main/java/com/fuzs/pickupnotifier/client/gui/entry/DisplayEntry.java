@@ -1,7 +1,7 @@
 package com.fuzs.pickupnotifier.client.gui.entry;
 
 import com.fuzs.pickupnotifier.config.ConfigValueHolder;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -128,7 +128,7 @@ public abstract class DisplayEntry {
         boolean sprite = ConfigValueHolder.getGeneralConfig().showSprite;
         int i = mirrored || !sprite ? posX : posX + 16 + MARGIN;
         int textWidth = this.getTextWidth(mc.fontRenderer);
-        int opacity = mc.gameSettings.getChatBackgroundColor(0);
+        int opacity = mc.gameSettings.func_216839_a(0);
         if (opacity != 0) {
 
             AbstractGui.fill(i - 2, posY + 3 - 2, i + textWidth + 2, posY + 3 + mc.fontRenderer.FONT_HEIGHT + 2, opacity);
@@ -138,17 +138,17 @@ public abstract class DisplayEntry {
         // prevents a bug where names would appear once at the end with full alpha
         if (fadeTime >= 5) {
 
-            RenderSystem.pushMatrix();
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
+            GlStateManager.pushMatrix();
+            GlStateManager.enableBlend();
+            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             mc.fontRenderer.drawStringWithShadow(this.getNameString(), i, posY + 3, 16777215 + (fadeTime << 24));
-            RenderSystem.disableBlend();
+            GlStateManager.disableBlend();
             if (sprite) {
 
                 this.renderSprite(mc, mirrored ? posX + textWidth + MARGIN : posX, posY);
             }
 
-            RenderSystem.popMatrix();
+            GlStateManager.popMatrix();
         }
     }
 

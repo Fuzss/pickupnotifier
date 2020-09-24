@@ -1,6 +1,6 @@
 package com.fuzs.pickupnotifier.client.gui.entry;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.entity.item.ExperienceOrbEntity;
@@ -50,10 +50,10 @@ public class ExperienceDisplayEntry extends DisplayEntry {
         float b = (MathHelper.sin(color + 4.1887903F) + 1.0F) * 0.1F;
 
         mc.getTextureManager().bindTexture(EXPERIENCE_ORB_TEXTURES);
-        RenderSystem.enableBlend();
-        RenderSystem.color4f(r, g, b, 1.0F);
+        GlStateManager.enableBlend();
+        GlStateManager.color4f(r, g, b, 1.0F);
         AbstractGui.blit(posX, posY, x, y, 16, 16, 64, 64);
-        RenderSystem.disableBlend();
+        GlStateManager.disableBlend();
     }
 
     /**

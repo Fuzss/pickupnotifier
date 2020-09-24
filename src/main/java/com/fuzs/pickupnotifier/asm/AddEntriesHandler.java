@@ -68,7 +68,7 @@ public class AddEntriesHandler {
     private static void addEntry(DisplayEntry entry) {
 
         float scale = ConfigValueHolder.getDisplayConfig().scale / 6.0F;
-        int scaledHeight = (int) (Minecraft.getInstance().getMainWindow().getScaledHeight() / scale);
+        int scaledHeight = (int) (Minecraft.getInstance().mainWindow.getScaledHeight() / scale);
         int maxSize = (int) (scaledHeight * ConfigValueHolder.getDisplayConfig().height / DisplayEntry.HEIGHT) - 1;
 
         Optional<DisplayEntry> duplicateOptional = ConfigValueHolder.getGeneralConfig().combineEntries ?
