@@ -19,13 +19,18 @@ public class ItemDisplayEntry extends DisplayEntry {
     @Override
     protected Component getEntryName() {
 
-        return ConfigValueHolder.getGeneralConfig().combineEntries ? this.stack.getItem().getName(this.stack) : this.stack.getDisplayName();
+        return ConfigValueHolder.getGeneralConfig().combineEntries ? this.getStackName() : this.stack.getHoverName();
+    }
+
+    private Component getStackName() {
+
+        return this.stack.getItem().getName(this.stack);
     }
 
     @Override
     public boolean mayMergeWith(DisplayEntry other) {
 
-        return other instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) other).stack.getItem();
+        return other instanceof ItemDisplayEntry && this.stack.getItem() == ((ItemDisplayEntry) other).stack.getItem() && this.getStackName().equals(((ItemDisplayEntry) other).getStackName());
     }
 
     @Override

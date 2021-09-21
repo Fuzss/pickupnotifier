@@ -94,11 +94,11 @@ public abstract class DisplayEntry {
 
     public int getEntryWidth() {
 
-        int width = this.mc.font.width(this.getTextComponent());
-        return ConfigValueHolder.getGeneralConfig().showSprite ? width + this.textItemMargin + 16 : width;
+        int textWidth = this.mc.font.width(this.getTextComponent());
+        return ConfigValueHolder.getGeneralConfig().showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
     }
 
-    public final void render(PoseStack poseStack, int posX, int posY, float alpha, float scale) {
+    public void render(PoseStack poseStack, int posX, int posY, float alpha, float scale) {
 
         boolean mirrorPosition = ConfigValueHolder.getDisplayConfig().position.isMirrored();
         boolean withSprite = ConfigValueHolder.getGeneralConfig().showSprite;
@@ -107,14 +107,14 @@ public abstract class DisplayEntry {
         poseStack.pushPose();
         poseStack.scale(scale, scale, 1.0F);
 
-        int textWidth = this.mc.font.width(this.getTextComponent());
-        int backgroundOpacity = this.mc.options.getBackgroundColor(0);
-        if (backgroundOpacity != 0) {
+        if (!this.mc.options.backgroundForChatOnly) {
 
+            // copied from Options::getBackgroundColor
+            int backgroundOpacity = (int) (this.mc.options.textBackgroundOpacity * (1.0F - alpha) * 255.0F) << 24 & -16777216;
             GuiComponent.fill(poseStack, posX - 2, posY, posX + this.getEntryWidth() + 4, posY + 16, backgroundOpacity);
         }
 
-        int fadeTime = ConfigValueHolder.getGeneralConfig().fadeAway ? 255 - (int) (255 * alpha) : 255;
+        int fadeTime = ConfigValueHolder.getGeneralConfig().fadeAway ? 255 - (int) (255.0F * alpha) : 255;
         // prevents a bug where names would appear once at the end with full alpha
         if (fadeTime >= 5) {
 
@@ -123,6 +123,7 @@ public abstract class DisplayEntry {
             GuiComponent.drawString(poseStack, this.mc.font, this.getTextComponent(), posXSide, posY + 3, 16777215 + (fadeTime << 24));
             if (withSprite) {
 
+                int textWidth = this.mc.font.width(this.getTextComponent());
                 this.renderSprite(poseStack, mirrorPosition ? posX + textWidth + this.textItemMargin : posX, posY, scale);
             }
 

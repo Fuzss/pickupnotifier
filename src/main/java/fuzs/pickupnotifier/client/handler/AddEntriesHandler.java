@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public class AddEntriesHandler {
 
-    public static void onEntityPickup(int playerId, int itemId) {
+    public static void onEntityPickup(int itemId, int playerId) {
 
         if (Minecraft.getInstance().level.getEntity(playerId) instanceof LocalPlayer) {
 
@@ -42,7 +42,7 @@ public class AddEntriesHandler {
 
     private static void addItemEntry(ItemStack stack) {
 
-        if (!stack.isEmpty() && stack.getCount() > 0 && !ConfigValueHolder.getGeneralConfig().blacklist.contains(stack.getItem())) {
+        if (!stack.isEmpty() && !ConfigValueHolder.getGeneralConfig().blacklist.contains(stack.getItem())) {
 
             stack = stack.copy();
             // remove enchantments from copy as we don't want the glint to show

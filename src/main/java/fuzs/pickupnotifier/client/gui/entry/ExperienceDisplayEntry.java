@@ -23,7 +23,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
 
     private ExperienceDisplayEntry(Component name, int count) {
 
-        super(count, Rarity.COMMON);
+        super(count, Rarity.UNCOMMON);
         this.name = name;
     }
 

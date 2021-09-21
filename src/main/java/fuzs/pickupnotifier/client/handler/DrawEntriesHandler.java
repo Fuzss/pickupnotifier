@@ -43,25 +43,40 @@ public class DrawEntriesHandler {
         int posY = (int) (ConfigValueHolder.getDisplayConfig().yOffset / scale);
         int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, scaledHeight, posY);
         int totalFade = ConfigValueHolder.getGeneralConfig().move ? (int) (PICK_UPS.getTotalFade(evt.getPartialTicks()) * DisplayEntry.ENTRY_HEIGHT) : 0;
-
         int entryX;
         int entryY = offset + (position.isBottom() ? totalFade : -totalFade);
+        int entryHeight = position.isBottom() ? DisplayEntry.ENTRY_HEIGHT : -DisplayEntry.ENTRY_HEIGHT;
 
         for (DisplayEntry entry : PICK_UPS) {
 
-            entryX = position.getX(entry.getEntryWidth(), scaledWidth, posX);
+            boolean mayRender = false;
             if (position.isBottom()) {
 
-                if (entryY < offset + DisplayEntry.ENTRY_HEIGHT) {
+                if (entryY < offset + entryHeight) {
 
-                    entry.render(evt.getMatrixStack(), entryX, entryY, ConfigValueHolder.getGeneralConfig().move ? Mth.clamp((float) (entryY - offset) / DisplayEntry.ENTRY_HEIGHT, 0.0F, 1.0F) : entry.getRemainingTicksRelative(evt.getPartialTicks()), scale);
+                    mayRender = true;
                 }
-            } else if (entryY > offset - DisplayEntry.ENTRY_HEIGHT) {
+            } else if (entryY > offset + entryHeight) {
 
-                entry.render(evt.getMatrixStack(), entryX, entryY, ConfigValueHolder.getGeneralConfig().move ? Mth.clamp((float) (entryY - offset) / -DisplayEntry.ENTRY_HEIGHT, 0.0F, 1.0F) : entry.getRemainingTicksRelative(evt.getPartialTicks()), scale);
+                mayRender = true;
             }
 
-            entryY += position.isBottom() ? -DisplayEntry.ENTRY_HEIGHT : DisplayEntry.ENTRY_HEIGHT;
+            if (mayRender) {
+
+                entryX = position.getX(entry.getEntryWidth(), scaledWidth, posX);
+                float alpha;
+                if (ConfigValueHolder.getGeneralConfig().move) {
+
+                    alpha = Mth.clamp((float) (entryY - offset) / entryHeight, 0.0F, 1.0F);
+                } else {
+
+                    alpha = entry.getRemainingTicksRelative(evt.getPartialTicks());
+                }
+
+                entry.render(evt.getMatrixStack(), entryX, entryY, alpha, scale);
+            }
+
+            entryY -= entryHeight;
         }
     }
 
