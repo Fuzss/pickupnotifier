@@ -1,7 +1,7 @@
-package com.fuzs.pickupnotifier.config;
+package fuzs.pickupnotifier.config;
 
 import com.google.common.collect.Lists;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +35,7 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
     protected final List<T> getEntryFromRegistry(String source) {
 
         List<T> entries = Lists.newArrayList();
-        Optional<ResourceLocation> location = Optional.ofNullable(ResourceLocation.tryCreate(source));
+        Optional<ResourceLocation> location = Optional.ofNullable(ResourceLocation.tryParse(source));
         if (location.isPresent()) {
 
             Optional<T> entry = this.getEntryFromRegistry(location.get());
@@ -83,8 +83,8 @@ public class StringListParser<T extends IForgeRegistryEntry<T>> {
     private List<T> getListFromRegistry(String namespace, String path) {
 
         List<T> entries = this.activeRegistry.getEntries().stream()
-                .filter(entry -> entry.getKey().func_240901_a_().getNamespace().equals(namespace))
-                .filter(entry -> entry.getKey().func_240901_a_().getPath().matches(path.replace("*", "[a-z0-9/._-]*")))
+                .filter(entry -> entry.getKey().getRegistryName().getNamespace().equals(namespace))
+                .filter(entry -> entry.getKey().getRegistryName().getPath().matches(path.replace("*", "[a-z0-9/._-]*")))
                 .map(Map.Entry::getValue).collect(Collectors.toList());
 
         if (entries.isEmpty()) {

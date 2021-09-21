@@ -1,9 +1,10 @@
-package com.fuzs.pickupnotifier.config;
+package fuzs.pickupnotifier.config;
 
-import com.fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.PickUpNotifier;
 import com.google.common.collect.Sets;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.io.File;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class ConfigSyncManager {
 
     }
 
-    public static void onModConfig(final ModConfig.Reloading evt) {
+    public static void onModConfig(final ModConfigEvent.Reloading evt) {
 
         if (evt.getConfig().getModId().equals(PickUpNotifier.MODID)) {
 

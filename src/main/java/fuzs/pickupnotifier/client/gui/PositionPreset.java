@@ -1,10 +1,10 @@
-package com.fuzs.pickupnotifier.client.gui;
+package fuzs.pickupnotifier.client.gui;
 
-import net.minecraft.potion.EffectInstance;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraftforge.client.RenderProperties;
 
 import java.util.Collection;
 
-@SuppressWarnings("unused")
 public enum PositionPreset {
 
     TOP_LEFT("top_left", 0, 0, false),
@@ -49,18 +49,18 @@ public enum PositionPreset {
         return -(rotation - rotation * 2 * this.posX);
     }
 
-    public int getPotionShift(Collection<EffectInstance> activeEffects) {
+    public int getPotionShift(Collection<MobEffectInstance> activeEffects) {
 
         if (!this.shift) {
 
             return 0;
         }
 
-        boolean renderInHUD = activeEffects.stream().anyMatch(effect -> effect.getPotion().shouldRenderHUD(effect));
-        boolean showsParticles = activeEffects.stream().anyMatch(EffectInstance::doesShowParticles);
+        boolean renderInHUD = activeEffects.stream().anyMatch(effect -> RenderProperties.getEffectRenderer(effect.getEffect()).shouldRenderHUD(effect));
+        boolean showsParticles = activeEffects.stream().anyMatch(MobEffectInstance::isVisible);
         if (!activeEffects.isEmpty() && renderInHUD && showsParticles) {
 
-            return activeEffects.stream().anyMatch(effect -> !effect.getPotion().isBeneficial()) ? 50 : 25;
+            return activeEffects.stream().anyMatch(effect -> !effect.getEffect().isBeneficial()) ? 50 : 25;
         }
 
         return 0;
