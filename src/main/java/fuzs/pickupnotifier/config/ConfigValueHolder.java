@@ -61,6 +61,7 @@ public class ConfigValueHolder {
         public boolean fadeAway;
         public int maxCount;
         public boolean displayExperience;
+        public boolean logEverything;
 
         @Override
         protected String getName() {
@@ -101,9 +102,16 @@ public class ConfigValueHolder {
             registerClientEntry(builder.comment("Make outdated entry names slowly fade away instead of simply vanishing.").define("Fade Away", true), v -> this.fadeAway = v);
             registerClientEntry(builder.comment("Maximum count number displayed. Setting this to 0 will prevent the count from being displayed at all.").defineInRange("Maximum Amount", 9999, 0, Integer.MAX_VALUE), v -> this.maxCount = v);
             registerClientEntry(builder.comment("Include experience orbs the player has collected as part of the list of entries.").define("Display Experience", true), v -> this.displayExperience = v);
+            registerClientEntry(builder.comment("Show entries for every item picked up, even the ones not going into the player inventory, e. g. when directly collected by backpacks.").define("Log Everything", true), v -> this.logEverything = v);
 
             builder.pop();
         }
+
+    }
+
+    public enum TT {
+
+        FULL_PICKUPS, PARTIAL_PICKUPS
 
     }
 

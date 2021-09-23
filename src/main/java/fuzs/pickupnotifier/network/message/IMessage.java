@@ -24,6 +24,6 @@ public interface IMessage {
      * handles message on receiving side
      * @param ctx message context for enqueuing work and player
      */
-    boolean handle(NetworkEvent.Context ctx);
+    void handle(NetworkEvent.Context ctx);
 
 }

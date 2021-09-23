@@ -34,10 +34,9 @@ public class S2CTakeItemMessage implements IMessage {
     }
 
     @Override
-    public boolean handle(NetworkEvent.Context ctx) {
+    public void handle(NetworkEvent.Context ctx) {
 
-        ctx.enqueueWork(() -> AddEntriesHandler.onEntityPickup(this.itemId));
-        return true;
+        ctx.enqueueWork(() -> AddEntriesHandler.onEntityPickup(this.itemId, this.amount));
     }
 
 }

@@ -6,6 +6,7 @@ import fuzs.pickupnotifier.config.ConfigValueHolder;
 import fuzs.pickupnotifier.handler.ItemPickupHandler;
 import fuzs.pickupnotifier.network.NetworkHandler;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
+import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
@@ -53,6 +54,7 @@ public class PickUpNotifier {
         });
 
         NetworkHandler.INSTANCE.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        NetworkHandler.INSTANCE.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent evt) {

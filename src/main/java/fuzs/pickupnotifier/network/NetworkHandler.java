@@ -47,6 +47,7 @@ public enum NetworkHandler {
 
     /**
      * register a message for a side
+     * mostly from AutoRegLib, thanks Vazkii!
      * @param clazz     message class type
      * @param supplier supplier for message (called when receiving at executing end)
      *                 we use this additional supplier to avoid having to invoke the class via reflection
@@ -63,17 +64,18 @@ public enum NetworkHandler {
             message.read(buf);
             return message;
         };
-        BiConsumer<T, Supplier<NetworkEvent.Context>> handle = (message, contextSupplier) -> {
+        BiConsumer<T, Supplier<NetworkEvent.Context>> handle = (msg, ctxSup) -> {
 
-            NetworkEvent.Context ctx = contextSupplier.get();
+            NetworkEvent.Context ctx = ctxSup.get();
             if (ctx.getDirection() == direction) {
 
-                ctx.setPacketHandled(message.handle(ctx));
+                msg.handle(ctx);
             } else {
 
-                PickUpNotifier.LOGGER.warn("Received message {} at wrong side, was {}, expected {}", message.getClass().getSimpleName(), ctx.getDirection(), direction);
-                ctx.setPacketHandled(true);
+                PickUpNotifier.LOGGER.warn("Received message {} at wrong side, was {}, expected {}", msg.getClass().getSimpleName(), ctx.getDirection().getReceptionSide(), direction.getReceptionSide());
             }
+
+            ctx.setPacketHandled(true);
         };
 
         this.channel.registerMessage(this.discriminator.getAndIncrement(), clazz, encode, decode, handle);

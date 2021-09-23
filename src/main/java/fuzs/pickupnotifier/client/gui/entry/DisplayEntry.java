@@ -20,12 +20,12 @@ public abstract class DisplayEntry {
 
     private final int textItemMargin = 4;
     private final Rarity rarity;
-    protected int displayCount;
+    protected int displayAmount;
     protected int remainingTicks;
 
-    protected DisplayEntry(int displayCount, Rarity rarity) {
+    protected DisplayEntry(int amount, Rarity rarity) {
 
-        this.displayCount = Math.min(displayCount, ConfigValueHolder.getGeneralConfig().maxCount);
+        this.displayAmount = Math.min(amount, ConfigValueHolder.getGeneralConfig().maxCount);
         this.rarity = rarity;
         this.setDefaultDisplayTicks();
     }
@@ -48,15 +48,15 @@ public abstract class DisplayEntry {
     public MutableComponent getTextComponent() {
 
         MutableComponent name = new TextComponent("").append(this.getEntryName());
-        if (this.displayCount <= 0) {
+        if (this.displayAmount <= 0) {
 
             return name;
         } else if (ConfigValueHolder.getDisplayConfig().position.isMirrored()) {
 
-            name = new TextComponent(this.displayCount + "x ").append(name);
+            name = new TextComponent(this.displayAmount + "x ").append(name);
         } else {
 
-            name.append(" x" + this.displayCount);
+            name.append(" x" + this.displayAmount);
         }
 
         return name.setStyle(this.getComponentStyle());
@@ -88,7 +88,7 @@ public abstract class DisplayEntry {
 
     public void mergeWith(DisplayEntry other) {
 
-        this.displayCount = Math.min(this.displayCount + other.displayCount, ConfigValueHolder.getGeneralConfig().maxCount);
+        this.displayAmount = Math.min(this.displayAmount + other.displayAmount, ConfigValueHolder.getGeneralConfig().maxCount);
         this.setDefaultDisplayTicks();
     }
 

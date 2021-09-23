@@ -10,9 +10,9 @@ public class ItemDisplayEntry extends DisplayEntry {
 
     private final ItemStack stack;
 
-    public ItemDisplayEntry(ItemStack stack) {
+    public ItemDisplayEntry(ItemStack stack, int amount) {
 
-        super(stack.getCount(), stack.getRarity());
+        super(amount, stack.getRarity());
         this.stack = stack;
     }
 

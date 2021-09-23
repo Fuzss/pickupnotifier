@@ -14,9 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ClientPacketListenerMixin implements ClientGamePacketListener {
 
     @Inject(method = "handleTakeItemEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V", shift = At.Shift.AFTER))
-    public void handleTakeItemEntity(ClientboundTakeItemEntityPacket pPacket, CallbackInfo callbackInfo) {
+    public void handleTakeItemEntity(ClientboundTakeItemEntityPacket packet, CallbackInfo callbackInfo) {
 
-        AddEntriesHandler.onEntityPickup(pPacket.getItemId(), pPacket.getPlayerId());
+        AddEntriesHandler.onEntityPickup(packet.getItemId(), packet.getPlayerId(), packet.getAmount());
     }
 
 }

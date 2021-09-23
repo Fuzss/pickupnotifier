@@ -12,50 +12,59 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.Optional;
 
 public class AddEntriesHandler {
 
-    public static void onEntityPickup(int itemId, int playerId) {
+    public static void onEntityPickup(int itemId, int playerId, int amount) {
 
         if (Minecraft.getInstance().level.getEntity(playerId) instanceof LocalPlayer) {
 
-            onEntityPickup(itemId);
+            onEntityPickup(itemId, amount);
         }
     }
 
-    public static void onEntityPickup(int itemId) {
+    public static void onEntityPickup(int itemId, int amount) {
 
-        Entity pickedEntity = Minecraft.getInstance().level.getEntity(itemId);
-        if (pickedEntity instanceof ItemEntity) {
+        if (DrawEntriesHandler.HANDLED_ENTITIES.put(itemId, new MutableInt()) == null) {
 
-            addItemEntry(((ItemEntity) pickedEntity).getItem());
-        } else if (pickedEntity instanceof AbstractArrow) {
+            Entity pickedEntity = Minecraft.getInstance().level.getEntity(itemId);
+            if (pickedEntity instanceof ItemEntity) {
 
-            addItemEntry(((AbstractArrowAccessor) pickedEntity).callGetPickupItem());
-        } else if (pickedEntity instanceof ExperienceOrb) {
+                addItemEntry(((ItemEntity) pickedEntity).getItem(), amount);
+            } else if (pickedEntity instanceof AbstractArrow) {
 
-            addExperienceEntry((ExperienceOrb) pickedEntity);
+                addItemEntry(((AbstractArrowAccessor) pickedEntity).callGetPickupItem(), amount);
+            } else if (pickedEntity instanceof ExperienceOrb) {
+
+                addExperienceEntry((ExperienceOrb) pickedEntity, amount);
+            }
         }
     }
 
-    private static void addItemEntry(ItemStack stack) {
+    public static void addItemEntry(ItemStack stack) {
+
+        addItemEntry(stack, stack.getCount());
+    }
+
+    private static void addItemEntry(ItemStack stack, int amount) {
 
         if (!stack.isEmpty() && !ConfigValueHolder.getGeneralConfig().blacklist.contains(stack.getItem())) {
 
             stack = stack.copy();
             // remove enchantments from copy as we don't want the glint to show
             stack.removeTagKey("Enchantments");
-            addEntry(new ItemDisplayEntry(stack));
+            addEntry(new ItemDisplayEntry(stack, amount));
         }
     }
 
-    private static void addExperienceEntry(ExperienceOrb orb) {
+    private static void addExperienceEntry(ExperienceOrb orb, int amount) {
 
         if (ConfigValueHolder.getGeneralConfig().displayExperience && orb.getValue() > 0) {
 
-            addEntry(new ExperienceDisplayEntry(orb));
+            addEntry(new ExperienceDisplayEntry(orb.getName(), amount));
         }
     }
 

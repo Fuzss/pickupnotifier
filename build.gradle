@@ -1,6 +1,5 @@
 import groovy.json.*
 import java.util.regex.Pattern
-import net.minecraftforge.gradle.common.tasks.SignJar
 
 buildscript {
 
@@ -10,7 +9,6 @@ buildscript {
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = 'https://repo.spongepowered.org/maven' }
         maven { url = 'https://maven.parchmentmc.org' }
-        maven { url = "https://cursemaven.com" }
     }
 
     dependencies {
@@ -24,6 +22,7 @@ buildscript {
 plugins {
 
     id "com.matthewprenger.cursegradle" version "1.4.0"
+//    id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -55,10 +54,6 @@ minecraft {
 
         client {
 
-            // default values
-//            workingDirectory project.file('run')
-//            ideaModule "${project.name}.main"
-
             // https://forums.minecraftforge.net/topic/82228-1152-3110-intellij-and-gradlew-forge-hotswap-and-dcevm-tutorial/
             if (project.hasProperty('hotswapAgent') && project.findProperty('enableHotswap').toBoolean()) {
 
@@ -69,28 +64,27 @@ minecraft {
             }
 
             args '--mixin.config', "META-INF/${project.modid}.mixins.json".toString()
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
+            properties 'fml.earlyprogresswindow': 'false', 'mixin.env.disableRefMap': 'true'
         }
 
         server {
 
-            // default values
-//            workingDirectory project.file('run')
-//            ideaModule "${project.name}.main"
-
             jvmArgs '-ea', '-Xms1G', '-Xmx4G'
             args 'nogui', '--mixin.config', "META-INF/${project.modid}.mixins.json".toString()
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
+            properties 'mixin.env.disableRefMap': 'true'
         }
     }
-
 }
+
+//configurations {
+//
+//    shade
+//}
 
 repositories {
 
     mavenLocal()
+    maven { url = "https://cursemaven.com" }
 }
 
 dependencies {
@@ -98,11 +92,18 @@ dependencies {
     minecraft "net.minecraftforge:forge:${forgeVersion}"
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 
+    runtimeOnly fg.deobf("curse.maven:configured-457570:3434072")
+    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3399552")
+
+    // shadow demo
+//    implementation "com.github.Ocelot5836:Sonar:ef5b90d"
+//    shade "com.github.Ocelot5836:Sonar:ef5b90d"
+
     // local maven
 //    implementation "fuzs.puzzleslib:PuzzlesLib:${puzzlesVersion}"
     // try use curse maven when local maven is not available
     // file id is end of url (7 digits usually) when on file details page on curse
-//    implementation fg.deobf("curse.maven:puzzles-lib:<file-id>")
+//    implementation fg.deobf("curse.maven:puzzles-lib-495476:<file-id>")
 }
 
 mixin {
@@ -177,18 +178,47 @@ ext.jarAttributes = [
         "MixinConfigs"              : "META-INF/${project.modid}.mixins.json"
 ]
 
+//import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+//
+//task relocateShadowJar(type: ConfigureShadowRelocation) {
+//
+//    // Configure Auto Relocation
+//    target = tasks.shadowJar
+//}
+//
+//tasks.shadowJar.dependsOn tasks.relocateShadowJar
+//
+//shadowJar {
+//
+//    from rootProject.file("LICENSE")
+//    configurations = [project.configurations.shade]
+//    // relocation is done via ConfigureShadowRelocation task
+//    // make this main jar without any classifier if it exists
+//    classifier ""
+//}
+//
+//reobf {
+//
+//    shadowJar {}
+//}
+//
+//build.dependsOn reobfShadowJar
+
 def createJarTask(def name, def type, def sources) {
 
     return tasks.create(name, Jar) {
 
         from sources
-        classifier = type
+        from rootProject.file("LICENSE")
+        classifier type
 
         manifest { attributes(project.jarAttributes) }
         dependsOn classes
         group 'jar'
     }
 }
+
+import net.minecraftforge.gradle.common.tasks.SignJar
 
 def createSignJarTask(def name, def jarTask) {
 
@@ -213,8 +243,10 @@ jar {
 
     from sourceSets.main.output.classesDirs
     from sourceSets.main.output.resourcesDir
+    from rootProject.file("LICENSE")
     manifest { attributes(project.jarAttributes) }
     group 'jar'
+//    classifier "jar"
 }
 
 createJarTask("deobfJar", "deobf", [sourceSets.main.output])
@@ -222,16 +254,23 @@ createJarTask("sourceJar", "sources", sourceSets.main.allSource)
 createJarTask("javadocJar", "javadoc", javadoc)
 
 createSignJarTask("signJar", jar)
+//createSignJarTask("signShadowJar", shadowJar)
 createSignJarTask("signDeobfJar", deobfJar)
 createSignJarTask("signSourceJar", sourceJar)
 createSignJarTask("signJavadocJar", javadocJar)
 
 // finalize all jar build tasks with a signing task
-def jarTasks = tasks.findAll { task -> !task.name.startsWith('sign') && task.name.toLowerCase().contains("jar")}
-jarTasks.each { task -> task.finalizedBy tasks.getByPath("sign" + task.name.substring(0, 1).toUpperCase() + task.name.substring(1))}
+def jarTasks = [jar, deobfJar, sourceJar, javadocJar]
+//def jarTasks = [jar, shadowJar, deobfJar, sourceJar, javadocJar]
+jarTasks.each { task -> task.finalizedBy tasks.findByName("sign" + task.name.substring(0, 1).toUpperCase() + task.name.substring(1))}
+
+signJar.mustRunAfter 'reobfJar'
+//signShadowJar.mustRunAfter 'reobfShadowJar'
 
 artifacts {
 
+    archives jar
+//    archives shadowJar
 //    archives deobfJar
 //    archives sourceJar
 //    archives javadocJar
@@ -270,6 +309,7 @@ curseforge {
         addGameVersion project.findProperty('curseModloader')
         project.findProperty('curseProjectVersion').replaceAll(" ", "").split(",").each { version -> addGameVersion version }
         mainArtifact jar
+//        mainArtifact shadowJar
         addArtifact sourceJar
 //        relations { requiredDependency 'puzzles-lib' }
     }
@@ -277,7 +317,7 @@ curseforge {
     options {
 
         // doesn't upload, only prints json to console
-        debug = false
+//        debug = true
         javaVersionAutoDetect = false
         forgeGradleIntegration = false
     }
@@ -294,6 +334,7 @@ task copyJarToDir(type: Copy) {
 
         // shortcut for jar.outputs.files
         from jar
+//        from shadowJar
         into project.findProperty('buildJarOutputDir')
         // add build number to be able to distinguish jars when testing thorough official launcher
         // build number is stored in global gradle.properties
@@ -386,9 +427,9 @@ signing {
 
 // general signing task runs before sources jar is signed otherwise
 signMavenJavaPublication.dependsOn project.signSourceJar
-// jar is otherwise signed before reobfJar task runs
-assemble.finalizedBy project.signJar
+
 tasks.getByPath('curseforge').finalizedBy project.refreshUpdateJson
 // only copy when building manually
 project.copyJarToDir.dependsOn signJar
+//project.copyJarToDir.dependsOn signShadowJar
 build.finalizedBy project.copyJarToDir, project.incrementBuildNumber

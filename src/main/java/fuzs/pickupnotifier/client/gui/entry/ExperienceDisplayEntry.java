@@ -16,14 +16,9 @@ public class ExperienceDisplayEntry extends DisplayEntry {
 
     private final Component name;
 
-    public ExperienceDisplayEntry(ExperienceOrb orb) {
+    public ExperienceDisplayEntry(Component name, int amount) {
 
-        this(orb.getName(), orb.getValue());
-    }
-
-    private ExperienceDisplayEntry(Component name, int count) {
-
-        super(count, Rarity.UNCOMMON);
+        super(amount, Rarity.UNCOMMON);
         this.name = name;
     }
 
@@ -42,7 +37,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     @Override
     protected void renderSprite(PoseStack poseStack, int posX, int posY, float scale) {
 
-        int textureOffset = this.getXpTexture(this.displayCount);
+        int textureOffset = this.getXpTexture(this.displayAmount);
         int x = textureOffset % 4 * 16;
         int y = textureOffset / 4 * 16;
         float color = this.remainingTicks / 4.0F;
