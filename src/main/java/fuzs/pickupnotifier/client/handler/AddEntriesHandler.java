@@ -3,7 +3,7 @@ package fuzs.pickupnotifier.client.handler;
 import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ItemDisplayEntry;
-import fuzs.pickupnotifier.config.ConfigValueHolder;
+import fuzs.pickupnotifier.config.ConfigHolder;
 import fuzs.pickupnotifier.mixin.client.accessor.AbstractArrowAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -28,7 +28,7 @@ public class AddEntriesHandler {
 
     public static void onEntityPickup(int itemId, int amount) {
 
-        if (DrawEntriesHandler.HANDLED_ENTITIES.put(itemId, new MutableInt()) == null) {
+        if (ConfigHolder.getGeneralConfig().clientSideOnly || DrawEntriesHandler.HANDLED_ENTITIES.put(itemId, new MutableInt()) == null) {
 
             Entity pickedEntity = Minecraft.getInstance().level.getEntity(itemId);
             if (pickedEntity instanceof ItemEntity) {
@@ -51,7 +51,7 @@ public class AddEntriesHandler {
 
     private static void addItemEntry(ItemStack stack, int amount) {
 
-        if (!stack.isEmpty() && !ConfigValueHolder.getGeneralConfig().blacklist.contains(stack.getItem())) {
+        if (!stack.isEmpty() && !ConfigHolder.getBehaviorConfig().blacklist.contains(stack.getItem())) {
 
             stack = stack.copy();
             // remove enchantments from copy as we don't want the glint to show
@@ -62,7 +62,7 @@ public class AddEntriesHandler {
 
     private static void addExperienceEntry(ExperienceOrb orb, int amount) {
 
-        if (ConfigValueHolder.getGeneralConfig().displayExperience && orb.getValue() > 0) {
+        if (ConfigHolder.getGeneralConfig().displayExperience && orb.getValue() > 0) {
 
             addEntry(new ExperienceDisplayEntry(orb.getName(), amount));
         }
@@ -70,9 +70,9 @@ public class AddEntriesHandler {
 
     private static void addEntry(DisplayEntry newEntry) {
 
-        int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() / (ConfigValueHolder.getDisplayConfig().scale / 6.0F));
-        int maxSize = (int) (scaledHeight * ConfigValueHolder.getDisplayConfig().height / DisplayEntry.ENTRY_HEIGHT) - 1;
-        Optional<DisplayEntry> possibleDuplicate = ConfigValueHolder.getGeneralConfig().combineEntries ? DrawEntriesHandler.PICK_UPS.findDuplicate(newEntry) : Optional.empty();
+        int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() / (ConfigHolder.getDisplayConfig().scale / 6.0F));
+        int maxSize = (int) (scaledHeight * ConfigHolder.getDisplayConfig().height / DisplayEntry.ENTRY_HEIGHT) - 1;
+        Optional<DisplayEntry> possibleDuplicate = ConfigHolder.getBehaviorConfig().combineEntries ? DrawEntriesHandler.PICK_UPS.findDuplicate(newEntry) : Optional.empty();
         if (possibleDuplicate.isPresent()) {
 
             DisplayEntry duplicate = possibleDuplicate.get();

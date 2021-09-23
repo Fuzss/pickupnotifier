@@ -4,18 +4,30 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-@SuppressWarnings("unused")
-public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends StringListParser<T> {
+/**
+ * builds a collection for a given type of registry from a list of strings
+ * @param <T> content type of collection to build
+ */
+public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends StringEntryReader<T> {
 
-    public EntryCollectionBuilder(IForgeRegistry<T> registry, Logger logger) {
+    public static final Function<String, String> CONFIG_STRING_BUILDER = s -> "Format for every entry is \"<namespace>:<path>" + s + "\". Path may use asterisk as wildcard parameter. Tags are not supported.";
+    public static final String CONFIG_STRING = CONFIG_STRING_BUILDER.apply("");
 
-        super(registry, logger);
+    /**
+     * @param registry registry entries the to be created collections contain
+     */
+    public EntryCollectionBuilder(IForgeRegistry<T> registry) {
+
+        super(registry);
     }
 
     /**
@@ -24,40 +36,40 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
      */
     public Set<T> buildEntrySet(List<String> locations) {
 
-        return this.buildEntrySetWithCondition(locations, flag -> true, "");
+        return this.buildEntrySet(locations, flag -> true, "");
     }
 
     /**
      * @param locations resource locations to build set from
      * @return entry map associated with given resource locations in active registry paired with a given double value
      */
-    public Map<T, Double> buildEntryMap(List<String> locations) {
+    public Map<T, double[]> buildEntryMap(List<String> locations) {
 
-        return this.buildEntryMapWithCondition(locations, (entry, value) -> true, "");
+        return this.buildEntryMap(locations, (entry, value) -> true, "");
     }
 
     /**
      * @param locations resource locations to build set from
      * @param condition condition need to match for an entry to be added to the set
-     * @param message message to be logged when condition is not met
+     * @param errorMessage message to be logged when condition is not met
      * @return entry set associated with given resource locations in active registry
      */
-    public Set<T> buildEntrySetWithCondition(List<String> locations, Predicate<T> condition, String message) {
+    public Set<T> buildEntrySet(List<String> locations, Predicate<T> condition, String errorMessage) {
 
         Set<T> set = Sets.newHashSet();
         for (String source : locations) {
 
-            this.getEntryFromRegistry(source.trim()).forEach(entry -> {
+            this.getEntriesFromRegistry(source.trim()).forEach(entry -> {
 
                 if (condition.test(entry)) {
 
-                    if (this.checkOverwrite(set.contains(entry), source)) {
+                    if (this.isNotPresent(set, entry)) {
 
                         set.add(entry);
                     }
                 } else {
 
-                    this.logError(source, message);
+                    log(source, errorMessage);
                 }
             });
         }
@@ -68,52 +80,70 @@ public class EntryCollectionBuilder<T extends IForgeRegistryEntry<T>> extends St
     /**
      * @param locations resource locations to build set from
      * @param condition condition need to match for an entry to be added to the map
-     * @param message message to be logged when condition is not met
+     * @param errorMessage message to be logged when condition is not met
      * @return entry map associated with given resource locations in active registry paired with a given double value
      */
-    public Map<T, Double> buildEntryMapWithCondition(List<String> locations, BiPredicate<T, Double> condition, String message) {
+    public Map<T, double[]> buildEntryMap(List<String> locations, BiPredicate<T, double[]> condition, String errorMessage) {
 
-        Map<T, Double> map = Maps.newHashMap();
+        Map<T, double[]> map = Maps.newHashMap();
         for (String source : locations) {
 
-            String[] s = Arrays.stream(source.split(",")).map(String::trim).toArray(String[]::new);
-            if (s.length == 2) {
+            String[] splitSource = Stream.of(source.split(",")).map(String::trim).toArray(String[]::new);
+            if (splitSource.length == 0) {
 
-                List<T> entries = this.getEntryFromRegistry(s[0]);
-                if (entries.isEmpty()) {
+                log(source, "Wrong number of arguments");
+                continue;
+            }
 
-                    continue;
-                }
+            List<T> entries = this.getEntriesFromRegistry(splitSource[0]);
+            if (entries.isEmpty()) {
 
-                Optional<Double> size = Optional.empty();
-                try {
+                continue;
+            }
 
-                    size = Optional.of(Double.parseDouble(s[1]));
-                } catch (NumberFormatException ignored) {
+            double[] values = Stream.of(splitSource).skip(1).mapToDouble(value -> parseDouble(value, source)).toArray();
+            for (T entry : entries) {
 
-                    this.logError(source, "Invalid number format");
-                }
+                if (condition.test(entry, values)) {
 
-                size.ifPresent(value -> entries.forEach(entry -> {
+                    if (this.isNotPresent(map.keySet(), entry)) {
 
-                    if (condition.test(entry, value)) {
-
-                        if (this.checkOverwrite(map.containsKey(entry), entry.toString())) {
-
-                            map.put(entry, value);
-                        }
-                    } else {
-
-                        this.logError(source, message);
+                        map.put(entry, values);
                     }
-                }));
-            } else {
+                } else {
 
-                this.logError(source, "Insufficient number of arguments");
+                    log(source, errorMessage);
+                }
             }
         }
 
         return map;
+    }
+
+    /**
+     * @param value double or boolean to parse
+     * @param source currently worked on entry for error message
+     * @return parsed double
+     */
+    private static double parseDouble(String value, String source) {
+
+        if (value.equalsIgnoreCase(Boolean.TRUE.toString())) {
+
+            return 1.0;
+        } else if (value.equalsIgnoreCase(Boolean.FALSE.toString())) {
+
+            return 0.0;
+        }
+
+        try {
+
+            return Double.parseDouble(value);
+        } catch (NumberFormatException ignored) {
+
+            log(source, "Invalid number format");
+        }
+
+        return 0.0;
     }
 
 }

@@ -6,15 +6,16 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class ConfigSyncManager {
+public class ConfigManager {
 
     private static final Set<ConfigEntry<? extends ForgeConfigSpec.ConfigValue<?>, ?>> CONFIG_ENTRIES = Sets.newHashSet();
 
-    private ConfigSyncManager() {
+    private ConfigManager() {
 
     }
 
@@ -41,14 +42,19 @@ public class ConfigSyncManager {
         CONFIG_ENTRIES.add(new ConfigEntry<>(type, entry, action));
     }
 
-    public static String defaultConfigName(ModConfig.Type type, String modId) {
+    public static String defaultConfigName(String modId, @Nullable ModConfig.Type type) {
+
+        if (type == null) {
+
+            return String.format("%s.toml", modId);
+        }
 
         return String.format("%s-%s.toml", modId, type.extension());
     }
 
-    public static String configNameForFolder(ModConfig.Type type, String modId) {
+    public static String configNameForFolder(String modId, ModConfig.Type type) {
 
-        return modId + File.separator + defaultConfigName(type, modId);
+        return modId + File.separator + defaultConfigName(modId, type);
     }
 
     private static class ConfigEntry<S extends ForgeConfigSpec.ConfigValue<T>, T> {

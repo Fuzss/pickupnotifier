@@ -1,16 +1,15 @@
 package fuzs.pickupnotifier;
 
 import fuzs.pickupnotifier.client.handler.DrawEntriesHandler;
-import fuzs.pickupnotifier.config.ConfigSyncManager;
-import fuzs.pickupnotifier.config.ConfigValueHolder;
+import fuzs.pickupnotifier.config.ConfigManager;
+import fuzs.pickupnotifier.config.ConfigHolder;
 import fuzs.pickupnotifier.handler.ItemPickupHandler;
 import fuzs.pickupnotifier.network.NetworkHandler;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
 import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -30,36 +29,39 @@ public class PickUpNotifier {
     public static final String NAME = "Pick Up Notifier";
     public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.NAME);
 
-    @SuppressWarnings("Convert2Lambda")
     public PickUpNotifier() {
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onLoadComplete);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ConfigSyncManager::onModConfig);
+        this.addListeners(FMLJavaModLoadingContext.get().getModEventBus());
+        this.buildConfig(ModLoadingContext.get());
+    }
 
-        // Forge doesn't like this being a lambda
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> new DistExecutor.SafeRunnable() {
+    private void addListeners(IEventBus bus) {
 
-            @Override
-            public void run() {
+        bus.addListener(this::onCommonSetup);
+        bus.addListener(this::onClientSetup);
+        bus.addListener(this::onLoadComplete);
+        bus.addListener(ConfigManager::onModConfig);
+    }
 
-                ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-                ConfigValueHolder.getGeneralConfig().setupConfig(builder);
-                ConfigValueHolder.getDisplayConfig().setupConfig(builder);
-                ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, builder.build());
+    private void buildConfig(ModLoadingContext ctx) {
 
-                FMLJavaModLoadingContext.get().getModEventBus().addListener(PickUpNotifier.this::onClientSetup);
-            }
-
-        });
-
-        NetworkHandler.INSTANCE.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
-        NetworkHandler.INSTANCE.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ConfigHolder.getGeneralConfig().setupConfig(builder);
+        ConfigHolder.getBehaviorConfig().setupConfig(builder);
+        ConfigHolder.getDisplayConfig().setupConfig(builder);
+        ctx.registerConfig(ModConfig.Type.COMMON, builder.build());
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent evt) {
 
+        this.registerMessages();
         MinecraftForge.EVENT_BUS.register(new ItemPickupHandler());
+    }
+
+    private void registerMessages() {
+
+        NetworkHandler.INSTANCE.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        NetworkHandler.INSTANCE.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     private void onClientSetup(final FMLClientSetupEvent evt) {
@@ -69,7 +71,7 @@ public class PickUpNotifier {
 
     private void onLoadComplete(final FMLLoadCompleteEvent evt) {
 
-        ConfigSyncManager.sync();
+        ConfigManager.sync();
     }
 
 }

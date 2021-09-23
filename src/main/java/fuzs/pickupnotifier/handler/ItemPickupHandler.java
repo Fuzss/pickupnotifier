@@ -1,6 +1,6 @@
 package fuzs.pickupnotifier.handler;
 
-import fuzs.pickupnotifier.config.ConfigValueHolder;
+import fuzs.pickupnotifier.config.ConfigHolder;
 import fuzs.pickupnotifier.network.NetworkHandler;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
 import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
@@ -22,9 +22,9 @@ public class ItemPickupHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onEntityItemPickup1(final EntityItemPickupEvent evt) {
 
-        if (ConfigValueHolder.getGeneralConfig().logEverything) {
+        if (ConfigHolder.getGeneralConfig().backpackCompat) {
 
-            if (!evt.getItem().getItem().isEmpty()) {
+            if (!evt.getItem().getItem().isEmpty() && !evt.getItem().isRemoved()) {
 
                 this.cachedStack = evt.getItem().getItem().copy();
             }
@@ -34,19 +34,28 @@ public class ItemPickupHandler {
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public void onEntityItemPickup2(final EntityItemPickupEvent evt) {
 
-        if (ConfigValueHolder.getGeneralConfig().logEverything) {
+        if (ConfigHolder.getGeneralConfig().logEverything) {
 
             ItemEntity entity = evt.getItem();
             Player player = evt.getPlayer();
             ItemStack stack = entity.getItem();
-            if (evt.isCanceled()) {
+            if (ConfigHolder.getGeneralConfig().backpackCompat && evt.isCanceled()) {
 
                 if (!this.cachedStack.isEmpty()) {
 
+                    boolean sendTakeMessage = false;
                     int takeAmount = this.cachedStack.getCount() - stack.getCount();
                     if (takeAmount > 0) {
 
                         this.cachedStack.setCount(takeAmount);
+                        sendTakeMessage = true;
+                    } else if (evt.getItem().isRemoved()) {
+
+                        sendTakeMessage = true;
+                    }
+
+                    if (sendTakeMessage) {
+
                         NetworkHandler.INSTANCE.sendTo(new S2CTakeItemStackMessage(this.cachedStack), (ServerPlayer) player);
                     }
                 }
@@ -73,14 +82,6 @@ public class ItemPickupHandler {
         }
     }
 
-    @SubscribeEvent
-    public void onEntityItemPickup(final EntityItemPickupEvent evt) {
-
-        ItemEntity itemEntity = evt.getItem();
-        itemEntity.setItem(ItemStack.EMPTY);
-        evt.setCanceled(true);
-    }
-
     private int getSpaceAtIndex(Inventory inventory, int slotIndex, ItemStack stack) {
 
         int itemCount = stack.getCount();
@@ -102,7 +103,7 @@ public class ItemPickupHandler {
     @SubscribeEvent
     public void onPlayerItemPickup(final PlayerEvent.ItemPickupEvent evt) {
 
-        if (!ConfigValueHolder.getGeneralConfig().logEverything) {
+        if (!ConfigHolder.getGeneralConfig().logEverything) {
 
             this.takeItem(evt.getPlayer(), evt.getOriginalEntity(), evt.getStack().getCount());
         }

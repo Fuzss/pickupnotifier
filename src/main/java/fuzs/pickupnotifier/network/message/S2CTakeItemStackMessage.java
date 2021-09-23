@@ -1,6 +1,7 @@
 package fuzs.pickupnotifier.network.message;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
+import fuzs.pickupnotifier.config.ConfigHolder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
@@ -33,7 +34,13 @@ public class S2CTakeItemStackMessage implements IMessage {
     @Override
     public void handle(NetworkEvent.Context ctx) {
 
-        ctx.enqueueWork(() -> AddEntriesHandler.addItemEntry(this.stack));
+        ctx.enqueueWork(() -> {
+
+            if (!ConfigHolder.getGeneralConfig().clientSideOnly) {
+
+                AddEntriesHandler.addItemEntry(this.stack);
+            }
+        });
     }
 
 }

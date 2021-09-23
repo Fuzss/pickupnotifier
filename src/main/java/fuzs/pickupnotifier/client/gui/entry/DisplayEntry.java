@@ -1,6 +1,6 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
-import fuzs.pickupnotifier.config.ConfigValueHolder;
+import fuzs.pickupnotifier.config.ConfigHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -25,7 +25,7 @@ public abstract class DisplayEntry {
 
     protected DisplayEntry(int amount, Rarity rarity) {
 
-        this.displayAmount = Math.min(amount, ConfigValueHolder.getGeneralConfig().maxCount);
+        this.displayAmount = Math.min(amount, ConfigHolder.getBehaviorConfig().maxCount);
         this.rarity = rarity;
         this.setDefaultDisplayTicks();
     }
@@ -51,7 +51,7 @@ public abstract class DisplayEntry {
         if (this.displayAmount <= 0) {
 
             return name;
-        } else if (ConfigValueHolder.getDisplayConfig().position.isMirrored()) {
+        } else if (ConfigHolder.getDisplayConfig().position.isMirrored()) {
 
             name = new TextComponent(this.displayAmount + "x ").append(name);
         } else {
@@ -64,44 +64,44 @@ public abstract class DisplayEntry {
 
     private Style getComponentStyle() {
 
-        if (!ConfigValueHolder.getGeneralConfig().ignoreRarity && this.rarity != Rarity.COMMON) {
+        if (!ConfigHolder.getDisplayConfig().ignoreRarity && this.rarity != Rarity.COMMON) {
 
             return Style.EMPTY.withColor(this.rarity.color);
         } else {
 
-            return Style.EMPTY.withColor(ConfigValueHolder.getGeneralConfig().textColor);
+            return Style.EMPTY.withColor(ConfigHolder.getDisplayConfig().textColor);
         }
     }
 
     public float getRemainingTicksRelative(float partialTicks) {
 
-        float moveTime = Math.min(ConfigValueHolder.getGeneralConfig().moveTime, ConfigValueHolder.getGeneralConfig().displayTime);
+        float moveTime = Math.min(ConfigHolder.getBehaviorConfig().moveTime, ConfigHolder.getBehaviorConfig().displayTime);
         return 1.0F - Mth.clamp((this.remainingTicks - partialTicks) / moveTime, 0.0F, 1.0F);
     }
 
     public void setDefaultDisplayTicks() {
 
-        this.remainingTicks = ConfigValueHolder.getGeneralConfig().displayTime;
+        this.remainingTicks = ConfigHolder.getBehaviorConfig().displayTime;
     }
 
     public abstract boolean mayMergeWith(DisplayEntry other);
 
     public void mergeWith(DisplayEntry other) {
 
-        this.displayAmount = Math.min(this.displayAmount + other.displayAmount, ConfigValueHolder.getGeneralConfig().maxCount);
+        this.displayAmount = Math.min(this.displayAmount + other.displayAmount, ConfigHolder.getBehaviorConfig().maxCount);
         this.setDefaultDisplayTicks();
     }
 
     public int getEntryWidth() {
 
         int textWidth = this.mc.font.width(this.getTextComponent());
-        return ConfigValueHolder.getGeneralConfig().showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
+        return ConfigHolder.getDisplayConfig().showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
     }
 
     public void render(PoseStack poseStack, int posX, int posY, float alpha, float scale) {
 
-        boolean mirrorPosition = ConfigValueHolder.getDisplayConfig().position.isMirrored();
-        boolean withSprite = ConfigValueHolder.getGeneralConfig().showSprite;
+        boolean mirrorPosition = ConfigHolder.getDisplayConfig().position.isMirrored();
+        boolean withSprite = ConfigHolder.getDisplayConfig().showSprite;
         int posXSide = mirrorPosition || !withSprite ? posX : posX + 16 + this.textItemMargin;
 
         poseStack.pushPose();
@@ -114,7 +114,7 @@ public abstract class DisplayEntry {
             GuiComponent.fill(poseStack, posX - 2, posY, posX + this.getEntryWidth() + 4, posY + 16, backgroundOpacity);
         }
 
-        int fadeTime = ConfigValueHolder.getGeneralConfig().fadeAway ? 255 - (int) (255.0F * alpha) : 255;
+        int fadeTime = ConfigHolder.getBehaviorConfig().fadeAway ? 255 - (int) (255.0F * alpha) : 255;
         // prevents a bug where names would appear once at the end with full alpha
         if (fadeTime >= 5) {
 
