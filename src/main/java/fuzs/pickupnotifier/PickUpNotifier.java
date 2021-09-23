@@ -1,13 +1,14 @@
 package fuzs.pickupnotifier;
 
 import fuzs.pickupnotifier.client.handler.DrawEntriesHandler;
-import fuzs.pickupnotifier.config.ConfigManager;
-import fuzs.pickupnotifier.config.ConfigHolder;
+import fuzs.pickupnotifier.config.ClientConfig;
+import fuzs.pickupnotifier.config.ServerConfig;
+import fuzs.pickupnotifier.config.core.ConfigHolder;
+import fuzs.pickupnotifier.config.core.ConfigManager;
 import fuzs.pickupnotifier.handler.ItemPickupHandler;
 import fuzs.pickupnotifier.network.NetworkHandler;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
 import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -29,10 +30,13 @@ public class PickUpNotifier {
     public static final String NAME = "Pick Up Notifier";
     public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.NAME);
 
+    @SuppressWarnings("Convert2MethodRef")
+    public static final ConfigHolder<ClientConfig, ServerConfig> CONFIG = new ConfigHolder<>(() -> new ClientConfig(), () -> new ServerConfig());
+
     public PickUpNotifier() {
 
         this.addListeners(FMLJavaModLoadingContext.get().getModEventBus());
-        this.buildConfig(ModLoadingContext.get());
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIG.buildSpec(), ConfigManager.getSimpleName(MODID));
     }
 
     private void addListeners(IEventBus bus) {
@@ -41,15 +45,6 @@ public class PickUpNotifier {
         bus.addListener(this::onClientSetup);
         bus.addListener(this::onLoadComplete);
         bus.addListener(ConfigManager::onModConfig);
-    }
-
-    private void buildConfig(ModLoadingContext ctx) {
-
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-        ConfigHolder.getGeneralConfig().setupConfig(builder);
-        ConfigHolder.getBehaviorConfig().setupConfig(builder);
-        ConfigHolder.getDisplayConfig().setupConfig(builder);
-        ctx.registerConfig(ModConfig.Type.COMMON, builder.build());
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent evt) {

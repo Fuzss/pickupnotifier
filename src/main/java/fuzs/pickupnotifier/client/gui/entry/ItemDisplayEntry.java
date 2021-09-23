@@ -2,7 +2,7 @@ package fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import fuzs.pickupnotifier.config.ConfigHolder;
+import fuzs.pickupnotifier.PickUpNotifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,7 +19,7 @@ public class ItemDisplayEntry extends DisplayEntry {
     @Override
     protected Component getEntryName() {
 
-        return ConfigHolder.getGeneralConfig().combineEntries ? this.getStackName() : this.stack.getHoverName();
+        return PickUpNotifier.CONFIG.client().behavior().combineEntries ? this.getStackName() : this.stack.getHoverName();
     }
 
     private Component getStackName() {

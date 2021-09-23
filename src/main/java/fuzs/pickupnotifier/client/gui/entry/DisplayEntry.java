@@ -1,8 +1,8 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
-import fuzs.pickupnotifier.config.ConfigHolder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import fuzs.pickupnotifier.PickUpNotifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
@@ -25,7 +25,7 @@ public abstract class DisplayEntry {
 
     protected DisplayEntry(int amount, Rarity rarity) {
 
-        this.displayAmount = Math.min(amount, ConfigHolder.getBehaviorConfig().maxCount);
+        this.displayAmount = Math.min(amount, PickUpNotifier.CONFIG.client().behavior().maxCount);
         this.rarity = rarity;
         this.setDefaultDisplayTicks();
     }
@@ -51,7 +51,7 @@ public abstract class DisplayEntry {
         if (this.displayAmount <= 0) {
 
             return name;
-        } else if (ConfigHolder.getDisplayConfig().position.isMirrored()) {
+        } else if (PickUpNotifier.CONFIG.client().display().position.isMirrored()) {
 
             name = new TextComponent(this.displayAmount + "x ").append(name);
         } else {
@@ -64,44 +64,44 @@ public abstract class DisplayEntry {
 
     private Style getComponentStyle() {
 
-        if (!ConfigHolder.getDisplayConfig().ignoreRarity && this.rarity != Rarity.COMMON) {
+        if (!PickUpNotifier.CONFIG.client().display().ignoreRarity && this.rarity != Rarity.COMMON) {
 
             return Style.EMPTY.withColor(this.rarity.color);
         } else {
 
-            return Style.EMPTY.withColor(ConfigHolder.getDisplayConfig().textColor);
+            return Style.EMPTY.withColor(PickUpNotifier.CONFIG.client().display().textColor);
         }
     }
 
     public float getRemainingTicksRelative(float partialTicks) {
 
-        float moveTime = Math.min(ConfigHolder.getBehaviorConfig().moveTime, ConfigHolder.getBehaviorConfig().displayTime);
+        float moveTime = Math.min(PickUpNotifier.CONFIG.client().behavior().moveTime, PickUpNotifier.CONFIG.client().behavior().displayTime);
         return 1.0F - Mth.clamp((this.remainingTicks - partialTicks) / moveTime, 0.0F, 1.0F);
     }
 
     public void setDefaultDisplayTicks() {
 
-        this.remainingTicks = ConfigHolder.getBehaviorConfig().displayTime;
+        this.remainingTicks = PickUpNotifier.CONFIG.client().behavior().displayTime;
     }
 
     public abstract boolean mayMergeWith(DisplayEntry other);
 
     public void mergeWith(DisplayEntry other) {
 
-        this.displayAmount = Math.min(this.displayAmount + other.displayAmount, ConfigHolder.getBehaviorConfig().maxCount);
+        this.displayAmount = Math.min(this.displayAmount + other.displayAmount, PickUpNotifier.CONFIG.client().behavior().maxCount);
         this.setDefaultDisplayTicks();
     }
 
     public int getEntryWidth() {
 
         int textWidth = this.mc.font.width(this.getTextComponent());
-        return ConfigHolder.getDisplayConfig().showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
+        return PickUpNotifier.CONFIG.client().display().showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
     }
 
     public void render(PoseStack poseStack, int posX, int posY, float alpha, float scale) {
 
-        boolean mirrorPosition = ConfigHolder.getDisplayConfig().position.isMirrored();
-        boolean withSprite = ConfigHolder.getDisplayConfig().showSprite;
+        boolean mirrorPosition = PickUpNotifier.CONFIG.client().display().position.isMirrored();
+        boolean withSprite = PickUpNotifier.CONFIG.client().display().showSprite;
         int posXSide = mirrorPosition || !withSprite ? posX : posX + 16 + this.textItemMargin;
 
         poseStack.pushPose();
@@ -114,7 +114,7 @@ public abstract class DisplayEntry {
             GuiComponent.fill(poseStack, posX - 2, posY, posX + this.getEntryWidth() + 4, posY + 16, backgroundOpacity);
         }
 
-        int fadeTime = ConfigHolder.getBehaviorConfig().fadeAway ? 255 - (int) (255.0F * alpha) : 255;
+        int fadeTime = PickUpNotifier.CONFIG.client().behavior().fadeAway ? 255 - (int) (255.0F * alpha) : 255;
         // prevents a bug where names would appear once at the end with full alpha
         if (fadeTime >= 5) {
 

@@ -1,9 +1,9 @@
 package fuzs.pickupnotifier.client.handler;
 
+import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.PositionPreset;
 import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import fuzs.pickupnotifier.client.util.PickUpCollector;
-import fuzs.pickupnotifier.config.ConfigHolder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -25,13 +25,13 @@ public class DrawEntriesHandler {
 
         if (evt.phase == TickEvent.Phase.END && !this.mc.isPaused()) {
 
-            if (!ConfigHolder.getGeneralConfig().clientSideOnly && !HANDLED_ENTITIES.isEmpty()) {
+            if (!PickUpNotifier.CONFIG.client().general().forceClient && !HANDLED_ENTITIES.isEmpty()) {
 
                 HANDLED_ENTITIES.values().forEach(MutableInt::increment);
                 HANDLED_ENTITIES.values().removeIf(time -> time.intValue() > this.timeOutTicks);
             }
 
-            if (ConfigHolder.getBehaviorConfig().displayTime != 0 && !PICK_UPS.isEmpty()) {
+            if (PickUpNotifier.CONFIG.client().behavior().displayTime != 0 && !PICK_UPS.isEmpty()) {
 
                 PICK_UPS.tick();
             }
@@ -43,14 +43,14 @@ public class DrawEntriesHandler {
 
         if (!PICK_UPS.isEmpty()) {
 
-            final float scale = ConfigHolder.getDisplayConfig().scale / 6.0F;
+            final float scale = PickUpNotifier.CONFIG.client().display().scale / 6.0F;
             int scaledWidth = (int) (evt.getWindow().getGuiScaledWidth() / scale);
             int scaledHeight = (int) (evt.getWindow().getGuiScaledHeight() / scale);
-            PositionPreset position = ConfigHolder.getDisplayConfig().position;
-            int posX = (int) (ConfigHolder.getDisplayConfig().xOffset / scale);
-            int posY = (int) (ConfigHolder.getDisplayConfig().yOffset / scale);
+            PositionPreset position = PickUpNotifier.CONFIG.client().display().position;
+            int posX = (int) (PickUpNotifier.CONFIG.client().display().xOffset / scale);
+            int posY = (int) (PickUpNotifier.CONFIG.client().display().yOffset / scale);
             int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, scaledHeight, posY);
-            int totalFade = ConfigHolder.getBehaviorConfig().move ? (int) (PICK_UPS.getTotalFade(evt.getPartialTicks()) * DisplayEntry.ENTRY_HEIGHT) : 0;
+            int totalFade = PickUpNotifier.CONFIG.client().behavior().move ? (int) (PICK_UPS.getTotalFade(evt.getPartialTicks()) * DisplayEntry.ENTRY_HEIGHT) : 0;
             int entryX;
             int entryY = offset + (position.isBottom() ? totalFade : -totalFade);
             int entryHeight = position.isBottom() ? DisplayEntry.ENTRY_HEIGHT : -DisplayEntry.ENTRY_HEIGHT;
@@ -73,7 +73,7 @@ public class DrawEntriesHandler {
 
                     entryX = position.getX(entry.getEntryWidth(), scaledWidth, posX);
                     float alpha;
-                    if (ConfigHolder.getBehaviorConfig().move) {
+                    if (PickUpNotifier.CONFIG.client().behavior().move) {
 
                         alpha = Mth.clamp((float) (entryY - offset) / entryHeight, 0.0F, 1.0F);
                     } else {

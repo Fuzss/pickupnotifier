@@ -1,4 +1,4 @@
-package fuzs.pickupnotifier.config;
+package fuzs.pickupnotifier.config.core;
 
 import fuzs.pickupnotifier.PickUpNotifier;
 import com.google.common.collect.Sets;
@@ -42,19 +42,19 @@ public class ConfigManager {
         CONFIG_ENTRIES.add(new ConfigEntry<>(type, entry, action));
     }
 
-    public static String defaultConfigName(String modId, @Nullable ModConfig.Type type) {
+    public static String getSimpleName(String modId) {
 
-        if (type == null) {
+        return String.format("%s.toml", modId);
+    }
 
-            return String.format("%s.toml", modId);
-        }
+    public static String getDefaultName(String modId, ModConfig.Type type) {
 
         return String.format("%s-%s.toml", modId, type.extension());
     }
 
-    public static String configNameForFolder(String modId, ModConfig.Type type) {
+    public static String getNameInModDir(String modId, @Nullable ModConfig.Type type) {
 
-        return modId + File.separator + defaultConfigName(modId, type);
+        return modId + File.separator + (type == null ? getSimpleName(modId) : getDefaultName(modId, type));
     }
 
     private static class ConfigEntry<S extends ForgeConfigSpec.ConfigValue<T>, T> {

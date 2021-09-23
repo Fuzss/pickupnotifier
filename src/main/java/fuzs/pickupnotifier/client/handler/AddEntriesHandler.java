@@ -1,9 +1,9 @@
 package fuzs.pickupnotifier.client.handler;
 
+import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ItemDisplayEntry;
-import fuzs.pickupnotifier.config.ConfigHolder;
 import fuzs.pickupnotifier.mixin.client.accessor.AbstractArrowAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -20,38 +20,64 @@ public class AddEntriesHandler {
 
     public static void onEntityPickup(int itemId, int playerId, int amount) {
 
+        // called by client directly
         if (Minecraft.getInstance().level.getEntity(playerId) instanceof LocalPlayer) {
 
+            // prevent client from adding duplicates already collected on server side
+            if (!DrawEntriesHandler.HANDLED_ENTITIES.containsKey(itemId)) {
+
+                onEntityPickup(itemId, amount);
+            }
+        }
+    }
+
+    public static void addPickUpEntry(int itemId, int amount) {
+
+        // called by package froms server
+        if (!PickUpNotifier.CONFIG.client().general().forceClient) {
+
+            // items collected on server side are added to this list to avoid creating duplicates when the client collects them as well
+            DrawEntriesHandler.HANDLED_ENTITIES.put(itemId, new MutableInt());
             onEntityPickup(itemId, amount);
         }
     }
 
-    public static void onEntityPickup(int itemId, int amount) {
+    public static void addItemEntry(ItemStack stack) {
 
-        if (ConfigHolder.getGeneralConfig().clientSideOnly || DrawEntriesHandler.HANDLED_ENTITIES.put(itemId, new MutableInt()) == null) {
+        // called by package froms server
+        if (!PickUpNotifier.CONFIG.client().general().forceClient && PickUpNotifier.CONFIG.client().general().logItems) {
 
-            Entity pickedEntity = Minecraft.getInstance().level.getEntity(itemId);
-            if (pickedEntity instanceof ItemEntity) {
+            addItemEntry(stack, stack.getCount());
+        }
+    }
+
+    private static void onEntityPickup(int itemId, int amount) {
+
+        Entity pickedEntity = Minecraft.getInstance().level.getEntity(itemId);
+        if (pickedEntity instanceof ItemEntity) {
+
+            if (PickUpNotifier.CONFIG.client().general().logItems) {
 
                 addItemEntry(((ItemEntity) pickedEntity).getItem(), amount);
-            } else if (pickedEntity instanceof AbstractArrow) {
+            }
+        } else if (pickedEntity instanceof AbstractArrow) {
+
+            if (PickUpNotifier.CONFIG.client().general().logArrows) {
 
                 addItemEntry(((AbstractArrowAccessor) pickedEntity).callGetPickupItem(), amount);
-            } else if (pickedEntity instanceof ExperienceOrb) {
+            }
+        } else if (pickedEntity instanceof ExperienceOrb) {
+
+            if (PickUpNotifier.CONFIG.client().general().logExperience) {
 
                 addExperienceEntry((ExperienceOrb) pickedEntity, amount);
             }
         }
     }
 
-    public static void addItemEntry(ItemStack stack) {
-
-        addItemEntry(stack, stack.getCount());
-    }
-
     private static void addItemEntry(ItemStack stack, int amount) {
 
-        if (!stack.isEmpty() && !ConfigHolder.getBehaviorConfig().blacklist.contains(stack.getItem())) {
+        if (!stack.isEmpty() && !PickUpNotifier.CONFIG.client().behavior().blacklist.contains(stack.getItem())) {
 
             stack = stack.copy();
             // remove enchantments from copy as we don't want the glint to show
@@ -62,7 +88,7 @@ public class AddEntriesHandler {
 
     private static void addExperienceEntry(ExperienceOrb orb, int amount) {
 
-        if (ConfigHolder.getGeneralConfig().displayExperience && orb.getValue() > 0) {
+        if (orb.getValue() > 0) {
 
             addEntry(new ExperienceDisplayEntry(orb.getName(), amount));
         }
@@ -70,9 +96,9 @@ public class AddEntriesHandler {
 
     private static void addEntry(DisplayEntry newEntry) {
 
-        int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() / (ConfigHolder.getDisplayConfig().scale / 6.0F));
-        int maxSize = (int) (scaledHeight * ConfigHolder.getDisplayConfig().height / DisplayEntry.ENTRY_HEIGHT) - 1;
-        Optional<DisplayEntry> possibleDuplicate = ConfigHolder.getBehaviorConfig().combineEntries ? DrawEntriesHandler.PICK_UPS.findDuplicate(newEntry) : Optional.empty();
+        int scaledHeight = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() / (PickUpNotifier.CONFIG.client().display().scale / 6.0F));
+        int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.client().display().height / DisplayEntry.ENTRY_HEIGHT) - 1;
+        Optional<DisplayEntry> possibleDuplicate = PickUpNotifier.CONFIG.client().behavior().combineEntries ? DrawEntriesHandler.PICK_UPS.findDuplicate(newEntry) : Optional.empty();
         if (possibleDuplicate.isPresent()) {
 
             DisplayEntry duplicate = possibleDuplicate.get();
