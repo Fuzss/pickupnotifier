@@ -37,7 +37,7 @@ group = "${modGroup}"
 ext.modid = "${modId}"
 ext.modauthor = "${modAuthor}"
 ext.nextmcversion = getNextVersion(project.mcversion)
-//ext.puzzlesversion = "${puzzlesVersion.substring(1, puzzlesVersion.indexOf("-"))}"
+ext.puzzlesversion = "${puzzlesVersion.substring(1, puzzlesVersion.indexOf("-"))}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
@@ -90,7 +90,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:bettermodsbutton-544048:3516528")
 
     // from local maven, those builds are not obfuscated
-//    implementation "fuzs.puzzleslib:PuzzlesLib:${puzzlesVersion}"
+    implementation "fuzs.puzzleslib:PuzzlesLib:${puzzlesVersion}"
     // try use curse maven when local maven is not available
     // file id is end of url (7 digits usually) when on file details page on curse
 //    implementation fg.deobf("curse.maven:puzzles-lib:<file-id>")
@@ -118,7 +118,7 @@ processResources {
     inputs.property "minForgeVersion", "${minForgeVersion}"
     inputs.property "minMinecraftVersion", "${minMinecraftVersion}"
     inputs.property "nextMinecraftVersion", project.nextmcversion
-//    inputs.property "minPuzzlesVersion", "${minPuzzlesVersion}"
+    inputs.property "minPuzzlesVersion", "${minPuzzlesVersion}"
     inputs.property "packFormat", "${packFormat}"
 
     // replace stuff in mods.toml and pack.mcmeta
@@ -136,7 +136,7 @@ processResources {
                 'minForgeVersion':      "${minForgeVersion}",
                 'minMinecraftVersion':  "${minMinecraftVersion}",
                 "nextMinecraftVersion": project.nextmcversion,
-//                "minPuzzlesVersion":    "${minPuzzlesVersion}"
+                "minPuzzlesVersion":    "${minPuzzlesVersion}"
         )
     }
 

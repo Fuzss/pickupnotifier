@@ -3,6 +3,7 @@ package fuzs.pickupnotifier;
 import fuzs.pickupnotifier.config.ClientConfig;
 import fuzs.pickupnotifier.config.ServerConfig;
 import fuzs.pickupnotifier.handler.ItemPickupHandler;
+import fuzs.puzzleslib.PuzzlesLib;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.config.ConfigHolderImpl;
 import fuzs.puzzleslib.network.NetworkHandler;
@@ -42,7 +43,7 @@ public class PickUpNotifier {
     }
 
     private static void registerMessages() {
-        NetworkHandler.INSTANCE.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
-        NetworkHandler.INSTANCE.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        PuzzlesLib.getNetworkHandler().register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        PuzzlesLib.getNetworkHandler().register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
     }
 }
