@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v2.1.0-1.17.1] - 2021-11-06
+### Changed
+- Now depends on [Puzzles Lib]
+- Replaced common config with separate client and server configs, for easily editing server configs use [Config Menus for Forge]
+
 ## [v1.3-1.17.1] - 2021-09-23
 ### Added
 - Updated to Minecraft 1.17.1
@@ -18,5 +23,7 @@ The format is based on [Keep a Changelog].
 - Entry display time is no longer tied to frame rate
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
+[Puzzles Lib]: https://www.curseforge.com/minecraft/mc-mods/puzzles-lib
+[Config Menus for Forge]: https://www.curseforge.com/minecraft/mc-mods/config-menus-forge
 [Catalogue]: https://www.curseforge.com/minecraft/mc-mods/catalogue
 [Configured]: https://www.curseforge.com/minecraft/mc-mods/configured

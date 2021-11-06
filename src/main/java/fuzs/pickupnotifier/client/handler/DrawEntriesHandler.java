@@ -17,18 +17,15 @@ public class DrawEntriesHandler {
     public static final PickUpCollector PICK_UPS = new PickUpCollector();
     public static final Int2ObjectArrayMap<MutableInt> HANDLED_ENTITIES = new Int2ObjectArrayMap<>();
 
-    private final Minecraft mc = Minecraft.getInstance();
-    private final int timeOutTicks = 80;
-
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent evt) {
 
-        if (evt.phase == TickEvent.Phase.END && !this.mc.isPaused()) {
+        if (evt.phase == TickEvent.Phase.END && !Minecraft.getInstance().isPaused()) {
 
             if (!PickUpNotifier.CONFIG.client().general().forceClient && !HANDLED_ENTITIES.isEmpty()) {
 
                 HANDLED_ENTITIES.values().forEach(MutableInt::increment);
-                HANDLED_ENTITIES.values().removeIf(time -> time.intValue() > this.timeOutTicks);
+                HANDLED_ENTITIES.values().removeIf(time -> time.intValue() > 80);
             }
 
             if (PickUpNotifier.CONFIG.client().behavior().displayTime != 0 && !PICK_UPS.isEmpty()) {

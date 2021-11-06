@@ -10,5 +10,4 @@ public interface AbstractArrowAccessor {
 
     @Invoker
     ItemStack callGetPickupItem();
-
 }

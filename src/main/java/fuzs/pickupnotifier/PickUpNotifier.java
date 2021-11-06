@@ -1,72 +1,48 @@
 package fuzs.pickupnotifier;
 
-import fuzs.pickupnotifier.client.handler.DrawEntriesHandler;
 import fuzs.pickupnotifier.config.ClientConfig;
 import fuzs.pickupnotifier.config.ServerConfig;
-import fuzs.pickupnotifier.config.core.ConfigHolder;
-import fuzs.pickupnotifier.config.core.ConfigManager;
 import fuzs.pickupnotifier.handler.ItemPickupHandler;
-import fuzs.pickupnotifier.network.NetworkHandler;
+import fuzs.puzzleslib.config.ConfigHolder;
+import fuzs.puzzleslib.config.ConfigHolderImpl;
+import fuzs.puzzleslib.network.NetworkHandler;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
 import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@SuppressWarnings("unused")
-@Mod(PickUpNotifier.MODID)
+@Mod(PickUpNotifier.MOD_ID)
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class PickUpNotifier {
-
-    public static final String MODID = "pickupnotifier";
-    public static final String NAME = "Pick Up Notifier";
-    public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.NAME);
+    public static final String MOD_ID = "pickupnotifier";
+    public static final String MOD_NAME = "Pick Up Notifier";
+    public static final Logger LOGGER = LogManager.getLogger(PickUpNotifier.MOD_NAME);
 
     @SuppressWarnings("Convert2MethodRef")
-    public static final ConfigHolder<ClientConfig, ServerConfig> CONFIG = new ConfigHolder<>(() -> new ClientConfig(), () -> new ServerConfig());
+    public static final ConfigHolder<ClientConfig, ServerConfig> CONFIG = ConfigHolder.of(() -> new ClientConfig(), () -> new ServerConfig());
 
-    public PickUpNotifier() {
-
-        this.addListeners(FMLJavaModLoadingContext.get().getModEventBus());
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIG.buildSpec(), ConfigManager.getSimpleName(MODID));
+    @SubscribeEvent
+    public static void onConstructMod(final FMLConstructModEvent evt) {
+        ((ConfigHolderImpl<?, ?>) CONFIG).addConfigs(MOD_ID);
+        registerHandler();
+        registerMessages();
     }
 
-    private void addListeners(IEventBus bus) {
-
-        bus.addListener(this::onCommonSetup);
-        bus.addListener(this::onClientSetup);
-        bus.addListener(this::onLoadComplete);
-        bus.addListener(ConfigManager::onModConfig);
+    private static void registerHandler() {
+        final ItemPickupHandler handler = new ItemPickupHandler();
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, handler::onEntityItemPickup1);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, true, handler::onEntityItemPickup2);
+        MinecraftForge.EVENT_BUS.addListener(handler::onPlayerItemPickup);
     }
 
-    private void onCommonSetup(final FMLCommonSetupEvent evt) {
-
-        this.registerMessages();
-        MinecraftForge.EVENT_BUS.register(new ItemPickupHandler());
-    }
-
-    private void registerMessages() {
-
+    private static void registerMessages() {
         NetworkHandler.INSTANCE.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
         NetworkHandler.INSTANCE.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
     }
-
-    private void onClientSetup(final FMLClientSetupEvent evt) {
-
-        MinecraftForge.EVENT_BUS.register(new DrawEntriesHandler());
-    }
-
-    private void onLoadComplete(final FMLLoadCompleteEvent evt) {
-
-        ConfigManager.sync();
-    }
-
 }

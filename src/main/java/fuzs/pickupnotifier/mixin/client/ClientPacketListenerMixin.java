@@ -9,14 +9,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@SuppressWarnings("unused")
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin implements ClientGamePacketListener {
 
     @Inject(method = "handleTakeItemEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V", shift = At.Shift.AFTER))
     public void handleTakeItemEntity(ClientboundTakeItemEntityPacket packet, CallbackInfo callbackInfo) {
-
         AddEntriesHandler.onEntityPickup(packet.getItemId(), packet.getPlayerId(), packet.getAmount());
     }
-
 }
