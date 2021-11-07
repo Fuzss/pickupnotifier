@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog].
 ### Changed
 - Now depends on [Puzzles Lib]
 - Replaced common config with separate client and server configs, for easily editing server configs use [Config Menus for Forge]
+### Fixed
+- Fixed Pick Up Notifier showing as incompatible with some servers when it wasn't
 
 ## [v1.3-1.17.1] - 2021-09-23
 ### Added

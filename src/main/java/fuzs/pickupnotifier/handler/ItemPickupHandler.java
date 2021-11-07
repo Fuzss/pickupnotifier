@@ -1,10 +1,9 @@
 package fuzs.pickupnotifier.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
-import fuzs.puzzleslib.PuzzlesLib;
-import fuzs.puzzleslib.network.NetworkHandler;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
 import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
+import fuzs.puzzleslib.network.NetworkHandler;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -42,7 +41,7 @@ public class ItemPickupHandler {
                     sendTakeMessage = true;
                 }
                 if (sendTakeMessage) {
-                    PuzzlesLib.getNetworkHandler().sendTo(new S2CTakeItemStackMessage(this.cachedStack), (ServerPlayer) player);
+                    PickUpNotifier.NETWORK.sendTo(new S2CTakeItemStackMessage(this.cachedStack), (ServerPlayer) player);
                 }
             }
             this.cachedStack = ItemStack.EMPTY;
@@ -59,7 +58,7 @@ public class ItemPickupHandler {
                     }
                 }
                 if (itemAmount > 0) {
-                    PuzzlesLib.getNetworkHandler().sendTo(new S2CTakeItemMessage(item.getId(), itemAmount), (ServerPlayer) player);
+                    PickUpNotifier.NETWORK.sendTo(new S2CTakeItemMessage(item.getId(), itemAmount), (ServerPlayer) player);
                 }
             }
         }
@@ -68,7 +67,7 @@ public class ItemPickupHandler {
     @SubscribeEvent
     public void onPlayerItemPickup(final PlayerEvent.ItemPickupEvent evt) {
         if (!PickUpNotifier.CONFIG.server().partialPickUps && !evt.getOriginalEntity().isRemoved()) {
-            PuzzlesLib.getNetworkHandler().sendTo(new S2CTakeItemMessage(evt.getOriginalEntity().getId(), evt.getStack().getCount()), (ServerPlayer) evt.getPlayer());
+            PickUpNotifier.NETWORK.sendTo(new S2CTakeItemMessage(evt.getOriginalEntity().getId(), evt.getStack().getCount()), (ServerPlayer) evt.getPlayer());
         }
     }
 

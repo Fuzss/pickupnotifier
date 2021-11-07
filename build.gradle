@@ -1,16 +1,12 @@
 buildscript {
-
     repositories {
-
         mavenCentral()
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = 'https://repo.spongepowered.org/maven' }
         maven { url = 'https://maven.parchmentmc.org' }
         maven { url = "https://cursemaven.com" }
     }
-
     dependencies {
-
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
         classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+'
@@ -18,7 +14,6 @@ buildscript {
 }
 
 plugins {
-
     id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
@@ -43,51 +38,43 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
-
     mappings channel: "${mappingsChannel}", version: "${mappingsVersion}"
-
     runs {
-
         client {
-
             // https://forums.minecraftforge.net/topic/82228-1152-3110-intellij-and-gradlew-forge-hotswap-and-dcevm-tutorial/
             if (project.hasProperty('hotswapAgent') && project.findProperty('enableHotswap').toBoolean()) {
-
                 jvmArgs '-ea', '-Xms1G', '-Xmx4G', '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5010', '-XXaltjvm=dcevm', '-XX:+UnlockExperimentalVMOptions', "-javaagent:${hotswapAgent}"
             } else {
-
                 jvmArgs '-ea', '-Xms1G', '-Xmx4G'
             }
-
-            arg '--mixin.config': "META-INF/${project.modid}.mixins.json".toString()
             property 'fml.earlyprogresswindow', 'false'
+            // mixin properties
+            args '--mixin.config', "META-INF/${project.modid}.mixins.json".toString()
             properties 'mixin.env.remapRefMap': 'true', 'mixin.env.refMapRemappingFile': "${project.projectDir}/build/createSrgToMcp/output.srg".toString()
         }
-
         server {
-
             jvmArgs '-ea', '-Xms1G', '-Xmx4G'
             arg 'nogui'
-            arg '--mixin.config': "META-INF/${project.modid}.mixins.json".toString()
+            // mixin properties
+            args '--mixin.config', "META-INF/${project.modid}.mixins.json".toString()
             properties 'mixin.env.remapRefMap': 'true', 'mixin.env.refMapRemappingFile': "${project.projectDir}/build/createSrgToMcp/output.srg".toString()
         }
     }
 }
 
 repositories {
-
     mavenLocal()
     maven { url = "https://cursemaven.com" }
 }
 
 dependencies {
-
     minecraft "net.minecraftforge:forge:${forgeVersion}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.3:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 
+    // don't enable these for puzzles, they'll be forced upon all dependencies then via maven
     runtimeOnly fg.deobf("curse.maven:catalogue-459701:3399552")
     runtimeOnly fg.deobf("curse.maven:bettermodsbutton-541584:3516115")
-    runtimeOnly fg.deobf("curse.maven:bettermodsbutton-544048:3516528")
+    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3516528")
 
     // from local maven, those builds are not obfuscated
     implementation "fuzs.puzzleslib:PuzzlesLib:${puzzlesVersion}"
@@ -97,12 +84,10 @@ dependencies {
 }
 
 mixin {
-
     add sourceSets.main, "${project.modid}.refmap.json"
 }
 
 processResources {
-
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 
     // this will ensure that this task is redone when the versions change.
@@ -241,7 +226,7 @@ curseforge {
         project.findProperty('curseProjectVersion').replaceAll(" ", "").split(",").each { version -> addGameVersion version }
         mainArtifact jar
         addArtifact sourceJar
-//        relations { requiredDependency 'puzzles-lib' }
+        relations { requiredDependency 'puzzles-lib' }
     }
     options {
         // doesn't upload, only prints json to console
