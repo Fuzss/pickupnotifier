@@ -1,9 +1,9 @@
 {
   "required": true,
-  "minVersion": "0.8.4",
+  "minVersion": "0.8",
   "compatibilityLevel": "JAVA_16",
   "package": "fuzs.pickupnotifier.mixin",
-  "refmap": "pickupnotifier.refmap.json",
+  "refmap": "META-INF/pickupnotifier.refmap.json",
   "mixins": [
   ],
   "client": [

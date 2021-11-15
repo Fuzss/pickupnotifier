@@ -74,7 +74,7 @@ dependencies {
     // don't enable these for puzzles, they'll be forced upon all dependencies then via maven
     runtimeOnly fg.deobf("curse.maven:catalogue-459701:3399552")
     runtimeOnly fg.deobf("curse.maven:bettermodsbutton-541584:3516115")
-    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3516528")
+    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3520852")
 
     // from local maven, those builds are not obfuscated
     implementation "fuzs.puzzleslib:PuzzlesLib:${puzzlesVersion}"
@@ -84,7 +84,7 @@ dependencies {
 }
 
 mixin {
-    add sourceSets.main, "${project.modid}.refmap.json"
+    add sourceSets.main, "META-INF/${project.modid}.refmap.json"
 }
 
 processResources {

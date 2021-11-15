@@ -8,6 +8,7 @@ import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
 import fuzs.puzzleslib.PuzzlesLib;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.config.ConfigHolderImpl;
+import fuzs.puzzleslib.network.MessageDirection;
 import fuzs.puzzleslib.network.NetworkHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -46,7 +47,7 @@ public class PickUpNotifier {
     }
 
     private static void registerMessages() {
-        NETWORK.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, NetworkDirection.PLAY_TO_CLIENT);
-        NETWORK.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, NetworkDirection.PLAY_TO_CLIENT);
+        NETWORK.register(S2CTakeItemMessage.class, S2CTakeItemMessage::new, MessageDirection.TO_CLIENT);
+        NETWORK.register(S2CTakeItemStackMessage.class, S2CTakeItemStackMessage::new, MessageDirection.TO_CLIENT);
     }
 }
