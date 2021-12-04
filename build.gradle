@@ -34,7 +34,7 @@ ext.modauthor = "${modAuthor}"
 ext.nextmcversion = getNextVersion(project.mcversion)
 ext.puzzlesversion = "${puzzlesVersion.substring(1, puzzlesVersion.indexOf("-"))}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
@@ -69,12 +69,12 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${forgeVersion}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // don't enable these for puzzles, they'll be forced upon all dependencies then via maven
-    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3399552")
-    runtimeOnly fg.deobf("curse.maven:bettermodsbutton-541584:3516115")
-    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3520852")
+    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3543625")
+    runtimeOnly fg.deobf("curse.maven:bettermodsbutton-541584:3548185")
+    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3548199")
 
     // from local maven, those builds are not obfuscated
     implementation "fuzs.puzzleslib:PuzzlesLib:${puzzlesVersion}"
