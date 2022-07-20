@@ -32,7 +32,8 @@ classes
 *.ipr
 *.iws
 *.iml
-.idea
+.idea/*
+!.idea/scopes
 
 ### NetBeans ###
 nbproject/private/
@@ -58,9 +59,15 @@ gradle-app.setting
 .gradletasknamecache
 
 ### Other ###
-run
 .DS_Store
 *.txt
+!run
+run/*
+!run/options.txt
+!run/config
+run/config/*
+!run/config/modmenu.json
+!run/config/fabric_loader_dependencies.json
 
 # Log file
 *.log
