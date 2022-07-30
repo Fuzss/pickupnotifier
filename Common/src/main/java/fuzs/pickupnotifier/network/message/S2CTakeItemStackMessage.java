@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class S2CTakeItemStackMessage implements Message {
+public class S2CTakeItemStackMessage implements Message<S2CTakeItemStackMessage> {
     private ItemStack stack;
 
     public S2CTakeItemStackMessage() {
@@ -28,7 +28,7 @@ public class S2CTakeItemStackMessage implements Message {
     }
 
     @Override
-    public TakeItemStackHandler makeHandler() {
+    public PacketHandler<S2CTakeItemStackMessage> makeHandler() {
         return new TakeItemStackHandler();
     }
 

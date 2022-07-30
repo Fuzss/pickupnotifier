@@ -5,7 +5,7 @@ import fuzs.puzzleslib.network.message.Message;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
-public class S2CTakeItemMessage implements Message {
+public class S2CTakeItemMessage implements Message<S2CTakeItemMessage> {
     private int itemId;
     private int amount;
 
@@ -31,7 +31,7 @@ public class S2CTakeItemMessage implements Message {
     }
 
     @Override
-    public TakeItemHandler makeHandler() {
+    public PacketHandler<S2CTakeItemMessage> makeHandler() {
         return new TakeItemHandler();
     }
 

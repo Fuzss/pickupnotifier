@@ -4,7 +4,7 @@ import fuzs.pickupnotifier.config.ClientConfig;
 import fuzs.pickupnotifier.config.ServerConfig;
 import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
 import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
-import fuzs.puzzleslib.config.ConfigHolderV2;
+import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.core.ModConstructor;
 import fuzs.puzzleslib.network.MessageDirection;
@@ -19,9 +19,9 @@ public class PickUpNotifier implements ModConstructor {
 
     public static final NetworkHandler NETWORK = CoreServices.FACTORIES.network(MOD_ID, true, true);
     @SuppressWarnings("Convert2MethodRef")
-    public static final ConfigHolderV2 CONFIG = CoreServices.FACTORIES
-            .client(ClientConfig.class, () -> new ClientConfig())
-            .server(ServerConfig.class, () -> new ServerConfig());
+    public static final ConfigHolder CONFIG = CoreServices.FACTORIES
+            .clientConfig(ClientConfig.class, () -> new ClientConfig())
+            .serverConfig(ServerConfig.class, () -> new ServerConfig());
 
     @Override
     public void onConstructMod() {

@@ -14,10 +14,15 @@ dependencies {
 //        parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
     }
 
-    // Common Dependencies
-    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
-    compileOnly 'com.electronwill.night-config:core:3.6.5'
-    compileOnly 'com.electronwill.night-config:toml:3.6.5'
+    // Mixin Dependencies
+    implementation 'org.ow2.asm:asm-tree:9.2'
+    implementation 'org.ow2.asm:asm-commons:9.2'
+    implementation 'org.ow2.asm:asm-util:9.2'
+    implementation 'org.spongepowered:mixin:0.8.5'
+
+    // Config Dependencies
+    implementation 'com.electronwill.night-config:core:3.6.5'
+    implementation 'com.electronwill.night-config:toml:3.6.5'
 
     // Puzzles Lib
     modImplementation "fuzs.puzzleslib:puzzleslib-common:${puzzlesVersion}"
@@ -82,15 +87,6 @@ publishing {
             artifactId = "${modId}-common"
             version = modVersion
             from components.java
-            // exclude certain dependencies when publishing to maven
-            // from https://stackoverflow.com/a/50121790
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    if ([].stream().anyMatch(mod -> dep.artifactId.last().value().last().contains(mod))) {
-                        assert dep.parent().remove(dep)
-                    }
-                }
-            }
             pom {
                 name = "${modName} [Common]"
                 description = "${modDescription}"
@@ -114,6 +110,18 @@ publishing {
                     developer {
                         id = "${modAuthor}".toLowerCase()
                         name = "${modAuthor}"
+                    }
+                }
+            }
+            afterEvaluate {
+                // exclude certain dependencies when publishing to maven
+                // from https://stackoverflow.com/a/50121790
+                pom.withXml {
+                    asNode().dependencies.dependency.each { dep ->
+                        // use this approach to make excluding dependencies from Curse Maven more convenient
+                        if ([].stream().anyMatch(mod -> "${dep.groupId.last().value().last()}:${dep.artifactId.last().value().last()}".startsWith(mod))) {
+                            assert dep.parent().remove(dep)
+                        }
                     }
                 }
             }

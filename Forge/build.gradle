@@ -46,6 +46,7 @@ minecraft {
             property 'terminal.ansi', 'true'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug.export', 'true'
             mods {
                 modClientRun {
                     source sourceSets.main
@@ -69,6 +70,7 @@ minecraft {
             property 'terminal.ansi', 'true'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug.export', 'true'
             mods {
                 modServerRun {
                     source sourceSets.main
@@ -92,6 +94,7 @@ minecraft {
             property 'terminal.ansi', 'true'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            property 'mixin.debug.export', 'true'
             mods {
                 modDataRun {
                     source sourceSets.main
@@ -112,15 +115,12 @@ dependencies {
 
     // Quality of Life Mods
     runtimeOnly fg.deobf("curse.maven:catalogue-459701:3873264")
-    runtimeOnly fg.deobf("fuzs.bettermodsbutton:bettermodsbutton-forge:4.0.1")
+    runtimeOnly fg.deobf("fuzs.bettermodsbutton:bettermodsbutton-forge:4.1.2")
 //    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3822820")
-//    runtimeOnly fg.deobf("curse.maven:configured-457570:3872190")
+//    runtimeOnly fg.deobf("curse.maven:configured-457570:3903908")
 
     // Puzzles Lib
     implementation fg.deobf("fuzs.puzzleslib:puzzleslib-forge:${puzzlesVersion}")
-    // try use curse maven when no other option is available
-    // file id is end of url (7 digits usually) when on file details page on curse
-//    implementation fg.deobf("curse.maven:puzzles-lib:<file-id>")
 }
 
 mixin {
@@ -209,16 +209,8 @@ publishing {
             artifactId = "${modId}-forge"
             version = modVersion
             from components.java
-            // exclude certain dependencies when publishing to maven
-            // from https://stackoverflow.com/a/50121790
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    // we need to exclude Forge itself, which could be problematic for any mod containing 'forge' in its name, but shouldn't really affect many though
-                    if (["catalogue", "bettermodsbutton", "configmenusforge", "configured", "forge"].stream().anyMatch(mod -> dep.artifactId.last().value().last().contains(mod))) {
-                        assert dep.parent().remove(dep)
-                    }
-                }
-            }
+            // strip Forge dependency from POM
+            fg.component(it)
             pom {
                 name = "${modName} [Forge]"
                 description = "${modDescription}"
@@ -242,6 +234,19 @@ publishing {
                     developer {
                         id = "${modAuthor}".toLowerCase()
                         name = "${modAuthor}"
+                    }
+                }
+            }
+            afterEvaluate {
+                // exclude certain dependencies when publishing to maven
+                // from https://stackoverflow.com/a/50121790
+                pom.withXml {
+                    asNode().dependencies.dependency.each { dep ->
+                        // Forge is weird as a dependency, so skip it along with quality of life mods
+                        // use this approach to make excluding dependencies from Curse Maven more convenient
+                        if (["curse.maven:catalogue", "curse.maven:configured", "curse.maven:configmenusforge", "fuzs.bettermodsbutton:bettermodsbutton-forge"].stream().anyMatch(mod -> "${dep.groupId.last().value().last()}:${dep.artifactId.last().value().last()}".startsWith(mod))) {
+                            assert dep.parent().remove(dep)
+                        }
                     }
                 }
             }
