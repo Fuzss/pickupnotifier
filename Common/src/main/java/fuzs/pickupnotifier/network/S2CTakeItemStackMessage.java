@@ -1,7 +1,7 @@
-package fuzs.pickupnotifier.network.message;
+package fuzs.pickupnotifier.network;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
-import fuzs.puzzleslib.network.message.Message;
+import fuzs.puzzleslib.network.Message;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -28,15 +28,13 @@ public class S2CTakeItemStackMessage implements Message<S2CTakeItemStackMessage>
     }
 
     @Override
-    public PacketHandler<S2CTakeItemStackMessage> makeHandler() {
-        return new TakeItemStackHandler();
-    }
+    public MessageHandler<S2CTakeItemStackMessage> makeHandler() {
+        return new MessageHandler<>() {
 
-    private static class TakeItemStackHandler extends PacketHandler<S2CTakeItemStackMessage> {
-
-        @Override
-        public void handle(S2CTakeItemStackMessage packet, Player player, Object gameInstance) {
-            AddEntriesHandler.addItemEntry(packet.stack);
-        }
+            @Override
+            public void handle(S2CTakeItemStackMessage message, Player player, Object gameInstance) {
+                AddEntriesHandler.addItemEntry(message.stack);
+            }
+        };
     }
 }

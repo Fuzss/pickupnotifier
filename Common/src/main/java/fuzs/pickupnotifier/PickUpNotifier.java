@@ -2,8 +2,8 @@ package fuzs.pickupnotifier;
 
 import fuzs.pickupnotifier.config.ClientConfig;
 import fuzs.pickupnotifier.config.ServerConfig;
-import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
-import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
+import fuzs.pickupnotifier.network.S2CTakeItemMessage;
+import fuzs.pickupnotifier.network.S2CTakeItemStackMessage;
 import fuzs.puzzleslib.config.ConfigHolder;
 import fuzs.puzzleslib.core.CoreServices;
 import fuzs.puzzleslib.core.ModConstructor;

@@ -2,8 +2,8 @@ package fuzs.pickupnotifier.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ServerConfig;
-import fuzs.pickupnotifier.network.message.S2CTakeItemMessage;
-import fuzs.pickupnotifier.network.message.S2CTakeItemStackMessage;
+import fuzs.pickupnotifier.network.S2CTakeItemMessage;
+import fuzs.pickupnotifier.network.S2CTakeItemStackMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
