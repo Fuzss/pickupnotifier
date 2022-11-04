@@ -28,7 +28,7 @@ public class ForgeItemPickupHandler {
     @SubscribeEvent
     public void onEntityItemPickup$2(final EntityItemPickupEvent evt) {
         ItemEntity itemEntity = evt.getItem();
-        Player player = evt.getEntity();
+        Player player = evt.getPlayer();
         ItemStack stack = itemEntity.getItem();
         if (PickUpNotifier.CONFIG.get(ServerConfig.class).backpackCompat && evt.isCanceled()) {
             if (!this.cachedStack.isEmpty()) {

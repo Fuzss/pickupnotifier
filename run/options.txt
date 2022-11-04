@@ -1,4 +1,4 @@
-version:3105
+version:2975
 autoJump:false
 autoSuggestions:true
 chatColors:true
@@ -12,7 +12,6 @@ invertYMouse:false
 realmsNotifications:true
 reducedDebugInfo:false
 showSubtitles:false
-directionalAudio:false
 touchscreen:false
 fullscreen:false
 bobView:true
@@ -24,7 +23,6 @@ mouseSensitivity:0.5
 fov:0.0
 screenEffectScale:1.0
 fovEffectScale:1.0
-darknessEffectScale:1.0
 gamma:0.5
 renderDistance:12
 simulationDistance:12
@@ -32,11 +30,12 @@ entityDistanceScaling:1.0
 guiScale:0
 particles:0
 maxFps:120
+difficulty:2
 graphicsMode:1
 ao:2
 prioritizeChunkUpdates:0
 biomeBlendRadius:2
-renderClouds:"true"
+renderClouds:false
 resourcePacks:["Fabric Mods"]
 incompatibleResourcePacks:[]
 lastServer:
@@ -60,7 +59,7 @@ chatScale:1.0
 chatWidth:1.0
 mipmapLevels:4
 useNativeTransport:true
-mainHand:"right"
+mainHand:right
 attackIndicator:1
 narrator:0
 tutorialStep:none
@@ -75,8 +74,6 @@ hideBundleTutorial:false
 syncChunkWrites:false
 showAutosaveIndicator:true
 allowServerListing:true
-chatPreview:true
-onlyShowSecureChat:false
 key_key.attack:key.mouse.left
 key_key.use:key.mouse.right
 key_key.forward:key.keyboard.w

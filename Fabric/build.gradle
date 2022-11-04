@@ -46,8 +46,9 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${fabricVersion}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
 
-    // Mod Menu
-    modRuntimeOnly "com.terraformersmc:modmenu:4.0.6"
+    // Quality of Life Mods
+    modRuntimeOnly "com.terraformersmc:modmenu:3.2.4"
+    modRuntimeOnly "curse.maven:tooltipfix-411557:3543273"
 
     // Puzzles Lib
     modImplementation "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesVersion}"

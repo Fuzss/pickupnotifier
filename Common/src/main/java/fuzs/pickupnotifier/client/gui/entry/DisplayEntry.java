@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Rarity;
 
@@ -47,13 +48,13 @@ public abstract class DisplayEntry {
 
     public MutableComponent getTextComponent() {
 
-        MutableComponent name = Component.empty().append(this.getEntryName());
+        MutableComponent name = new TextComponent("").append(this.getEntryName());
         if (this.displayAmount <= 0) {
 
             return name;
         } else if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored()) {
 
-            name = Component.literal(this.displayAmount + "x ").append(name);
+            name = new TextComponent(this.displayAmount + "x ").append(name);
         } else {
 
             name.append(" x" + this.displayAmount);
@@ -107,10 +108,10 @@ public abstract class DisplayEntry {
         poseStack.pushPose();
         poseStack.scale(scale, scale, 1.0F);
 
-        if (!this.mc.options.backgroundForChatOnly().get()) {
+        if (!this.mc.options.backgroundForChatOnly) {
 
             // copied from Options::getBackgroundColor
-            int backgroundOpacity = (int) (this.mc.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
+            int backgroundOpacity = (int) (this.mc.options.textBackgroundOpacity * (1.0F - alpha) * 255.0F) << 24 & -16777216;
             GuiComponent.fill(poseStack, posX - 2, posY, posX + this.getEntryWidth() + 4, posY + 16, backgroundOpacity);
         }
 
