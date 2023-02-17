@@ -4,6 +4,7 @@ import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ItemDisplayEntry;
+import fuzs.pickupnotifier.config.ItemBlacklistManager;
 import fuzs.pickupnotifier.mixin.client.accessor.AbstractArrowAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -77,7 +78,7 @@ public class AddEntriesHandler {
 
     private static void addItemEntry(ItemStack stack, int amount) {
 
-        if (!stack.isEmpty() && !PickUpNotifier.CONFIG.client().behavior().blacklist.contains(stack.getItem())) {
+        if (!stack.isEmpty() && ItemBlacklistManager.isItemAllowed(Minecraft.getInstance().level.dimension(), stack.getItem())) {
 
             stack = stack.copy();
             // remove enchantments from copy as we don't want the glint to show

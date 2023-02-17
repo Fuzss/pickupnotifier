@@ -1,17 +1,12 @@
 package fuzs.pickupnotifier.config;
 
-import com.google.common.collect.Lists;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.PositionPreset;
-import fuzs.puzzleslib.config.serialization.EntryCollectionBuilder;
 import fuzs.puzzleslib.config.AbstractConfig;
 import fuzs.puzzleslib.config.ConfigHolder;
 import net.minecraft.ChatFormatting;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,7 +58,6 @@ public class ClientConfig extends AbstractConfig {
     }
 
     public static class BehaviorConfig extends AbstractConfig {
-        public Set<Item> blacklist;
         public boolean combineEntries;
         public int displayTime;
         public boolean move;
@@ -77,7 +71,6 @@ public class ClientConfig extends AbstractConfig {
 
         @Override
         protected void addToBuilder(ForgeConfigSpec.Builder builder, ConfigHolder.ConfigCallback saveCallback) {
-            saveCallback.accept(builder.comment("Disable specific items or content from whole mods from showing.", EntryCollectionBuilder.CONFIG_DESCRIPTION).define("Blacklist", Lists.<String>newArrayList()), v -> this.blacklist = EntryCollectionBuilder.of(ForgeRegistries.ITEMS).buildSet(v));
             saveCallback.accept(builder.comment("Combine entries of the same type instead of showing each one individually.").define("Combine Entries", true), v -> this.combineEntries = v);
             saveCallback.accept(builder.comment("Amount of ticks each entry will be shown for. Set to 0 to only remove entries when space for new ones is needed.").defineInRange("Display Time", 80, 0, Integer.MAX_VALUE), v -> this.displayTime = v);
             saveCallback.accept(builder.comment("Make outdated entries slowly move out of the screen instead of disappearing in place.").define("Move Out Of Screen", true), v -> this.move = v);

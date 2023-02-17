@@ -14,6 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,9 @@ public class PickUpNotifier {
 
     public static final NetworkHandler NETWORK = NetworkHandler.of(MOD_ID, true, true);
     @SuppressWarnings("Convert2MethodRef")
-    public static final ConfigHolder<ClientConfig, ServerConfig> CONFIG = ConfigHolder.of(() -> new ClientConfig(), () -> new ServerConfig());
+    public static final ConfigHolder<ClientConfig, ServerConfig> CONFIG = ConfigHolder.of(() -> new ClientConfig(), () -> new ServerConfig())
+            .setClientFileName(ConfigHolder.moveToDir(MOD_ID, ConfigHolder.defaultName(MOD_ID, ModConfig.Type.CLIENT)))
+            .setServerFileName(ConfigHolder.moveToDir(MOD_ID, ConfigHolder.defaultName(MOD_ID, ModConfig.Type.SERVER)));
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
