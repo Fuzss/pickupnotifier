@@ -2,7 +2,7 @@
 
 A Minecraft mod. Downloads can be found on CurseForge.
 
-![](https://i.imgur.com/DCwxKZU.png)
+![](https://raw.githubusercontent.com/Fuzss/modresources/main/pages/data/pickupnotifier/banner.png)
 
 ## Configuration
 Apart from all the display settings found in the `.minecraft/config/pickupnotifier/pickupnotifier-client.toml` file, Pick Up Notifier also supports blacklisting or whitelisting individual items from showing up via separate `.json` based configuration files.

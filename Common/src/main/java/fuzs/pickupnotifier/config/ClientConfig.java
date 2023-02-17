@@ -26,6 +26,8 @@ public class ClientConfig implements ConfigCore {
         public boolean logArrows;
         @Config(description = "Show the value of experience points collected instead of the amount of individual orbs.")
         public boolean experienceValue = true;
+        @Config(description = "Prevent items from being added to the pick-up log when in creative mode.")
+        public boolean disableInCreative = false;
 
         @Override
         public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {

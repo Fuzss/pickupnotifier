@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.2-1.18.2] - 2023-02-17
+### Added
+- Added an option to disable new pick-ups being added to the log when the player is in creative mode
+
 ## [v4.2.1-1.18.2] - 2023-02-17
 ### Added
 - Added dimension specific blacklists, also supports inverting the lists to be used as whitelists

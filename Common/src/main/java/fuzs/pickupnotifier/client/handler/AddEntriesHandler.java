@@ -95,11 +95,14 @@ public class AddEntriesHandler {
 
                 amount = orb.getValue();
             }
+
             addEntry(minecraft, new ExperienceDisplayEntry(orb.getName(), amount));
         }
     }
 
     private static void addEntry(Minecraft minecraft, DisplayEntry newEntry) {
+
+        if (minecraft.player != null && minecraft.player.getAbilities().instabuild && PickUpNotifier.CONFIG.get(ClientConfig.class).general.disableInCreative) return;
 
         int scaledHeight = (int) (minecraft.getWindow().getGuiScaledHeight() / (PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F));
         int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.height / DisplayEntry.ENTRY_HEIGHT) - 1;
