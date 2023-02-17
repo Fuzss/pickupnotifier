@@ -41,9 +41,8 @@ public class ItemDisplayEntry extends DisplayEntry {
         modelViewStack.pushPose();
         modelViewStack.scale(scale, scale, 1.0F);
         RenderSystem.applyModelViewMatrix();
-        this.mc.getItemRenderer().renderAndDecorateItem(this.stack, posX, posY);
+        this.minecraft.getItemRenderer().renderAndDecorateItem(this.stack, posX, posY);
         modelViewStack.popPose();
         RenderSystem.applyModelViewMatrix();
     }
-
 }

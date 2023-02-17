@@ -1,9 +1,12 @@
 package fuzs.pickupnotifier.client;
 
 import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.client.commands.ModReloadCommand;
 import fuzs.pickupnotifier.client.handler.DrawEntriesHandler;
+import fuzs.puzzleslib.client.core.ClientCoreServices;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,13 +20,16 @@ public class PickUpNotifierForgeClient {
 
     @SubscribeEvent
     public static void onConstructMod(final FMLConstructModEvent evt) {
+        ClientCoreServices.FACTORIES.clientModConstructor(PickUpNotifier.MOD_ID).accept(new PickUpNotifierClient());
         registerHandlers();
     }
 
     private static void registerHandlers() {
-        MinecraftForge.EVENT_BUS.addListener((TickEvent.ClientTickEvent evt) -> {
-            if (evt.phase != TickEvent.Phase.END) return;
-            DrawEntriesHandler.INSTANCE.onClientTick(Minecraft.getInstance());
+        MinecraftForge.EVENT_BUS.addListener((final TickEvent.ClientTickEvent evt) -> {
+            if (evt.phase == TickEvent.Phase.END) DrawEntriesHandler.INSTANCE.onClientTick(Minecraft.getInstance());
+        });
+        MinecraftForge.EVENT_BUS.addListener((final RegisterClientCommandsEvent evt) -> {
+            ModReloadCommand.register(evt.getDispatcher(), (source, component) -> source.sendSuccess(component, true));
         });
     }
 

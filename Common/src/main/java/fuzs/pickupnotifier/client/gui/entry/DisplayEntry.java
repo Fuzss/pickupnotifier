@@ -14,7 +14,7 @@ import net.minecraft.world.item.Rarity;
 
 public abstract class DisplayEntry {
     
-    protected final Minecraft mc = Minecraft.getInstance(); 
+    protected final Minecraft minecraft = Minecraft.getInstance();
 
     public static final int ENTRY_HEIGHT = 18;
 
@@ -94,7 +94,7 @@ public abstract class DisplayEntry {
 
     public int getEntryWidth() {
 
-        int textWidth = this.mc.font.width(this.getTextComponent());
+        int textWidth = this.minecraft.font.width(this.getTextComponent());
         return PickUpNotifier.CONFIG.get(ClientConfig.class).display.showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
     }
 
@@ -107,10 +107,10 @@ public abstract class DisplayEntry {
         poseStack.pushPose();
         poseStack.scale(scale, scale, 1.0F);
 
-        if (!this.mc.options.backgroundForChatOnly().get()) {
+        if (!this.minecraft.options.backgroundForChatOnly().get()) {
 
             // copied from Options::getBackgroundColor
-            int backgroundOpacity = (int) (this.mc.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
+            int backgroundOpacity = (int) (this.minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
             GuiComponent.fill(poseStack, posX - 2, posY, posX + this.getEntryWidth() + 4, posY + 16, backgroundOpacity);
         }
 
@@ -120,10 +120,10 @@ public abstract class DisplayEntry {
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            GuiComponent.drawString(poseStack, this.mc.font, this.getTextComponent(), posXSide, posY + 3, 16777215 + (fadeTime << 24));
+            GuiComponent.drawString(poseStack, this.minecraft.font, this.getTextComponent(), posXSide, posY + 3, 16777215 + (fadeTime << 24));
             if (withSprite) {
 
-                int textWidth = this.mc.font.width(this.getTextComponent());
+                int textWidth = this.minecraft.font.width(this.getTextComponent());
                 this.renderSprite(poseStack, mirrorPosition ? posX + textWidth + this.textItemMargin : posX, posY, scale);
             }
 
@@ -133,6 +133,5 @@ public abstract class DisplayEntry {
         poseStack.popPose();
     }
 
-    protected abstract void renderSprite(PoseStack matrixstack, int posX, int posY, float scale);
-
+    protected abstract void renderSprite(PoseStack poseStack, int posX, int posY, float scale);
 }

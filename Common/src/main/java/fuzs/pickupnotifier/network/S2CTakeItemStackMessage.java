@@ -2,6 +2,7 @@ package fuzs.pickupnotifier.network;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
 import fuzs.puzzleslib.network.Message;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +34,7 @@ public class S2CTakeItemStackMessage implements Message<S2CTakeItemStackMessage>
 
             @Override
             public void handle(S2CTakeItemStackMessage message, Player player, Object gameInstance) {
-                AddEntriesHandler.addItemEntry(message.stack);
+                AddEntriesHandler.addItemEntry((Minecraft) gameInstance, message.stack);
             }
         };
     }

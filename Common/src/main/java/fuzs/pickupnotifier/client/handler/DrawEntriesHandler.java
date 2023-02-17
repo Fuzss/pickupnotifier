@@ -14,7 +14,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 public class DrawEntriesHandler {
     public static final DrawEntriesHandler INSTANCE = new DrawEntriesHandler();
-    private final PickUpCollector pickUpCollector = new PickUpCollector();
+    private final PickUpCollector collector = new PickUpCollector();
     private final Int2ObjectArrayMap<MutableInt> handledEntities = new Int2ObjectArrayMap<>();
 
     private DrawEntriesHandler() {
@@ -29,30 +29,29 @@ public class DrawEntriesHandler {
         return this.handledEntities.containsKey(itemId);
     }
 
-    public PickUpCollector getPickUpCollector() {
-        return this.pickUpCollector;
+    public PickUpCollector getCollector() {
+        return this.collector;
     }
 
-    public void onClientTick(Minecraft client) {
+    public void onClientTick(Minecraft minecraft) {
 
-        if (!client.isPaused()) {
+        if (minecraft.isPaused()) return;
 
-            if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient && !handledEntities.isEmpty()) {
+        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient && !this.handledEntities.isEmpty()) {
 
-                handledEntities.values().forEach(MutableInt::increment);
-                handledEntities.values().removeIf(time -> time.intValue() > 80);
-            }
+            this.handledEntities.values().forEach(MutableInt::increment);
+            this.handledEntities.values().removeIf(time -> time.intValue() > 80);
+        }
 
-            if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.displayTime != 0 && !pickUpCollector.isEmpty()) {
+        if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.displayTime != 0 && !this.collector.isEmpty()) {
 
-                pickUpCollector.tick();
-            }
+            this.collector.tick();
         }
     }
 
     public void onRenderGameOverlayText(PoseStack poseStack, float tickDelta) {
 
-        if (pickUpCollector.isEmpty()) return;
+        if (this.collector.isEmpty()) return;
 
         final float scale = PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F;
         Window window = Minecraft.getInstance().getWindow();
@@ -62,12 +61,12 @@ public class DrawEntriesHandler {
         int posX = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.xOffset / scale);
         int posY = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.yOffset / scale);
         int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, scaledHeight, posY);
-        int totalFade = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move ? (int) (pickUpCollector.getTotalFade(tickDelta) * DisplayEntry.ENTRY_HEIGHT) : 0;
+        int totalFade = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move ? (int) (this.collector.getTotalFade(tickDelta) * DisplayEntry.ENTRY_HEIGHT) : 0;
         int entryX;
         int entryY = offset + (position.bottom() ? totalFade : -totalFade);
         int entryHeight = position.bottom() ? DisplayEntry.ENTRY_HEIGHT : -DisplayEntry.ENTRY_HEIGHT;
 
-        for (DisplayEntry entry : pickUpCollector) {
+        for (DisplayEntry entry : this.collector) {
 
             boolean mayRender = false;
             if (position.bottom()) {

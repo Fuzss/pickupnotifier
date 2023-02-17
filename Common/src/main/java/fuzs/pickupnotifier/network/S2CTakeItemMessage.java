@@ -2,6 +2,7 @@ package fuzs.pickupnotifier.network;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
 import fuzs.puzzleslib.network.Message;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
@@ -36,7 +37,7 @@ public class S2CTakeItemMessage implements Message<S2CTakeItemMessage> {
 
             @Override
             public void handle(S2CTakeItemMessage packet, Player player, Object gameInstance) {
-                AddEntriesHandler.addPickUpEntry(packet.itemId, packet.amount);
+                AddEntriesHandler.addPickUpEntry((Minecraft) gameInstance, packet.itemId, packet.amount);
             }
         };
     }

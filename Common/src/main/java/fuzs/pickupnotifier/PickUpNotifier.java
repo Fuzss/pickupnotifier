@@ -21,7 +21,9 @@ public class PickUpNotifier implements ModConstructor {
     @SuppressWarnings("Convert2MethodRef")
     public static final ConfigHolder CONFIG = CoreServices.FACTORIES
             .clientConfig(ClientConfig.class, () -> new ClientConfig())
-            .serverConfig(ServerConfig.class, () -> new ServerConfig());
+            .serverConfig(ServerConfig.class, () -> new ServerConfig())
+            .setFileName(ClientConfig.class, id -> ConfigHolder.moveToDir(id, ConfigHolder.defaultName(id, "client")))
+            .setFileName(ServerConfig.class, id -> ConfigHolder.moveToDir(id, ConfigHolder.defaultName(id, "server")));
 
     @Override
     public void onConstructMod() {

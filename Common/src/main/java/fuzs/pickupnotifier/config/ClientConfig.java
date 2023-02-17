@@ -1,18 +1,13 @@
 package fuzs.pickupnotifier.config;
 
-import com.google.common.collect.Lists;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.PositionPreset;
 import fuzs.puzzleslib.config.ConfigCore;
 import fuzs.puzzleslib.config.ValueCallback;
 import fuzs.puzzleslib.config.annotation.Config;
 import fuzs.puzzleslib.config.core.AbstractConfigBuilder;
-import fuzs.puzzleslib.config.serialization.EntryCollectionBuilder;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
-import net.minecraft.world.item.Item;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,7 +37,6 @@ public class ClientConfig implements ConfigCore {
     }
 
     public static class BehaviorConfig implements ConfigCore {
-        public Set<Item> blacklist;
         public boolean combineEntries;
         public int displayTime;
         public boolean move;
@@ -52,7 +46,6 @@ public class ClientConfig implements ConfigCore {
 
         @Override
         public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
-            callback.accept(builder.comment("Disable specific items or content from whole mods from showing.", EntryCollectionBuilder.CONFIG_DESCRIPTION).define("blacklist", Lists.<String>newArrayList()), v -> this.blacklist = EntryCollectionBuilder.of(Registry.ITEM_REGISTRY).buildSet(v));
             callback.accept(builder.comment("Combine entries of the same type instead of showing each one individually.").define("combine_entries", true), v -> this.combineEntries = v);
             callback.accept(builder.comment("Amount of ticks each entry will be shown for. Set to 0 to only remove entries when space for new ones is needed.").defineInRange("display_time", 80, 0, Integer.MAX_VALUE), v -> this.displayTime = v);
             callback.accept(builder.comment("Make outdated entries slowly move out of the screen instead of disappearing in place.").define("move_out_of_screen", true), v -> this.move = v);

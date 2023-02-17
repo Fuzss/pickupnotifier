@@ -8,6 +8,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(AbstractArrow.class)
 public interface AbstractArrowAccessor {
 
-    @Invoker
-    ItemStack callGetPickupItem();
+    @Invoker("getPickupItem")
+    ItemStack pickupnotifier$callGetPickupItem();
 }

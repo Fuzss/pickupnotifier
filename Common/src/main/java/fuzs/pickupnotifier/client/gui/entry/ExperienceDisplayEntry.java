@@ -89,5 +89,4 @@ public class ExperienceDisplayEntry extends DisplayEntry {
             return displayCount >= 3 ? 1 : 0;
         }
     }
-
 }
