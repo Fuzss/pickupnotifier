@@ -2,16 +2,17 @@ package fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Rarity;
 
 public class ExperienceDisplayEntry extends DisplayEntry {
-
     private static final ResourceLocation EXPERIENCE_ORB_TEXTURES = new ResourceLocation("textures/entity/experience_orb.png");
 
     private final Component name;
@@ -35,9 +36,14 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     @Override
+    protected int getInventoryCount(Inventory inventory) {
+        return 0;
+    }
+
+    @Override
     protected void renderSprite(PoseStack poseStack, int posX, int posY, float scale) {
 
-        int textureOffset = this.getXpTexture(this.displayAmount);
+        int textureOffset = this.getXpTexture(this.getDisplayAmount());
         int x = textureOffset % 4 * 16;
         int y = textureOffset / 4 * 16;
         float color = this.remainingTicks / 4.0F;

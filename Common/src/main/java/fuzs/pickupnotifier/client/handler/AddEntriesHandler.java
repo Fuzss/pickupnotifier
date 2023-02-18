@@ -46,7 +46,7 @@ public class AddEntriesHandler {
     public static void addItemEntry(Minecraft minecraft, ItemStack stack) {
 
         // called by package froms server
-        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient && PickUpNotifier.CONFIG.get(ClientConfig.class).general.logItems) {
+        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient && PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeItems) {
 
             addItemEntry(minecraft, stack, stack.getCount());
         }
@@ -57,19 +57,19 @@ public class AddEntriesHandler {
         Entity entity = minecraft.level.getEntity(itemId);
         if (entity instanceof ItemEntity item) {
 
-            if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.logItems) {
+            if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeItems) {
 
                 addItemEntry(minecraft, item.getItem(), amount);
             }
         } else if (entity instanceof AbstractArrow) {
 
-            if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.logArrows) {
+            if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeArrows) {
 
                 addItemEntry(minecraft, ((AbstractArrowAccessor) entity).pickupnotifier$callGetPickupItem(), amount);
             }
         } else if (entity instanceof ExperienceOrb experience) {
 
-            if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.logExperience) {
+            if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeExperience) {
 
                 addExperienceEntry(minecraft, experience, amount);
             }
@@ -105,7 +105,7 @@ public class AddEntriesHandler {
         if (minecraft.player != null && minecraft.player.getAbilities().instabuild && PickUpNotifier.CONFIG.get(ClientConfig.class).general.disableInCreative) return;
 
         int scaledHeight = (int) (minecraft.getWindow().getGuiScaledHeight() / (PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F));
-        int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.height / DisplayEntry.ENTRY_HEIGHT) - 1;
+        int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.maxHeight / DisplayEntry.ENTRY_HEIGHT) - 1;
         Optional<DisplayEntry> possibleDuplicate = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ? DrawEntriesHandler.INSTANCE.getCollector().findDuplicate(newEntry) : Optional.empty();
         if (possibleDuplicate.isPresent()) {
 

@@ -10,24 +10,71 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Rarity;
 
 public abstract class DisplayEntry {
-    
-    protected final Minecraft minecraft = Minecraft.getInstance();
-
     public static final int ENTRY_HEIGHT = 18;
+    private static final DisplayEntryTextFactory RIGHT = (name, displayAmount, inventoryCount) -> {
 
+        MutableComponent component;
+
+        if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
+
+            component = DisplayEntryRenderHelper.shortenValue(displayAmount).append(displayAmount < 1000 ? "x " : " ");
+        } else {
+
+            component = Component.empty();
+        }
+
+        component.append(name);
+
+        if (inventoryCount > 0) {
+
+            component.append(" ").append(wrapInBrackets(Component.literal(String.valueOf(inventoryCount))));
+        }
+
+        return component;
+    };
+    private static final DisplayEntryTextFactory LEFT = (name, displayAmount, inventoryCount) -> {
+
+        MutableComponent component;
+
+        if (inventoryCount > 0) {
+
+            component = wrapInBrackets(Component.literal(String.valueOf(inventoryCount))).append(" ");
+        } else {
+
+            component = Component.empty();
+        }
+
+        component.append(name);
+
+        if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
+
+            component.append(displayAmount < 1000 ? " x" : " ").append(DisplayEntryRenderHelper.shortenValue(displayAmount));
+        }
+
+        return component;
+    };
+
+    protected final Minecraft minecraft = Minecraft.getInstance();
     private final int textItemMargin = 4;
     private final Rarity rarity;
-    protected int displayAmount;
     protected int remainingTicks;
+    private int displayAmount;
+    private Component component;
 
-    protected DisplayEntry(int amount, Rarity rarity) {
+    protected DisplayEntry(int displayAmount, Rarity rarity) {
 
-        this.displayAmount = Math.min(amount, PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.maxCount);
+        this.displayAmount = displayAmount;
         this.rarity = rarity;
-        this.setDefaultDisplayTicks();
+        this.resetEntry();
+    }
+
+    private static MutableComponent wrapInBrackets(Component toWrap) {
+
+        return Component.literal("(").append(toWrap).append(")");
     }
 
     public boolean readyToRemove() {
@@ -45,21 +92,24 @@ public abstract class DisplayEntry {
 
     protected abstract Component getEntryName();
 
-    public MutableComponent getTextComponent() {
+    protected abstract int getInventoryCount(Inventory inventory);
 
-        MutableComponent name = Component.empty().append(this.getEntryName());
-        if (this.displayAmount <= 0) {
+    public int getDisplayAmount() {
 
-            return name;
-        } else if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored()) {
+        return this.displayAmount;
+    }
 
-            name = Component.literal(this.displayAmount + "x ").append(name);
-        } else {
+    public Component getTextComponent() {
 
-            name.append(" x" + this.displayAmount);
+        if (this.component == null) {
+
+            DisplayEntryTextFactory factory = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored() ? RIGHT : LEFT;
+            int displayAmount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.text() ? this.getDisplayAmount() : 0;
+            int inventoryCount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.inventoryCount ? this.getInventoryCount(this.minecraft.player.getInventory()) : 0;
+            this.component = factory.create(this.getEntryName(), displayAmount, inventoryCount).setStyle(this.getComponentStyle());
         }
 
-        return name.setStyle(this.getComponentStyle());
+        return this.component;
     }
 
     private Style getComponentStyle() {
@@ -79,40 +129,36 @@ public abstract class DisplayEntry {
         return 1.0F - Mth.clamp((this.remainingTicks - partialTicks) / moveTime, 0.0F, 1.0F);
     }
 
-    public void setDefaultDisplayTicks() {
+    public void resetEntry() {
 
         this.remainingTicks = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.displayTime;
+        this.component = null;
     }
 
     public abstract boolean mayMergeWith(DisplayEntry other);
 
     public void mergeWith(DisplayEntry other) {
 
-        this.displayAmount = Math.min(this.displayAmount + other.displayAmount, PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.maxCount);
-        this.setDefaultDisplayTicks();
+        this.displayAmount = this.displayAmount + other.displayAmount;
+        this.resetEntry();
     }
 
     public int getEntryWidth() {
 
         int textWidth = this.minecraft.font.width(this.getTextComponent());
-        return PickUpNotifier.CONFIG.get(ClientConfig.class).display.showSprite ? textWidth + this.textItemMargin + 16 : textWidth;
+        return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ? textWidth + this.textItemMargin + 16 : textWidth;
     }
 
     public void render(PoseStack poseStack, int posX, int posY, float alpha, float scale) {
 
         boolean mirrorPosition = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored();
-        boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.showSprite;
+        boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite;
         int posXSide = mirrorPosition || !withSprite ? posX : posX + 16 + this.textItemMargin;
 
         poseStack.pushPose();
         poseStack.scale(scale, scale, 1.0F);
 
-        if (!this.minecraft.options.backgroundForChatOnly().get()) {
-
-            // copied from Options::getBackgroundColor
-            int backgroundOpacity = (int) (this.minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
-            GuiComponent.fill(poseStack, posX - 2, posY, posX + this.getEntryWidth() + 4, posY + 16, backgroundOpacity);
-        }
+        this.renderBg(poseStack, posX, posY, alpha);
 
         int fadeTime = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.fadeAway ? 255 - (int) (255.0F * alpha) : 255;
         // prevents a bug where names would appear once at the end with full alpha
@@ -120,7 +166,7 @@ public abstract class DisplayEntry {
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            GuiComponent.drawString(poseStack, this.minecraft.font, this.getTextComponent(), posXSide, posY + 3, 16777215 + (fadeTime << 24));
+            GuiComponent.drawString(poseStack, this.minecraft.font, this.getTextComponent(), posXSide, posY + 4, 16777215 | (fadeTime << 24));
             if (withSprite) {
 
                 int textWidth = this.minecraft.font.width(this.getTextComponent());
@@ -133,5 +179,29 @@ public abstract class DisplayEntry {
         poseStack.popPose();
     }
 
+    private void renderBg(PoseStack poseStack, int posX, int posY, float alpha) {
+
+        switch (PickUpNotifier.CONFIG.get(ClientConfig.class).display.background) {
+
+            case BLACK -> {
+
+                // copied from Options::getBackgroundColor
+                int backgroundOpacity = (int) (this.minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
+                GuiComponent.fill(poseStack, posX - 3, posY, posX + this.getEntryWidth() + 5, posY + 16, backgroundOpacity);
+            }
+
+            case TOOLTIP -> {
+
+                DisplayEntryRenderHelper.renderTooltipInternal(poseStack, posX, posY + 3, this.getEntryWidth(), 9, (int) ((1.0F - alpha) * 255.0F));
+            }
+        }
+    }
+
     protected abstract void renderSprite(PoseStack poseStack, int posX, int posY, float scale);
+
+    @FunctionalInterface
+    private interface DisplayEntryTextFactory {
+
+        MutableComponent create(Component name, int displayAmount, int inventoryCount);
+    }
 }

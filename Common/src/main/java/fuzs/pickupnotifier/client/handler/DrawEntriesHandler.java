@@ -58,8 +58,8 @@ public class DrawEntriesHandler {
         int scaledWidth = (int) (window.getGuiScaledWidth() / scale);
         int scaledHeight = (int) (window.getGuiScaledHeight() / scale);
         PositionPreset position = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position;
-        int posX = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.xOffset / scale);
-        int posY = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.yOffset / scale);
+        int posX = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.offsetX / scale);
+        int posY = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.offsetY / scale);
         int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, scaledHeight, posY);
         int totalFade = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move ? (int) (this.collector.getTotalFade(tickDelta) * DisplayEntry.ENTRY_HEIGHT) : 0;
         int entryX;
@@ -98,5 +98,4 @@ public class DrawEntriesHandler {
             entryY -= entryHeight;
         }
     }
-
 }
