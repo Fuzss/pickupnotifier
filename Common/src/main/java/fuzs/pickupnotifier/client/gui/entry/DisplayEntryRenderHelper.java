@@ -20,7 +20,7 @@ import java.util.NavigableMap;
 public class DisplayEntryRenderHelper {
     private static final NavigableMap<Integer, Character> MAP = ImmutableSortedMap.<Integer, Character>naturalOrder().put(1_000, 'K').put(1_000_000, 'M').put(1_000_000_000, 'B').build();
 
-    public static MutableComponent shortenValue(int value) {
+    private static MutableComponent shortenValue(int value) {
 
         Map.Entry<Integer, Character> entry = MAP.floorEntry(value);
 

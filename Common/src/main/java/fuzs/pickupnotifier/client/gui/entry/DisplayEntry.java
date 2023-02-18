@@ -23,7 +23,7 @@ public abstract class DisplayEntry {
 
         if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
 
-            component = DisplayEntryRenderHelper.shortenValue(displayAmount).append(displayAmount < 1000 ? "x " : " ");
+            component = Component.literal(displayAmount + "x ");
         } else {
 
             component = Component.empty();
@@ -54,7 +54,7 @@ public abstract class DisplayEntry {
 
         if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
 
-            component.append(displayAmount < 1000 ? " x" : " ").append(DisplayEntryRenderHelper.shortenValue(displayAmount));
+            component.append(Component.literal(" x" + displayAmount));
         }
 
         return component;

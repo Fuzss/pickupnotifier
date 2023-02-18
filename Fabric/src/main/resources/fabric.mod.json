@@ -5,19 +5,22 @@
 
   "name": "${modName}",
   "description": "${modDescription}",
+
   "authors": [
     "${modAuthor}"
   ],
+  
   "contact": {
     "homepage": "${modPageUrl}",
     "issues": "${modIssueUrl}",
     "sources": "${modPageUrl}"
   },
 
-  "license": "MPL-2",
+  "license": "MPL-2.0",
   "icon": "mod_logo.png",
 
   "environment": "${modFabricEnvironment}",
+
   "entrypoints": {
     "main": [
       "${mainEntryPoint}"
@@ -26,6 +29,7 @@
       "${clientEntryPoint}"
     ]
   },
+
   "mixins": [
     "${modId}.common.mixins.json",
     "${modId}.fabric.mixins.json"
@@ -35,7 +39,7 @@
     "fabricloader": ">=${minFabricVersion}",
     "fabric-api": ">=${minFabricApiVersion}",
     "puzzleslib": ">=${minPuzzlesVersion}",
-    "minecraft": ">=${minMinecraftVersion} <${nextMinecraftVersion}",
+    "minecraft": "${minecraftVersion}",
     "java": ">=17"
   }
 }

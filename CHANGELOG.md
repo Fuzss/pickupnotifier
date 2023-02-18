@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
+## [v4.2.4-1.18.2] - 2023-02-18
+### Changed
+- Adjusted default settings to reflect the default state of versions before v4.2.3
+### Fixed
+- Fixed start-up crash on Forge due to reobfuscation having failed to apply on last build
+
 ## [v4.2.3-1.18.2] - 2023-02-18
 ### Added
 - Added an option to include the total count of an item in your inventory in the pick-up entry

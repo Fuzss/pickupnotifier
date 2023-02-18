@@ -67,7 +67,7 @@ public class ClientConfig implements ConfigCore {
         @Config(description = "Where to display the amount of items picked up. 'SPRITE' will render the amount on the item sprite like in inventories, 'TEXT' will add a dedicated text including the amount to the item name display.")
         public DisplayAmount displayAmount = DisplayAmount.TEXT;
         @Config(description = "Add the total amount of an item in your inventory to the entry.")
-        public boolean inventoryCount = true;
+        public boolean inventoryCount = false;
         @Config(description = "Should the picked up amount be shown when it's just a single item.")
         public boolean displaySingleCount = true;
         @Config(description = "Mode for drawing a background behind entries for better visibility. 'BLACK' is similar to the chat background, 'TOOLTIP' uses the tooltip background rendering instead.")
