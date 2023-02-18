@@ -36,7 +36,7 @@ public class PickUpNotifierForgeClient {
     @SubscribeEvent
     public static void onRegisterGuiOverlays(final RegisterGuiOverlaysEvent evt) {
         evt.registerAbove(VanillaGuiOverlay.DEBUG_TEXT.id(), "pick_up_notifications", (gui, poseStack, partialTick, width, height) -> {
-            DrawEntriesHandler.INSTANCE.onRenderGameOverlayText(poseStack, partialTick);
+            DrawEntriesHandler.INSTANCE.onRenderGameOverlayText(gui.getMinecraft(), poseStack, partialTick);
         });
     }
 }

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ClientConfig;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
@@ -42,17 +43,17 @@ public class ItemDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(PoseStack poseStack, int posX, int posY, float scale) {
+    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale) {
 
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();
         modelViewStack.scale(scale, scale, 1.0F);
         RenderSystem.applyModelViewMatrix();
-        this.minecraft.getItemRenderer().renderAndDecorateItem(this.stack, posX, posY);
+        minecraft.getItemRenderer().renderAndDecorateItem(this.stack, posX, posY);
 
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.sprite()) {
 
-            DisplayEntryRenderHelper.renderGuiItemDecorations(this.minecraft.font, this.getDisplayAmount(), posX, posY);
+            DisplayEntryRenderHelper.renderGuiItemDecorations(minecraft.getItemRenderer(), minecraft.font, this.getDisplayAmount(), posX, posY);
         }
 
         modelViewStack.popPose();

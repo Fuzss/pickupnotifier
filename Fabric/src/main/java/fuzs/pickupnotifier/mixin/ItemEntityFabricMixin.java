@@ -12,14 +12,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin extends Entity {
+abstract class ItemEntityFabricMixin extends Entity {
 
-    public ItemEntityMixin(EntityType<?> entityType, Level level) {
+    public ItemEntityFabricMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
     @Inject(method = "playerTouch", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getCount()I"))
-    public void playerTouch$invokeGetCount(Player player, CallbackInfo callback) {
-        EntityItemPickupCallback.EVENT.invoker().onEntityItemPickup(player, (ItemEntity) (Object) this);
+    public void playerTouch(Player player, CallbackInfo callback) {
+        EntityItemPickupCallback.EVENT.invoker().onEntityItemPickup(player, ItemEntity.class.cast(this));
     }
 }

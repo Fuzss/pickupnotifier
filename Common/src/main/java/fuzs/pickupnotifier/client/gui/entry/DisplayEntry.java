@@ -11,10 +11,12 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Rarity;
 
 public abstract class DisplayEntry {
     public static final int ENTRY_HEIGHT = 18;
+    private static final int TEXT_ITEM_MARGIN = 4;
     private static final DisplayEntryTextFactory RIGHT = (name, displayAmount, inventoryCount) -> {
 
         MutableComponent component;
@@ -58,10 +60,8 @@ public abstract class DisplayEntry {
         return component;
     };
 
-    protected final Minecraft minecraft = Minecraft.getInstance();
-    private final int textItemMargin = 4;
     private final Rarity rarity;
-    protected int remainingTicks;
+    private int remainingTicks;
     private int displayAmount;
     private Component component;
 
@@ -77,7 +77,17 @@ public abstract class DisplayEntry {
         return Component.literal("(").append(toWrap).append(")");
     }
 
-    public boolean readyToRemove() {
+    public int getRemainingTicks() {
+
+        return this.remainingTicks;
+    }
+
+    public int getDisplayAmount() {
+
+        return this.displayAmount;
+    }
+
+    public boolean mayDiscard() {
 
         return this.remainingTicks <= 0;
     }
@@ -94,18 +104,13 @@ public abstract class DisplayEntry {
 
     protected abstract int getInventoryCount(Inventory inventory);
 
-    public int getDisplayAmount() {
-
-        return this.displayAmount;
-    }
-
-    public Component getTextComponent() {
+    public Component getTextComponent(Player player) {
 
         if (this.component == null) {
 
             DisplayEntryTextFactory factory = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored() ? RIGHT : LEFT;
             int displayAmount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.text() ? this.getDisplayAmount() : 0;
-            int inventoryCount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.inventoryCount ? this.getInventoryCount(this.minecraft.player.getInventory()) : 0;
+            int inventoryCount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.inventoryCount ? this.getInventoryCount(player.getInventory()) : 0;
             this.component = factory.create(this.getEntryName(), displayAmount, inventoryCount).setStyle(this.getComponentStyle());
         }
 
@@ -143,22 +148,22 @@ public abstract class DisplayEntry {
         this.resetEntry();
     }
 
-    public int getEntryWidth() {
+    public int getEntryWidth(Minecraft minecraft) {
 
-        int textWidth = this.minecraft.font.width(this.getTextComponent());
-        return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ? textWidth + this.textItemMargin + 16 : textWidth;
+        int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
+        return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ? textWidth + TEXT_ITEM_MARGIN + 16 : textWidth;
     }
 
-    public void render(PoseStack poseStack, int posX, int posY, float alpha, float scale) {
+    public void render(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float alpha, float scale) {
 
         boolean mirrorPosition = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored();
         boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite;
-        int posXSide = mirrorPosition || !withSprite ? posX : posX + 16 + this.textItemMargin;
+        int posXSide = mirrorPosition || !withSprite ? posX : posX + 16 + TEXT_ITEM_MARGIN;
 
         poseStack.pushPose();
         poseStack.scale(scale, scale, 1.0F);
 
-        this.renderBg(poseStack, posX, posY, alpha);
+        this.renderBg(minecraft, poseStack, posX, posY, alpha);
 
         int fadeTime = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.fadeAway ? 255 - (int) (255.0F * alpha) : 255;
         // prevents a bug where names would appear once at the end with full alpha
@@ -166,11 +171,11 @@ public abstract class DisplayEntry {
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            GuiComponent.drawString(poseStack, this.minecraft.font, this.getTextComponent(), posXSide, posY + 4, 16777215 | (fadeTime << 24));
+            GuiComponent.drawString(poseStack, minecraft.font, this.getTextComponent(minecraft.player), posXSide, posY + 4, 16777215 | (fadeTime << 24));
             if (withSprite) {
 
-                int textWidth = this.minecraft.font.width(this.getTextComponent());
-                this.renderSprite(poseStack, mirrorPosition ? posX + textWidth + this.textItemMargin : posX, posY, scale);
+                int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
+                this.renderSprite(minecraft, poseStack, mirrorPosition ? posX + textWidth + TEXT_ITEM_MARGIN : posX, posY, scale);
             }
 
             RenderSystem.disableBlend();
@@ -179,25 +184,24 @@ public abstract class DisplayEntry {
         poseStack.popPose();
     }
 
-    private void renderBg(PoseStack poseStack, int posX, int posY, float alpha) {
+    private void renderBg(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float alpha) {
 
         switch (PickUpNotifier.CONFIG.get(ClientConfig.class).display.background) {
 
             case BLACK -> {
 
-                // copied from Options::getBackgroundColor
-                int backgroundOpacity = (int) (this.minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
-                GuiComponent.fill(poseStack, posX - 3, posY, posX + this.getEntryWidth() + 5, posY + 16, backgroundOpacity);
+                int backgroundOpacity = (int) (minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
+                GuiComponent.fill(poseStack, posX - 3, posY, posX + this.getEntryWidth(minecraft) + 5, posY + 16, backgroundOpacity);
             }
 
             case TOOLTIP -> {
 
-                DisplayEntryRenderHelper.renderTooltipInternal(poseStack, posX, posY + 3, this.getEntryWidth(), 9, (int) ((1.0F - alpha) * 255.0F));
+                DisplayEntryRenderHelper.renderTooltipInternal(poseStack, posX, posY + 3, this.getEntryWidth(minecraft), 9, (int) ((1.0F - alpha) * 255.0F));
             }
         }
     }
 
-    protected abstract void renderSprite(PoseStack poseStack, int posX, int posY, float scale);
+    protected abstract void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale);
 
     @FunctionalInterface
     private interface DisplayEntryTextFactory {

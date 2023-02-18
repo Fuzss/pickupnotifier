@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -31,14 +32,14 @@ public class DisplayEntryRenderHelper {
         return Component.literal(String.valueOf(value / entry.getKey()) + entry.getValue());
     }
 
-    public static void renderGuiItemDecorations(Font font, int count, int xPosition, int yPosition) {
+    public static void renderGuiItemDecorations(ItemRenderer itemRenderer, Font font, int count, int xPosition, int yPosition) {
 
         if (count <= 1 && !PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) return;
 
         PoseStack poseStack = new PoseStack();
         Component component = shortenValue(count);
 
-        poseStack.translate(0.0, 0.0, Minecraft.getInstance().getItemRenderer().blitOffset + 200.0F);
+        poseStack.translate(0.0, 0.0, itemRenderer.blitOffset + 200.0F);
 
         float scale = Math.min(1.0F, 16.0F / font.width(component));
         poseStack.scale(scale, scale, 1.0F);

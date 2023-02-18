@@ -12,7 +12,7 @@ public class PickUpCollector extends ArrayList<DisplayEntry> {
         if (!this.isEmpty()) {
 
             this.forEach(DisplayEntry::tick);
-            this.removeIf(DisplayEntry::readyToRemove);
+            this.removeIf(DisplayEntry::mayDiscard);
         }
     }
 

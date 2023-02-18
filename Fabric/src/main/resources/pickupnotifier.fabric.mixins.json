@@ -5,7 +5,7 @@
   "package": "fuzs.pickupnotifier.mixin",
   "refmap": "pickupnotifier.refmap.json",
   "mixins": [
-    "ItemEntityMixin"
+    "ItemEntityFabricMixin"
   ],
   "client": [
   ],

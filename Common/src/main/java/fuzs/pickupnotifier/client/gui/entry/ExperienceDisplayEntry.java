@@ -2,8 +2,7 @@ package fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import fuzs.pickupnotifier.PickUpNotifier;
-import fuzs.pickupnotifier.config.ClientConfig;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -41,12 +40,12 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(PoseStack poseStack, int posX, int posY, float scale) {
+    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale) {
 
         int textureOffset = this.getXpTexture(this.getDisplayAmount());
         int x = textureOffset % 4 * 16;
         int y = textureOffset / 4 * 16;
-        float color = this.remainingTicks / 4.0F;
+        float color = this.getRemainingTicks() / 4.0F;
         float r = (Mth.sin(color) + 1.0F) * 0.5F;
         float g = 1.0F;
         float b = (Mth.sin(color + 4.1887903F) + 1.0F) * 0.1F;

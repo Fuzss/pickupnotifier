@@ -49,12 +49,12 @@ public class DrawEntriesHandler {
         }
     }
 
-    public void onRenderGameOverlayText(PoseStack poseStack, float tickDelta) {
+    public void onRenderGameOverlayText(Minecraft minecraft, PoseStack poseStack, float tickDelta) {
 
         if (this.collector.isEmpty()) return;
 
         final float scale = PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F;
-        Window window = Minecraft.getInstance().getWindow();
+        Window window = minecraft.getWindow();
         int scaledWidth = (int) (window.getGuiScaledWidth() / scale);
         int scaledHeight = (int) (window.getGuiScaledHeight() / scale);
         PositionPreset position = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position;
@@ -82,7 +82,7 @@ public class DrawEntriesHandler {
 
             if (mayRender) {
 
-                entryX = position.getX(entry.getEntryWidth(), scaledWidth, posX);
+                entryX = position.getX(entry.getEntryWidth(minecraft), scaledWidth, posX);
                 float alpha;
                 if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move) {
 
@@ -92,7 +92,7 @@ public class DrawEntriesHandler {
                     alpha = entry.getRemainingTicksRelative(tickDelta);
                 }
 
-                entry.render(poseStack, entryX, entryY, alpha, scale);
+                entry.render(minecraft, poseStack, entryX, entryY, alpha, scale);
             }
 
             entryY -= entryHeight;
