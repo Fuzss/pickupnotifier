@@ -106,21 +106,22 @@ minecraft {
 }
 
 dependencies {
-    // Include Common Project
-    compileOnly project(":Common")
+    // Common Project
+    compileOnly(project(":Common")) {
+        transitive = false
+    }
 
     // Minecraft
     minecraft "net.minecraftforge:forge:${forgeVersion}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Quality of Life Mods
-    runtimeOnly fg.deobf("curse.maven:catalogue-459701:3873264")
-    runtimeOnly fg.deobf("fuzs.bettermodsbutton:bettermodsbutton-forge:4.2.0")
-//    runtimeOnly fg.deobf("curse.maven:configmenusforge-544048:3822820")
-//    runtimeOnly fg.deobf("curse.maven:configured-457570:3903908")
+    runtimeOnly fg.deobf("fuzs.bettermodsbutton:bettermodsbutton-forge:5.0.0")
+    runtimeOnly fg.deobf("curse.maven:catalogue-459701:4171025")
+    runtimeOnly fg.deobf("curse.maven:configured-457570:4441589")
 
     // Puzzles Lib
-    implementation fg.deobf("fuzs.puzzleslib:puzzleslib-forge:${puzzlesVersion}")
+    api fg.deobf("fuzs.puzzleslib:puzzleslib-forge:${puzzlesVersion}")
 }
 
 mixin {
@@ -136,10 +137,7 @@ mixin {
 }
 
 processResources {
-    from(project(":Common").sourceSets.main.resources) {
-        // we need to have this in common so that in a non-production environment the common jar is correctly deobfuscated
-        exclude("quilt.mod.json")
-    }
+    from(project(":Common").sourceSets.main.resources)
     from(file('src/generated/resources')) {
         exclude('.cache/')
     }
@@ -163,7 +161,7 @@ processResources {
     inputs.property "packFormat", "${packFormat}"
     inputs.property "modForgeDisplayTest", "${modForgeDisplayTest}"
 
-    // replace stuff in mods.toml and pack.mcmeta
+    // replace stuff in mods.toml
     filesMatching ('META-INF/mods.toml') {
         expand (
                 'modId':                "${modId}",
@@ -183,6 +181,7 @@ processResources {
         )
     }
 
+    // replace stuff in pack.mcmeta
     filesMatching ('pack.mcmeta') {
         expand (
                 'modDescription':       "${modDescription}",

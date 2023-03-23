@@ -1,5 +1,6 @@
 plugins {
-    id 'org.quiltmc.loom' version '0.12.+'
+    id 'fabric-loom' version '1.0.+'
+    id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
 }
 
 archivesBaseName = rootProject.name
@@ -14,18 +15,8 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
     }
 
-    // Mixin Dependencies
-    implementation 'org.ow2.asm:asm-tree:9.2'
-    implementation 'org.ow2.asm:asm-commons:9.2'
-    implementation 'org.ow2.asm:asm-util:9.2'
-    implementation 'org.spongepowered:mixin:0.8.5'
-
-    // Config Dependencies
-    implementation 'com.electronwill.night-config:core:3.6.5'
-    implementation 'com.electronwill.night-config:toml:3.6.5'
-
     // Puzzles Lib
-    modImplementation "fuzs.puzzleslib:puzzleslib-common:${puzzlesVersion}"
+    modApi "fuzs.puzzleslib:puzzleslib-common:${puzzlesVersion}"
 }
 
 loom {
@@ -57,20 +48,8 @@ processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 
     // this will ensure that this task is redone when a value changes
-    inputs.property "modId", 					"${modId}"
-    inputs.property "modVersion", 				"${modVersion}"
-    inputs.property "modGroup", 				project.group
     inputs.property "modDescription", 			"${modDescription}"
     inputs.property "packFormat", 				"${packFormat}"
-
-    // replace stuff in fabric.mod.json and pack.mcmeta
-    filesMatching ('quilt.mod.json') {
-        expand (
-                'modId':                	"${modId}",
-                'modVersion':           	"${modVersion}",
-                'modGroup':             	project.group
-        )
-    }
 
     // replace stuff in pack.mcmeta
     filesMatching ('pack.mcmeta') {
@@ -113,18 +92,6 @@ publishing {
                     }
                 }
             }
-            afterEvaluate {
-                // exclude certain dependencies when publishing to maven
-                // from https://stackoverflow.com/a/50121790
-                pom.withXml {
-                    asNode().dependencies.dependency.each { dep ->
-                        // use this approach to make excluding dependencies from Curse Maven more convenient
-                        if ([].stream().anyMatch(mod -> "${dep.groupId.last().value().last()}:${dep.artifactId.last().value().last()}".startsWith(mod))) {
-                            assert dep.parent().remove(dep)
-                        }
-                    }
-                }
-            }
         }
     }
     repositories {
@@ -138,3 +105,23 @@ publishing {
 signing {
     sign publishing.publications.mavenJava
 }
+
+import net.fabricmc.loom.task.AbstractRemapJarTask
+
+// thanks to lukebemish for this comment: https://github.com/jaredlll08/MultiLoader-Template/issues/17#issuecomment-1221598082
+tasks.withType(AbstractRemapJarTask).each {
+    it.targetNamespace = "named"
+}
+
+task copyJarToDir(type: Copy) {
+    onlyIf { project.hasProperty('buildJarOutputDir') && project.hasProperty('uniqueBuildNumber') }
+    if (project.findProperty('copyBuildJar').toBoolean()) {
+        from remapJar
+        into project.findProperty('buildJarOutputDir')
+        // add build number to be able to distinguish jars when testing thorough official launcher
+        // build number is stored in global gradle.properties
+        rename { fileName -> fileName.replace("v${modVersion}", "v${modVersion}.${uniqueBuildNumber}") }
+    }
+}
+
+build.finalizedBy project.tasks.copyJarToDir, rootProject.tasks.incrementBuildNumber

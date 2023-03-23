@@ -3,16 +3,15 @@ package fuzs.pickupnotifier.client.gui.entry;
 import com.google.common.collect.ImmutableSortedMap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ClientConfig;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.joml.Matrix4f;
 
 import java.util.Map;
 import java.util.NavigableMap;
@@ -88,7 +87,6 @@ public class DisplayEntryRenderHelper {
     }
 
     private static void fillGradient(Matrix4f matrix, BufferBuilder builder, int x1, int y1, int x2, int y2, int blitOffset, int colorA, int colorB) {
-
         float f = (float)(colorA >> 24 & 0xFF) / 255.0F;
         float g = (float)(colorA >> 16 & 0xFF) / 255.0F;
         float h = (float)(colorA >> 8 & 0xFF) / 255.0F;

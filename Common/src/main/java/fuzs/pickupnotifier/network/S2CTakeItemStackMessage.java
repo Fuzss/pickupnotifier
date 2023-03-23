@@ -1,13 +1,13 @@
 package fuzs.pickupnotifier.network;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class S2CTakeItemStackMessage implements Message<S2CTakeItemStackMessage> {
+public class S2CTakeItemStackMessage implements MessageV2<S2CTakeItemStackMessage> {
     private ItemStack stack;
 
     public S2CTakeItemStackMessage() {

@@ -5,9 +5,9 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fuzs.puzzleslib.config.serialization.EntryCollectionBuilder;
-import fuzs.puzzleslib.json.JsonConfigFileUtil;
-import net.minecraft.core.Registry;
+import fuzs.puzzleslib.api.config.v3.json.JsonConfigFileUtil;
+import fuzs.puzzleslib.api.config.v3.serialization.ConfigDataSet;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -56,7 +56,7 @@ public class ItemBlacklistManager {
         ResourceKey<Level> dimension;
         if (jsonObject.has("dimension")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "dimension"));
-            dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation);
+            dimension = ResourceKey.create(Registries.DIMENSION, resourceLocation);
         } else {
             dimension = null;
         }
@@ -77,7 +77,7 @@ public class ItemBlacklistManager {
             }
             blacklist = this.defaultBlacklist;
         }
-        blacklist.items().addAll(EntryCollectionBuilder.of(Registry.ITEM_REGISTRY).buildSet(Arrays.asList(items)));
+        blacklist.items().addAll(ConfigDataSet.from(Registries.ITEM, Arrays.asList(items)));
     }
 
     private record DimensionBlacklist(Set<Item> items, boolean inverted) {

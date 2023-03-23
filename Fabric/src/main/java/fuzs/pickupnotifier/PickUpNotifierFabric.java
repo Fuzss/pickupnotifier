@@ -1,20 +1,19 @@
 package fuzs.pickupnotifier;
 
-import fuzs.pickupnotifier.api.event.EntityItemPickupCallback;
 import fuzs.pickupnotifier.handler.FabricItemPickupHandler;
-import fuzs.puzzleslib.core.CoreServices;
+import fuzs.puzzleslib.api.core.v1.ModConstructor;
+import fuzs.puzzleslib.api.event.v1.FabricPlayerEvents;
 import net.fabricmc.api.ModInitializer;
 
 public class PickUpNotifierFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CoreServices.FACTORIES.modConstructor(PickUpNotifier.MOD_ID).accept(new PickUpNotifier());
+        ModConstructor.construct(PickUpNotifier.MOD_ID, PickUpNotifier::new);
         registerHandler();
     }
 
     private static void registerHandler() {
-        final FabricItemPickupHandler itemPickupHandler = new FabricItemPickupHandler();
-        EntityItemPickupCallback.EVENT.register(itemPickupHandler::onEntityItemPickup);
+        FabricPlayerEvents.ITEM_TOUCH.register(FabricItemPickupHandler::onEntityItemPickup);
     }
 }

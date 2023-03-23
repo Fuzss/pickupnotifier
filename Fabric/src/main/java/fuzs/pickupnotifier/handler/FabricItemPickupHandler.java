@@ -3,6 +3,7 @@ package fuzs.pickupnotifier.handler;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ServerConfig;
 import fuzs.pickupnotifier.network.S2CTakeItemMessage;
+import fuzs.puzzleslib.api.event.v1.core.EventResult;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class FabricItemPickupHandler {
 
-    public void onEntityItemPickup(Player player, ItemEntity item) {
+    public static EventResult onEntityItemPickup(Player player, ItemEntity item) {
 
         if (PickUpNotifier.CONFIG.get(ServerConfig.class).partialPickUps && !item.isRemoved()) {
 
@@ -28,7 +29,7 @@ public class FabricItemPickupHandler {
                     int slotWithRemainingSpace = player.getInventory().getSlotWithRemainingSpace(stack);
                     if (slotWithRemainingSpace != -1) {
 
-                        itemAmount = this.getSpaceAtIndex(player.getInventory(), slotWithRemainingSpace, stack);
+                        itemAmount = getSpaceAtIndex(player.getInventory(), slotWithRemainingSpace, stack);
                     }
                 }
 
@@ -38,9 +39,11 @@ public class FabricItemPickupHandler {
                 }
             }
         }
+
+        return EventResult.PASS;
     }
 
-    private int getSpaceAtIndex(Inventory inventory, int slotIndex, ItemStack stack) {
+    private static int getSpaceAtIndex(Inventory inventory, int slotIndex, ItemStack stack) {
 
         int itemCount = stack.getCount();
         ItemStack itemstack = inventory.getItem(slotIndex);

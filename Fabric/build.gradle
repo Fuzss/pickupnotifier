@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'fabric-loom' version '1.0.+'
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
     // this depends on an older version of guava, which loom is incompatible with, so make sure to apply this plugin after loom
     // haven't found a proper way to manage plugin dependencies otherwise
@@ -32,8 +32,10 @@ repositories {
 }
 
 dependencies {
-    // Include Common Project
-    compileOnly project(":Common")
+    // Common Project
+    compileOnly(project(path: ":Common", configuration: "namedElements")) {
+        transitive = false
+    }
 
     // Minecraft
     minecraft "com.mojang:minecraft:${minecraftVersion}"
@@ -43,15 +45,15 @@ dependencies {
     }
 
     // Fabric
-    modImplementation "net.fabricmc:fabric-loader:${fabricVersion}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+    modApi "net.fabricmc:fabric-loader:${fabricVersion}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
 
     // Quality of Life Mods
-    modRuntimeOnly "com.terraformersmc:modmenu:4.0.6"
-    modRuntimeOnly "curse.maven:tooltipfix-411557:3820437"
+    modLocalRuntime "com.terraformersmc:modmenu:5.0.2"
+    modLocalRuntime "curse.maven:configured-fabric-667378:4441611"
 
     // Puzzles Lib
-    modImplementation "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesVersion}"
+    modApi "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesVersion}"
 }
 
 loom {
@@ -76,10 +78,7 @@ loom {
 }
 
 processResources {
-    from(project(":Common").sourceSets.main.resources) {
-        // we need to have this in common so that in a non-production environment the common jar is correctly deobfuscated
-        exclude("quilt.mod.json")
-    }
+    from(project(":Common").sourceSets.main.resources)
     from(project(":Forge").file('src/generated/resources')) {
         exclude('.cache/')
     }
@@ -109,7 +108,7 @@ processResources {
 	inputs.property "clientEntryPoint", 		"${project.group}.client.${rootProject.name}FabricClient"
     inputs.property "modFabricEnvironment", 	"${modFabricEnvironment}"
 
-    // replace stuff in fabric.mod.json and pack.mcmeta
+    // replace stuff in fabric.mod.json
     filesMatching ('fabric.mod.json') {
         expand (
                 'modId':                	"${modId}",
@@ -130,6 +129,7 @@ processResources {
         )
     }
 
+    // replace stuff in pack.mcmeta
     filesMatching ('pack.mcmeta') {
         expand (
                 'modDescription':       "${modDescription}",
@@ -179,18 +179,6 @@ publishing {
                     developer {
                         id = "${modAuthor}".toLowerCase()
                         name = "${modAuthor}"
-                    }
-                }
-            }
-            afterEvaluate {
-                // exclude certain dependencies when publishing to maven
-                // from https://stackoverflow.com/a/50121790
-                pom.withXml {
-                    asNode().dependencies.dependency.each { dep ->
-                        // use this approach to make excluding dependencies from Curse Maven more convenient
-                        if (["curse.maven:", "com.terraformersmc:modmenu"].stream().anyMatch(mod -> "${dep.groupId.last().value().last()}:${dep.artifactId.last().value().last()}".startsWith(mod))) {
-                            assert dep.parent().remove(dep)
-                        }
                     }
                 }
             }

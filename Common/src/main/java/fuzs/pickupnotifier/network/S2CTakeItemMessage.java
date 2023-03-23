@@ -1,12 +1,12 @@
 package fuzs.pickupnotifier.network;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
-import fuzs.puzzleslib.network.Message;
+import fuzs.puzzleslib.api.network.v2.MessageV2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
-public class S2CTakeItemMessage implements Message<S2CTakeItemMessage> {
+public class S2CTakeItemMessage implements MessageV2<S2CTakeItemMessage> {
     private int itemId;
     private int amount;
 

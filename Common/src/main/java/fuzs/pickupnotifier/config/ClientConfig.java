@@ -1,22 +1,22 @@
 package fuzs.pickupnotifier.config;
 
 import fuzs.pickupnotifier.client.gui.PositionPreset;
-import fuzs.puzzleslib.config.ConfigCore;
-import fuzs.puzzleslib.config.ValueCallback;
-import fuzs.puzzleslib.config.annotation.Config;
-import fuzs.puzzleslib.config.core.AbstractConfigBuilder;
+import fuzs.puzzleslib.api.config.v3.Config;
+import fuzs.puzzleslib.api.config.v3.ConfigCore;
+import fuzs.puzzleslib.api.config.v3.ValueCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientConfig implements ConfigCore {
     @Config
-    public GeneralConfig general = new GeneralConfig();
+    public final GeneralConfig general = new GeneralConfig();
     @Config
-    public BehaviorConfig behavior = new BehaviorConfig();
+    public final BehaviorConfig behavior = new BehaviorConfig();
     @Config
-    public DisplayConfig display = new DisplayConfig();
+    public final DisplayConfig display = new DisplayConfig();
 
     public static class GeneralConfig implements ConfigCore {
         public boolean forceClient;
@@ -29,7 +29,7 @@ public class ClientConfig implements ConfigCore {
         public boolean disableInCreative = false;
 
         @Override
-        public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
+        public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
             callback.accept(builder.comment("Force-run the mod on the client-side only.", "Only enable this when there are problems, e. g. the same pick-up being logged multiple times. Partial item stack pick-ups (when the inventory is full) won't show, and backpack compat won't work.", "When playing on a server without this mod this option will be used automatically.").define("force_client_only", false), v -> this.forceClient = v);
             callback.accept(builder.comment("Show item entities the player has collected in the pick-up notifications.").define("include_items", true), v -> this.includeItems = v);
             callback.accept(builder.comment("Show experience orbs the player has collected in the pick-up notifications.").define("include_experience", true), v -> this.includeExperience = v);
@@ -45,7 +45,7 @@ public class ClientConfig implements ConfigCore {
         public boolean fadeAway;
 
         @Override
-        public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
+        public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
             callback.accept(builder.comment("Combine entries of the same type instead of showing each one individually.").define("combine_entries", true), v -> this.combineEntries = v);
             callback.accept(builder.comment("Amount of ticks each entry will be shown for. Set to 0 to only remove entries when space for new ones is needed.").defineInRange("display_time", 80, 0, Integer.MAX_VALUE), v -> this.displayTime = v);
             callback.accept(builder.comment("Make outdated entries slowly move out of the screen instead of disappearing in place.").define("move_out_of_screen", true), v -> this.move = v);
@@ -74,7 +74,7 @@ public class ClientConfig implements ConfigCore {
         public Background background = Background.NONE;
 
         @Override
-        public void addToBuilder(AbstractConfigBuilder builder, ValueCallback callback) {
+        public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
             callback.accept(builder.comment("Show a small sprite next to the name of each entry showing its contents.").define("draw_sprites", true), v -> this.drawSprite = v);
             callback.accept(builder.comment("Color of the entry name text.").defineEnum("default_color", ChatFormatting.WHITE, Stream.of(ChatFormatting.values()).filter(ChatFormatting::isColor).collect(Collectors.toList())), v -> this.textColor = v);
             callback.accept(builder.comment("Ignore rarity of items and always use color specified in \"Text Color\" instead.").define("ignore_rarity", false), v -> this.ignoreRarity = v);
@@ -87,7 +87,6 @@ public class ClientConfig implements ConfigCore {
     }
 
     public enum DisplayAmount {
-
         OFF, SPRITE, TEXT, BOTH;
 
         public boolean sprite() {

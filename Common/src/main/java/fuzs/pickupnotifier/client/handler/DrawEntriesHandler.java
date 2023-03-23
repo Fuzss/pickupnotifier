@@ -1,6 +1,5 @@
 package fuzs.pickupnotifier.client.handler;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.PositionPreset;
@@ -49,18 +48,17 @@ public class DrawEntriesHandler {
         }
     }
 
-    public void onRenderGameOverlayText(Minecraft minecraft, PoseStack poseStack, float tickDelta) {
+    public void onRenderGui(Minecraft minecraft, PoseStack poseStack, float tickDelta, int screenWidth, int screenHeight) {
 
         if (this.collector.isEmpty()) return;
 
         final float scale = PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F;
-        Window window = minecraft.getWindow();
-        int scaledWidth = (int) (window.getGuiScaledWidth() / scale);
-        int scaledHeight = (int) (window.getGuiScaledHeight() / scale);
+        screenWidth /= scale;
+        screenHeight /= scale;
         PositionPreset position = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position;
         int posX = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.offsetX / scale);
         int posY = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.offsetY / scale);
-        int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, scaledHeight, posY);
+        int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, screenHeight, posY);
         int totalFade = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move ? (int) (this.collector.getTotalFade(tickDelta) * DisplayEntry.ENTRY_HEIGHT) : 0;
         int entryX;
         int entryY = offset + (position.bottom() ? totalFade : -totalFade);
@@ -82,7 +80,7 @@ public class DrawEntriesHandler {
 
             if (mayRender) {
 
-                entryX = position.getX(entry.getEntryWidth(minecraft), scaledWidth, posX);
+                entryX = position.getX(entry.getEntryWidth(minecraft), screenWidth, posX);
                 float alpha;
                 if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move) {
 

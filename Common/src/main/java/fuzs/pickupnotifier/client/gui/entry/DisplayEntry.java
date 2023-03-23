@@ -175,7 +175,7 @@ public abstract class DisplayEntry {
             if (withSprite) {
 
                 int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
-                this.renderSprite(minecraft, poseStack, mirrorPosition ? posX + textWidth + TEXT_ITEM_MARGIN : posX, posY, scale);
+                this.renderSprite(minecraft, poseStack, mirrorPosition ? posX + textWidth + TEXT_ITEM_MARGIN : posX, posY, scale, fadeTime / 255.0F);
             }
 
             RenderSystem.disableBlend();
@@ -201,7 +201,7 @@ public abstract class DisplayEntry {
         }
     }
 
-    protected abstract void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale);
+    protected abstract void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime);
 
     @FunctionalInterface
     private interface DisplayEntryTextFactory {

@@ -40,7 +40,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale) {
+    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime) {
 
         int textureOffset = this.getXpTexture(this.getDisplayAmount());
         int x = textureOffset % 4 * 16;
@@ -52,7 +52,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, EXPERIENCE_ORB_TEXTURES);
-        RenderSystem.setShaderColor(r, g, b, 1.0F);
+        RenderSystem.setShaderColor(r, g, b, fadeTime);
         GuiComponent.blit(poseStack, posX, posY, x, y, 16, 16, 64, 64);
     }
 

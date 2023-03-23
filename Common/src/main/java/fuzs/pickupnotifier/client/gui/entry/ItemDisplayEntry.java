@@ -43,7 +43,7 @@ public class ItemDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale) {
+    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime) {
 
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();
