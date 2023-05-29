@@ -1,8 +1,10 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -14,51 +16,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Rarity;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class DisplayEntry {
     public static final int ENTRY_HEIGHT = 18;
     private static final int TEXT_ITEM_MARGIN = 4;
-    private static final DisplayEntryTextFactory RIGHT = (name, displayAmount, inventoryCount) -> {
-
-        MutableComponent component;
-
-        if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
-
-            component = Component.literal(displayAmount + "x ");
-        } else {
-
-            component = Component.empty();
-        }
-
-        component.append(name);
-
-        if (inventoryCount > 0) {
-
-            component.append(" ").append(wrapInBrackets(Component.literal(String.valueOf(inventoryCount))));
-        }
-
-        return component;
-    };
-    private static final DisplayEntryTextFactory LEFT = (name, displayAmount, inventoryCount) -> {
-
-        MutableComponent component;
-
-        if (inventoryCount > 0) {
-
-            component = wrapInBrackets(Component.literal(String.valueOf(inventoryCount))).append(" ");
-        } else {
-
-            component = Component.empty();
-        }
-
-        component.append(name);
-
-        if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
-
-            component.append(Component.literal(" x" + displayAmount));
-        }
-
-        return component;
-    };
 
     private final Rarity rarity;
     private int remainingTicks;
@@ -75,11 +38,6 @@ public abstract class DisplayEntry {
     private static MutableComponent wrapInBrackets(Component toWrap) {
 
         return Component.literal("(").append(toWrap).append(")");
-    }
-
-    public int getRemainingTicks() {
-
-        return this.remainingTicks;
     }
 
     public int getDisplayAmount() {
@@ -108,13 +66,39 @@ public abstract class DisplayEntry {
 
         if (this.component == null) {
 
-            DisplayEntryTextFactory factory = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored() ? RIGHT : LEFT;
             int displayAmount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.text() ? this.getDisplayAmount() : 0;
             int inventoryCount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.inventoryCount ? this.getInventoryCount(player.getInventory()) : 0;
-            this.component = factory.create(this.getEntryName(), displayAmount, inventoryCount).setStyle(this.getComponentStyle());
+            this.component = Component.empty().append(this.createTextComponent(this.getEntryName(), displayAmount, inventoryCount, PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored())).setStyle(this.getComponentStyle());
         }
 
         return this.component;
+    }
+
+    private Component createTextComponent(Component name, int displayAmount, int inventoryCount, boolean reverse) {
+
+        List<Component> components = Lists.newArrayList();
+
+        if (inventoryCount > 0) {
+
+            components.add(wrapInBrackets(Component.literal(String.valueOf(inventoryCount))));
+        }
+
+        if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayItemName) {
+
+            components.add(name);
+        }
+
+        if (displayAmount > 1 || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
+
+            components.add(Component.literal(reverse ? displayAmount + "x" : "x" + displayAmount));
+        }
+
+        if (reverse) {
+
+            Collections.reverse(components);
+        }
+
+        return components.stream().reduce(((component1, component2) -> Component.empty().append(component1).append(" ").append(component2))).orElse(Component.empty());
     }
 
     private Style getComponentStyle() {
@@ -140,7 +124,7 @@ public abstract class DisplayEntry {
         this.component = null;
     }
 
-    public abstract boolean mayMergeWith(DisplayEntry other);
+    public abstract boolean mayMergeWith(DisplayEntry other, boolean excludeNamed);
 
     public void mergeWith(DisplayEntry other) {
 
@@ -151,14 +135,14 @@ public abstract class DisplayEntry {
     public int getEntryWidth(Minecraft minecraft) {
 
         int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
-        return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ? textWidth + TEXT_ITEM_MARGIN + 16 : textWidth;
+        return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ? textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) + 16 : textWidth;
     }
 
     public void render(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float alpha, float scale) {
 
         boolean mirrorPosition = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored();
         boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite;
-        int posXSide = mirrorPosition || !withSprite ? posX : posX + 16 + TEXT_ITEM_MARGIN;
+        int textStartX = mirrorPosition || !withSprite ? posX : posX + 16 + TEXT_ITEM_MARGIN;
 
         poseStack.pushPose();
         poseStack.scale(scale, scale, 1.0F);
@@ -171,11 +155,11 @@ public abstract class DisplayEntry {
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            GuiComponent.drawString(poseStack, minecraft.font, this.getTextComponent(minecraft.player), posXSide, posY + 4, 16777215 | (fadeTime << 24));
+            GuiComponent.drawString(poseStack, minecraft.font, this.getTextComponent(minecraft.player), textStartX, posY + 4, 16777215 | (fadeTime << 24));
             if (withSprite) {
 
                 int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
-                this.renderSprite(minecraft, poseStack, mirrorPosition ? posX + textWidth + TEXT_ITEM_MARGIN : posX, posY, scale, fadeTime / 255.0F);
+                this.renderSprite(minecraft, poseStack, mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX, posY, scale, fadeTime / 255.0F);
             }
 
             RenderSystem.disableBlend();
@@ -186,12 +170,14 @@ public abstract class DisplayEntry {
 
     private void renderBg(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float alpha) {
 
-        switch (PickUpNotifier.CONFIG.get(ClientConfig.class).display.background) {
+        switch (PickUpNotifier.CONFIG.get(ClientConfig.class).display.entryBackground) {
 
-            case BLACK -> {
+            case CHAT -> {
 
                 int backgroundOpacity = (int) (minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
-                GuiComponent.fill(poseStack, posX - 3, posY, posX + this.getEntryWidth(minecraft) + 5, posY + 16, backgroundOpacity);
+                int endY = posY + 16;
+                if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.sprite()) endY += 1;
+                GuiComponent.fill(poseStack, posX - 3, posY, posX + this.getEntryWidth(minecraft) + 5, endY, backgroundOpacity);
             }
 
             case TOOLTIP -> {
@@ -202,10 +188,4 @@ public abstract class DisplayEntry {
     }
 
     protected abstract void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime);
-
-    @FunctionalInterface
-    private interface DisplayEntryTextFactory {
-
-        MutableComponent create(Component name, int displayAmount, int inventoryCount);
-    }
 }

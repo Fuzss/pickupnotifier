@@ -1,8 +1,9 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
+import fuzs.pickupnotifier.client.util.TransparencyBuffer;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -22,41 +23,58 @@ public class ItemDisplayEntry extends DisplayEntry {
     @Override
     protected Component getEntryName() {
 
-        return PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ? this.stack.getItem().getName(this.stack) : this.stack.getHoverName();
+        if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries == ClientConfig.CombineEntries.ALWAYS) {
+
+            return this.stack.getItem().getName(this.stack);
+        }
+
+        return this.stack.getHoverName();
     }
 
     @Override
-    public boolean mayMergeWith(DisplayEntry other) {
+    public boolean mayMergeWith(DisplayEntry other, boolean excludeNamed) {
 
-        return other instanceof ItemDisplayEntry itemDisplayEntry && this.sameItem(itemDisplayEntry.stack);
+        return other instanceof ItemDisplayEntry itemDisplayEntry && this.sameItem(itemDisplayEntry.stack, excludeNamed);
     }
 
-    private boolean sameItem(ItemStack other) {
+    private boolean sameItem(ItemStack other, boolean testHoverName) {
 
-        return this.stack.getItem() == other.getItem() && this.stack.getItem().getName(this.stack).equals(other.getItem().getName(other));
+        if (this.stack.getItem() == other.getItem()) {
+            if (testHoverName) {
+                return this.stack.getHoverName().equals(other.getHoverName()) && this.stack.getRarity().equals(other.getRarity());
+            } else {
+                return this.stack.getItem().getName(this.stack).equals(other.getItem().getName(other));
+            }
+        }
+        return false;
     }
 
     @Override
     protected int getInventoryCount(Inventory inventory) {
 
-        return ContainerHelper.clearOrCountMatchingItems(inventory, this::sameItem, Integer.MAX_VALUE, true);
+        return ContainerHelper.clearOrCountMatchingItems(inventory, stack -> this.sameItem(stack, false), Integer.MAX_VALUE, true);
     }
 
     @Override
     protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime) {
 
-        PoseStack modelViewStack = RenderSystem.getModelViewStack();
-        modelViewStack.pushPose();
-        modelViewStack.scale(scale, scale, 1.0F);
-        RenderSystem.applyModelViewMatrix();
-        minecraft.getItemRenderer().renderAndDecorateItem(this.stack, posX, posY);
-
+        TransparencyBuffer.prepareExtraFramebuffer();
+        minecraft.getItemRenderer().renderAndDecorateItem(poseStack, this.stack, posX, posY);
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.sprite()) {
 
-            DisplayEntryRenderHelper.renderGuiItemDecorations(minecraft.getItemRenderer(), minecraft.font, this.getDisplayAmount(), posX, posY);
+            DisplayEntryRenderHelper.renderGuiItemDecorations(poseStack, minecraft.font, this.getDisplayAmount(), posX, posY);
         }
 
-        modelViewStack.popPose();
-        RenderSystem.applyModelViewMatrix();
+        TransparencyBuffer.preInject(fadeTime);
+
+        // Align the matrix stack
+        poseStack.pushPose();
+        poseStack.scale(1.0F / scale, 1.0F / scale, 1.0F);
+
+        // Draw the framebuffer texture
+        TransparencyBuffer.drawExtraFramebuffer(poseStack);
+        poseStack.popPose();
+
+        TransparencyBuffer.postInject();
     }
 }

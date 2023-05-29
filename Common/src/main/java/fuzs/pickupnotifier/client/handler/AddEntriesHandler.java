@@ -1,7 +1,6 @@
 package fuzs.pickupnotifier.client.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
-import fuzs.pickupnotifier.client.data.ItemBlacklistManager;
 import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ItemDisplayEntry;
@@ -82,7 +81,9 @@ public class AddEntriesHandler {
 
             stack = stack.copy();
             // remove enchantments from copy as we don't want the glint to show
-            stack.removeTagKey(ItemStack.TAG_ENCH);
+            if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries == ClientConfig.CombineEntries.ALWAYS) {
+                stack.removeTagKey(ItemStack.TAG_ENCH);
+            }
             addEntry(minecraft, new ItemDisplayEntry(stack, amount));
         }
     }
@@ -106,7 +107,15 @@ public class AddEntriesHandler {
 
         int scaledHeight = (int) (minecraft.getWindow().getGuiScaledHeight() / (PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F));
         int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.maxHeight / DisplayEntry.ENTRY_HEIGHT) - 1;
-        Optional<DisplayEntry> possibleDuplicate = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ? DrawEntriesHandler.INSTANCE.getCollector().findDuplicate(newEntry) : Optional.empty();
+
+        ClientConfig.CombineEntries combineEntries = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries;
+        Optional<DisplayEntry> possibleDuplicate;
+        if (combineEntries == ClientConfig.CombineEntries.NEVER) {
+            possibleDuplicate = Optional.empty();
+        } else {
+            possibleDuplicate = DrawEntriesHandler.INSTANCE.getCollector().findDuplicate(newEntry, combineEntries == ClientConfig.CombineEntries.EXCLUDE_NAMED);
+        }
+
         if (possibleDuplicate.isPresent()) {
 
             DisplayEntry duplicate = possibleDuplicate.get();

@@ -9,6 +9,7 @@
   ],
   "client": [
     "client.ClientPacketListenerMixin",
+    "client.MinecraftMixin",
     "client.accessor.AbstractArrowAccessor"
   ],
   "injectors": {

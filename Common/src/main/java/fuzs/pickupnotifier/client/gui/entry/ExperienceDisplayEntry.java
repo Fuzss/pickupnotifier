@@ -2,12 +2,14 @@ package fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import fuzs.pickupnotifier.client.util.TransparencyBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Rarity;
 
@@ -29,7 +31,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    public boolean mayMergeWith(DisplayEntry other) {
+    public boolean mayMergeWith(DisplayEntry other, boolean excludeNamed) {
 
         return other instanceof ExperienceDisplayEntry;
     }
@@ -45,20 +47,34 @@ public class ExperienceDisplayEntry extends DisplayEntry {
         int textureOffset = this.getXpTexture(this.getDisplayAmount());
         int x = textureOffset % 4 * 16;
         int y = textureOffset / 4 * 16;
-        float color = this.getRemainingTicks() / 4.0F;
+        float color = (int) (System.currentTimeMillis() % 10E5 / 50) / 4.0F;
         float r = (Mth.sin(color) + 1.0F) * 0.5F;
         float g = 1.0F;
         float b = (Mth.sin(color + 4.1887903F) + 1.0F) * 0.1F;
 
+        TransparencyBuffer.prepareExtraFramebuffer();
+
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, EXPERIENCE_ORB_TEXTURES);
-        RenderSystem.setShaderColor(r, g, b, fadeTime);
+        RenderSystem.setShaderColor(r, g, b, 1.0F);
         GuiComponent.blit(poseStack, posX, posY, x, y, 16, 16, 64, 64);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+        TransparencyBuffer.preInject(fadeTime);
+
+        // Align the matrix stack
+        poseStack.pushPose();
+        poseStack.scale(1.0F / scale, 1.0F / scale, 1.0F);
+
+        // Draw the framebuffer texture
+        TransparencyBuffer.drawExtraFramebuffer(poseStack);
+        poseStack.popPose();
+
+        TransparencyBuffer.postInject();
     }
 
     /**
-     * returns a number from 0 to 10 based on how much experience this orb is worth, used to determine the texture to use
-     * taken from ExperienceOrbEntity#getTextureByXP
+     * Copied from {@link ExperienceOrb#getIcon()} since we do not have access to an object instance.
      */
     private int getXpTexture(int displayCount) {
 

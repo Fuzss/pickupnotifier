@@ -3,7 +3,7 @@ package fuzs.pickupnotifier.client.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import fuzs.pickupnotifier.PickUpNotifier;
-import fuzs.pickupnotifier.client.data.ItemBlacklistManager;
+import fuzs.pickupnotifier.client.handler.ItemBlacklistManager;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 

@@ -1,4 +1,4 @@
-package fuzs.pickupnotifier.client.data;
+package fuzs.pickupnotifier.client.handler;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

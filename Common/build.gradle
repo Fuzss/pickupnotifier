@@ -1,6 +1,6 @@
 plugins {
     id 'fabric-loom' version '1.0.+'
-    id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
+    id 'io.github.juuxel.loom-quiltflower' version '1.+'
 }
 
 archivesBaseName = rootProject.name
@@ -12,7 +12,7 @@ dependencies {
     minecraft "com.mojang:minecraft:${minecraftVersion}"
     mappings loom.layered() {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
+//        parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
     }
 
     // Puzzles Lib
@@ -49,13 +49,15 @@ processResources {
 
     // this will ensure that this task is redone when a value changes
     inputs.property "modDescription", 			"${modDescription}"
-    inputs.property "packFormat", 				"${packFormat}"
+    inputs.property "resourcePackFormat",       "${resourcePackFormat}"
+    inputs.property "dataPackFormat", 			"${dataPackFormat}"
 
     // replace stuff in pack.mcmeta
     filesMatching ('pack.mcmeta') {
         expand (
                 'modDescription':       "${modDescription}",
-                "packFormat":           "${packFormat}"
+                "resourcePackFormat":   "${resourcePackFormat}",
+                "dataPackFormat":       "${dataPackFormat}"
         )
     }
 }

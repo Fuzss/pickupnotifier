@@ -1,4 +1,4 @@
-package fuzs.pickupnotifier.client.gui.entry;
+package fuzs.pickupnotifier.client.util;
 
 import com.google.common.collect.ImmutableSortedMap;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -31,23 +31,23 @@ public class DisplayEntryRenderHelper {
         return Component.literal(String.valueOf(value / entry.getKey()) + entry.getValue());
     }
 
-    public static void renderGuiItemDecorations(ItemRenderer itemRenderer, Font font, int count, int xPosition, int yPosition) {
+    public static void renderGuiItemDecorations(PoseStack poseStack, Font font, int count, int xPosition, int yPosition) {
 
         if (count <= 1 && !PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) return;
 
-        PoseStack poseStack = new PoseStack();
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.0, 200.0F);
+
         Component component = shortenValue(count);
-
-        poseStack.translate(0.0, 0.0, itemRenderer.blitOffset + 200.0F);
-
         float scale = Math.min(1.0F, 16.0F / font.width(component));
         poseStack.scale(scale, scale, 1.0F);
 
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         float posX = (xPosition + 17) / scale - font.width(component);
         float posY = (yPosition + font.lineHeight * 2) / scale - font.lineHeight;
-        font.drawInBatch(component, posX, posY, 16777215, true, poseStack.last().pose(), bufferSource, false, 0, 15728880);
+        font.drawInBatch(component, posX, posY, 16777215, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
         bufferSource.endBatch();
+        poseStack.popPose();
     }
 
     public static void renderTooltipInternal(PoseStack poseStack, int posX, int posY, int width, int height, int alpha) {
@@ -72,12 +72,10 @@ public class DisplayEntryRenderHelper {
         fillGradient(matrix4f, bufferBuilder, posX - 3, posY - 3, posX + width + 3, posY - 3 + 1, blitOffset, colorA, colorA);
         fillGradient(matrix4f, bufferBuilder, posX - 3, posY + height + 2, posX + width + 3, posY + height + 3, blitOffset, colorB, colorB);
         RenderSystem.enableDepthTest();
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
         poseStack.popPose();
     }
 

@@ -38,7 +38,7 @@ public class ClientConfig implements ConfigCore {
     }
 
     public static class BehaviorConfig implements ConfigCore {
-        public boolean combineEntries;
+        public CombineEntries combineEntries;
         public int displayTime;
         public boolean move;
         public int moveTime;
@@ -46,13 +46,12 @@ public class ClientConfig implements ConfigCore {
 
         @Override
         public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
-            callback.accept(builder.comment("Combine entries of the same type instead of showing each one individually.").define("combine_entries", true), v -> this.combineEntries = v);
+            callback.accept(builder.comment("Combine entries of the same type instead of showing each one individually.").defineEnum("combine_entries", CombineEntries.EXCLUDE_NAMED), v -> this.combineEntries = v);
             callback.accept(builder.comment("Amount of ticks each entry will be shown for. Set to 0 to only remove entries when space for new ones is needed.").defineInRange("display_time", 80, 0, Integer.MAX_VALUE), v -> this.displayTime = v);
             callback.accept(builder.comment("Make outdated entries slowly move out of the screen instead of disappearing in place.").define("move_out_of_screen", true), v -> this.move = v);
             callback.accept(builder.comment("Amount of ticks it takes for an entry to move out of the screen. Value cannot be larger than \"Display Time\".").defineInRange("move_time", 20, 0, Integer.MAX_VALUE), v -> this.moveTime = v);
             callback.accept(builder.comment("Make outdated entry names slowly fade away instead of simply vanishing.").define("fade_away", true), v -> this.fadeAway = v);
         }
-
     }
 
     public static class DisplayConfig implements ConfigCore {
@@ -64,14 +63,16 @@ public class ClientConfig implements ConfigCore {
         public int offsetY;
         public double maxHeight;
         public int scale;
-        @Config(description = "Where to display the amount of items picked up. 'SPRITE' will render the amount on the item sprite like in inventories, 'TEXT' will add a dedicated text including the amount to the item name display.")
+        @Config(description = "Where and if to display the amount of items picked up. 'SPRITE' will render the amount on the item sprite like in inventories, 'TEXT' will add a dedicated text including the amount to the item name display.")
         public DisplayAmount displayAmount = DisplayAmount.TEXT;
         @Config(description = "Add the total amount of an item in your inventory to the entry.")
         public boolean inventoryCount = false;
         @Config(description = "Should the picked up amount be shown when it's just a single item.")
         public boolean displaySingleCount = true;
-        @Config(description = "Mode for drawing a background behind entries for better visibility. 'BLACK' is similar to the chat background, 'TOOLTIP' uses the tooltip background rendering instead.")
-        public Background background = Background.NONE;
+        @Config(description = "Mode for drawing a background behind entries for better visibility. 'CHAT' is similar to the chat background, 'TOOLTIP' uses the tooltip background rendering instead.")
+        public EntryBackground entryBackground = EntryBackground.NONE;
+        @Config(description = "Add the name of the item to the entry.")
+        public boolean displayItemName = true;
 
         @Override
         public void addToBuilder(ForgeConfigSpec.Builder builder, ValueCallback callback) {
@@ -100,7 +101,11 @@ public class ClientConfig implements ConfigCore {
         }
     }
 
-    public enum Background {
-        NONE, BLACK, TOOLTIP
+    public enum EntryBackground {
+        NONE, CHAT, TOOLTIP
+    }
+
+    public enum CombineEntries {
+        ALWAYS, NEVER, EXCLUDE_NAMED
     }
 }

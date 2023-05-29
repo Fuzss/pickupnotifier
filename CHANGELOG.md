@@ -3,11 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog].
 
-## [v5.0.1-1.19.3] - 2023-03-24
+## [v6.0.0-1.19.4] - 2023-05-28
+- Ported to Minecraft 1.19.4
+### Added
+- Added an option to hide item names
+### Changed
+- Renamed and enchanted items are no longer grouped with other items of the same kind by default
+- Item and experience icons now properly fade away
 ### Fixed
-- Fixed start-up crash on Fabric due to `pickupnotifier.fabric.mixins.json` missing
-
-## [v5.0.0-1.19.3] - 2023-03-23
-- Ported to Minecraft 1.19.3
+- Item log no longer persists after respawning and switching levels / logging out
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/

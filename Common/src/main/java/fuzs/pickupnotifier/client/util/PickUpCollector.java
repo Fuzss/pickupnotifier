@@ -33,9 +33,9 @@ public class PickUpCollector extends ArrayList<DisplayEntry> {
         this.add(entry);
     }
 
-    public Optional<DisplayEntry> findDuplicate(DisplayEntry entry) {
+    public Optional<DisplayEntry> findDuplicate(DisplayEntry entry, boolean excludeNamed) {
 
-        return this.stream().filter(pickUp -> pickUp.mayMergeWith(entry)).findAny();
+        return this.stream().filter(pickUp -> pickUp.mayMergeWith(entry, excludeNamed)).findAny();
     }
 
     public double getTotalFade(float partialTicks) {

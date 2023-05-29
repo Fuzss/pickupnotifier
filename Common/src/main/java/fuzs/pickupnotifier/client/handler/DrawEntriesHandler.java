@@ -8,6 +8,9 @@ import fuzs.pickupnotifier.client.util.PickUpCollector;
 import fuzs.pickupnotifier.config.ClientConfig;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.Connection;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -21,14 +24,17 @@ public class DrawEntriesHandler {
     }
 
     public void addHandledEntity(int itemId) {
+
         this.handledEntities.put(itemId, new MutableInt());
     }
 
     public boolean isItemEntityHandled(int itemId) {
+
         return this.handledEntities.containsKey(itemId);
     }
 
     public PickUpCollector getCollector() {
+
         return this.collector;
     }
 
@@ -95,5 +101,15 @@ public class DrawEntriesHandler {
 
             entryY -= entryHeight;
         }
+    }
+
+    public void onLoggedOut(LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) {
+
+        this.collector.clear();
+    }
+
+    public void onCopy(LocalPlayer oldPlayer, LocalPlayer newPlayer, MultiPlayerGameMode multiPlayerGameMode, Connection connection) {
+
+        this.collector.clear();
     }
 }
