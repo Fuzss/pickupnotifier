@@ -1,11 +1,9 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.client.util.TransparencyBuffer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -42,7 +40,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime) {
+    protected void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime) {
 
         int textureOffset = this.getXpTexture(this.getDisplayAmount());
         int x = textureOffset % 4 * 16;
@@ -54,21 +52,19 @@ public class ExperienceDisplayEntry extends DisplayEntry {
 
         TransparencyBuffer.prepareExtraFramebuffer();
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, EXPERIENCE_ORB_TEXTURES);
         RenderSystem.setShaderColor(r, g, b, 1.0F);
-        GuiComponent.blit(poseStack, posX, posY, x, y, 16, 16, 64, 64);
+        guiGraphics.blit(EXPERIENCE_ORB_TEXTURES, posX, posY, x, y, 16, 16, 64, 64);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         TransparencyBuffer.preInject(fadeTime);
 
         // Align the matrix stack
-        poseStack.pushPose();
-        poseStack.scale(1.0F / scale, 1.0F / scale, 1.0F);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().scale(1.0F / scale, 1.0F / scale, 1.0F);
 
         // Draw the framebuffer texture
-        TransparencyBuffer.drawExtraFramebuffer(poseStack);
-        poseStack.popPose();
+        TransparencyBuffer.drawExtraFramebuffer(guiGraphics);
+        guiGraphics.pose().popPose();
 
         TransparencyBuffer.postInject();
     }

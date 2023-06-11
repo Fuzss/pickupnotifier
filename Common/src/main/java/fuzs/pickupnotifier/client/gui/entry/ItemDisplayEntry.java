@@ -1,11 +1,11 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.client.util.TransparencyBuffer;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
@@ -56,24 +56,24 @@ public class ItemDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime) {
+    protected void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime) {
 
         TransparencyBuffer.prepareExtraFramebuffer();
-        minecraft.getItemRenderer().renderAndDecorateItem(poseStack, this.stack, posX, posY);
+        guiGraphics.renderItem(this.stack, posX, posY);
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.sprite()) {
 
-            DisplayEntryRenderHelper.renderGuiItemDecorations(poseStack, minecraft.font, this.getDisplayAmount(), posX, posY);
+            DisplayEntryRenderHelper.renderGuiItemDecorations(guiGraphics, minecraft.font, this.getDisplayAmount(), posX, posY);
         }
 
         TransparencyBuffer.preInject(fadeTime);
 
         // Align the matrix stack
-        poseStack.pushPose();
-        poseStack.scale(1.0F / scale, 1.0F / scale, 1.0F);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().scale(1.0F / scale, 1.0F / scale, 1.0F);
 
         // Draw the framebuffer texture
-        TransparencyBuffer.drawExtraFramebuffer(poseStack);
-        poseStack.popPose();
+        TransparencyBuffer.drawExtraFramebuffer(guiGraphics);
+        guiGraphics.pose().popPose();
 
         TransparencyBuffer.postInject();
     }

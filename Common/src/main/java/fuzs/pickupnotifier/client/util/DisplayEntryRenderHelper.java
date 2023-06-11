@@ -6,9 +6,9 @@ import com.mojang.blaze3d.vertex.*;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.joml.Matrix4f;
@@ -31,33 +31,33 @@ public class DisplayEntryRenderHelper {
         return Component.literal(String.valueOf(value / entry.getKey()) + entry.getValue());
     }
 
-    public static void renderGuiItemDecorations(PoseStack poseStack, Font font, int count, int xPosition, int yPosition) {
+    public static void renderGuiItemDecorations(GuiGraphics guiGraphics, Font font, int count, int xPosition, int yPosition) {
 
         if (count <= 1 && !PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) return;
 
-        poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, 200.0F);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0.0, 0.0, 200.0F);
 
         Component component = shortenValue(count);
         float scale = Math.min(1.0F, 16.0F / font.width(component));
-        poseStack.scale(scale, scale, 1.0F);
+        guiGraphics.pose().scale(scale, scale, 1.0F);
 
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         float posX = (xPosition + 17) / scale - font.width(component);
         float posY = (yPosition + font.lineHeight * 2) / scale - font.lineHeight;
-        font.drawInBatch(component, posX, posY, 16777215, true, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
+        font.drawInBatch(component, posX, posY, 16777215, true, guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
         bufferSource.endBatch();
-        poseStack.popPose();
+        guiGraphics.pose().popPose();
     }
 
-    public static void renderTooltipInternal(PoseStack poseStack, int posX, int posY, int width, int height, int alpha) {
+    public static void renderTooltipInternal(GuiGraphics guiGraphics, int posX, int posY, int width, int height, int alpha) {
 
-        poseStack.pushPose();
+        guiGraphics.pose().pushPose();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f matrix4f = poseStack.last().pose();
+        Matrix4f matrix4f = guiGraphics.pose().last().pose();
         int color = applyAlphaComponent(-267386864, alpha);
         int blitOffset = 0;
         fillGradient(matrix4f, bufferBuilder, posX - 3, posY - 4, posX + width + 3, posY - 3, blitOffset, color, color);
@@ -76,7 +76,7 @@ public class DisplayEntryRenderHelper {
         RenderSystem.defaultBlendFunc();
         BufferUploader.drawWithShader(bufferBuilder.end());
         RenderSystem.disableBlend();
-        poseStack.popPose();
+        guiGraphics.pose().popPose();
     }
 
     private static int applyAlphaComponent(int color, int alpha) {

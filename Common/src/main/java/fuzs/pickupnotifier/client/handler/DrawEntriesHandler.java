@@ -1,6 +1,5 @@
 package fuzs.pickupnotifier.client.handler;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.gui.PositionPreset;
 import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
@@ -8,6 +7,7 @@ import fuzs.pickupnotifier.client.util.PickUpCollector;
 import fuzs.pickupnotifier.config.ClientConfig;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.Connection;
@@ -54,7 +54,7 @@ public class DrawEntriesHandler {
         }
     }
 
-    public void onRenderGui(Minecraft minecraft, PoseStack poseStack, float tickDelta, int screenWidth, int screenHeight) {
+    public void onRenderGui(Minecraft minecraft, GuiGraphics guiGraphics, float tickDelta, int screenWidth, int screenHeight) {
 
         if (this.collector.isEmpty()) return;
 
@@ -96,7 +96,7 @@ public class DrawEntriesHandler {
                     alpha = entry.getRemainingTicksRelative(tickDelta);
                 }
 
-                entry.render(minecraft, poseStack, entryX, entryY, alpha, scale);
+                entry.render(minecraft, guiGraphics, entryX, entryY, alpha, scale);
             }
 
             entryY -= entryHeight;

@@ -5,9 +5,11 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
 /**
@@ -38,7 +40,7 @@ public class TransparencyBuffer {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
     }
 
-    public static void drawExtraFramebuffer(PoseStack matrices) {
+    public static void drawExtraFramebuffer(GuiGraphics guiGraphics) {
         // Restore the original framebuffer
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFramebuffer);
 
@@ -46,7 +48,7 @@ public class TransparencyBuffer {
         RenderSystem.setShaderTexture(0, BUFFER_INSTANCE.getColorTextureId());
         Window window = Minecraft.getInstance().getWindow();
         // Create new matrix stack to prevent the transparency from affecting the rest of the GUI
-        GuiComponent.blit(matrices,
+        blit(guiGraphics.pose(),
                 0,                                       // x
                 0,                                          // y
                 window.getGuiScaledWidth(),                 // width
@@ -58,6 +60,25 @@ public class TransparencyBuffer {
                 BUFFER_INSTANCE.width,             // width of the entire texture
                 BUFFER_INSTANCE.height             // height of the entire texture
         );
+    }
+
+    public static void blit(PoseStack poseStack, int x, int y, int width, int height, float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+        blit(poseStack, x, x + width, y, y + height, 0, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
+    }
+
+    private static void blit(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
+        innerBlit(poseStack.last().pose(), i, j, k, l, m, (f + 0.0F) / (float)p, (f + (float)n) / (float)p, (g + 0.0F) / (float)q, (g + (float)o) / (float)q);
+    }
+
+    private static void innerBlit(Matrix4f matrix, int x1, int x2, int y1, int y2, int blitOffset, float minU, float maxU, float minV, float maxV) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(matrix, (float)x1, (float)y1, (float)blitOffset).uv(minU, minV).endVertex();
+        bufferBuilder.vertex(matrix, (float)x1, (float)y2, (float)blitOffset).uv(minU, maxV).endVertex();
+        bufferBuilder.vertex(matrix, (float)x2, (float)y2, (float)blitOffset).uv(maxU, maxV).endVertex();
+        bufferBuilder.vertex(matrix, (float)x2, (float)y1, (float)blitOffset).uv(maxU, minV).endVertex();
+        BufferUploader.drawWithShader(bufferBuilder.end());
     }
 
     public static void postInject() {

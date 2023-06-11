@@ -2,12 +2,11 @@ package fuzs.pickupnotifier.client.gui.entry;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -138,16 +137,16 @@ public abstract class DisplayEntry {
         return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ? textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) + 16 : textWidth;
     }
 
-    public void render(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float alpha, float scale) {
+    public void render(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float alpha, float scale) {
 
         boolean mirrorPosition = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored();
         boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite;
         int textStartX = mirrorPosition || !withSprite ? posX : posX + 16 + TEXT_ITEM_MARGIN;
 
-        poseStack.pushPose();
-        poseStack.scale(scale, scale, 1.0F);
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().scale(scale, scale, 1.0F);
 
-        this.renderBg(minecraft, poseStack, posX, posY, alpha);
+        this.renderBg(minecraft, guiGraphics, posX, posY, alpha);
 
         int fadeTime = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.fadeAway ? 255 - (int) (255.0F * alpha) : 255;
         // prevents a bug where names would appear once at the end with full alpha
@@ -155,20 +154,20 @@ public abstract class DisplayEntry {
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            GuiComponent.drawString(poseStack, minecraft.font, this.getTextComponent(minecraft.player), textStartX, posY + 4, 16777215 | (fadeTime << 24));
+            guiGraphics.drawString(minecraft.font, this.getTextComponent(minecraft.player), textStartX, posY + 4, 16777215 | (fadeTime << 24), false);
             if (withSprite) {
 
                 int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
-                this.renderSprite(minecraft, poseStack, mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX, posY, scale, fadeTime / 255.0F);
+                this.renderSprite(minecraft, guiGraphics, mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX, posY, scale, fadeTime / 255.0F);
             }
 
             RenderSystem.disableBlend();
         }
 
-        poseStack.popPose();
+        guiGraphics.pose().popPose();
     }
 
-    private void renderBg(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float alpha) {
+    private void renderBg(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float alpha) {
 
         switch (PickUpNotifier.CONFIG.get(ClientConfig.class).display.entryBackground) {
 
@@ -177,15 +176,15 @@ public abstract class DisplayEntry {
                 int backgroundOpacity = (int) (minecraft.options.textBackgroundOpacity().get() * (1.0F - alpha) * 255.0F) << 24 & -16777216;
                 int endY = posY + 16;
                 if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.sprite()) endY += 1;
-                GuiComponent.fill(poseStack, posX - 3, posY, posX + this.getEntryWidth(minecraft) + 5, endY, backgroundOpacity);
+                guiGraphics.fill(posX - 3, posY, posX + this.getEntryWidth(minecraft) + 5, endY, backgroundOpacity);
             }
 
             case TOOLTIP -> {
 
-                DisplayEntryRenderHelper.renderTooltipInternal(poseStack, posX, posY + 3, this.getEntryWidth(minecraft), 9, (int) ((1.0F - alpha) * 255.0F));
+                DisplayEntryRenderHelper.renderTooltipInternal(guiGraphics, posX, posY + 3, this.getEntryWidth(minecraft), 9, (int) ((1.0F - alpha) * 255.0F));
             }
         }
     }
 
-    protected abstract void renderSprite(Minecraft minecraft, PoseStack poseStack, int posX, int posY, float scale, float fadeTime);
+    protected abstract void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime);
 }

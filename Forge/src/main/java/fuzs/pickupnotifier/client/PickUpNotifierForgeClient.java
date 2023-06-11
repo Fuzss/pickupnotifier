@@ -3,6 +3,8 @@ package fuzs.pickupnotifier.client;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.commands.ModReloadCommand;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -21,7 +23,7 @@ public class PickUpNotifierForgeClient {
 
     private static void registerHandlers() {
         MinecraftForge.EVENT_BUS.addListener((final RegisterClientCommandsEvent evt) -> {
-            ModReloadCommand.register(evt.getDispatcher(), (source, component) -> source.sendSuccess(component, true));
+            ModReloadCommand.register(evt.getDispatcher(), (CommandSourceStack source, Component component) -> source.sendSuccess(() -> component, true));
         });
     }
 }
