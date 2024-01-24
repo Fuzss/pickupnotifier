@@ -1,6 +1,7 @@
-package fuzs.pickupnotifier.client;
+package fuzs.pickupnotifier.forge.client;
 
 import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.client.PickUpNotifierClient;
 import fuzs.pickupnotifier.client.commands.ModReloadCommand;
 import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import net.minecraft.commands.CommandSourceStack;

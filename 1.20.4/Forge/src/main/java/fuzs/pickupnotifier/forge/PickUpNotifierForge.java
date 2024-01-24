@@ -1,6 +1,7 @@
-package fuzs.pickupnotifier;
+package fuzs.pickupnotifier.forge;
 
-import fuzs.pickupnotifier.handler.ForgeItemPickupHandler;
+import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.forge.handler.ForgeItemPickupHandler;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;

@@ -1,8 +1,9 @@
-package fuzs.pickupnotifier;
+package fuzs.pickupnotifier.fabric;
 
-import fuzs.pickupnotifier.handler.FabricItemPickupHandler;
+import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.fabric.handler.FabricItemPickupHandler;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
-import fuzs.puzzleslib.api.event.v1.FabricPlayerEvents;
+import fuzs.puzzleslib.fabric.api.event.v1.FabricPlayerEvents;
 import net.fabricmc.api.ModInitializer;
 
 public class PickUpNotifierFabric implements ModInitializer {

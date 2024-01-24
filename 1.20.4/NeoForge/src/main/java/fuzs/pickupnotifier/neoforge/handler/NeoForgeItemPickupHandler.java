@@ -1,4 +1,4 @@
-package fuzs.pickupnotifier.handler;
+package fuzs.pickupnotifier.neoforge.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ServerConfig;
@@ -9,10 +9,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.EntityItemPickupEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-public class ForgeItemPickupHandler {
+public class NeoForgeItemPickupHandler {
     private static ItemStack currentStack = ItemStack.EMPTY;
 
     public static void onEntityItemPickup$1(final EntityItemPickupEvent evt) {

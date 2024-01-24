@@ -1,4 +1,4 @@
-package fuzs.pickupnotifier.handler;
+package fuzs.pickupnotifier.forge.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ServerConfig;

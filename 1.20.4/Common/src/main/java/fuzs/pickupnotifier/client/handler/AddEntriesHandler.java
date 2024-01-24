@@ -5,7 +5,6 @@ import fuzs.pickupnotifier.client.gui.entry.DisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import fuzs.pickupnotifier.client.gui.entry.ItemDisplayEntry;
 import fuzs.pickupnotifier.config.ClientConfig;
-import fuzs.pickupnotifier.mixin.client.accessor.AbstractArrowAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
@@ -60,11 +59,11 @@ public class AddEntriesHandler {
 
                 addItemEntry(minecraft, item.getItem(), amount);
             }
-        } else if (entity instanceof AbstractArrow) {
+        } else if (entity instanceof AbstractArrow abstractArrow) {
 
             if (PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeArrows) {
 
-                addItemEntry(minecraft, ((AbstractArrowAccessor) entity).pickupnotifier$callGetPickupItem(), amount);
+                addItemEntry(minecraft, abstractArrow.getPickupItemStackOrigin(), amount);
             }
         } else if (entity instanceof ExperienceOrb experience) {
 

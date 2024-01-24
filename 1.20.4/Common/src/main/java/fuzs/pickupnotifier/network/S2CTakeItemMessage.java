@@ -1,34 +1,29 @@
 package fuzs.pickupnotifier.network;
 
 import fuzs.pickupnotifier.client.handler.AddEntriesHandler;
-import fuzs.puzzleslib.api.network.v2.MessageV2;
+import fuzs.puzzleslib.api.network.v2.WritableMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 
-public class S2CTakeItemMessage implements MessageV2<S2CTakeItemMessage> {
-    private int itemId;
-    private int amount;
-
-    public S2CTakeItemMessage() {
-
-    }
+public class S2CTakeItemMessage implements WritableMessage<S2CTakeItemMessage> {
+    private final int itemId;
+    private final int amount;
 
     public S2CTakeItemMessage(int itemId, int amount) {
         this.itemId = itemId;
         this.amount = amount;
     }
 
+    public S2CTakeItemMessage(FriendlyByteBuf buf) {
+        this.itemId = buf.readVarInt();
+        this.amount = buf.readVarInt();
+    }
+
     @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeVarInt(this.itemId);
         buf.writeVarInt(this.amount);
-    }
-
-    @Override
-    public void read(FriendlyByteBuf buf) {
-        this.itemId = buf.readVarInt();
-        this.amount = buf.readVarInt();
     }
 
     @Override

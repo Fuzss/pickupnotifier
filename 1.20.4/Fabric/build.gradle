@@ -1,6 +1,4 @@
-apply from: 'https://raw.githubusercontent.com/Fuzss/modresources/main/gradle/fabric.gradle'
-
-def versionCatalog = extensions.getByType(VersionCatalogsExtension).named("libs")
+apply from: "https://raw.githubusercontent.com/Fuzss/modresources/main/gradle/v2/fabric.gradle"
 
 dependencies {
     // Fabric Api
@@ -18,12 +16,4 @@ dependencies {
 
     // Extensible Enums
 //    modApi(include(libs.extensibleenums.fabric.get()))
-
-    // Quality of Life Mods
-    versionCatalog.findLibrary("modmenu.fabric").ifPresent {
-        modLocalRuntime(it)
-    }
-    versionCatalog.findLibrary("forgeconfigscreens.fabric").ifPresent {
-        modLocalRuntime(it)
-    }
 }
