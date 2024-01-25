@@ -154,7 +154,7 @@ public abstract class DisplayEntry {
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            guiGraphics.drawString(minecraft.font, this.getTextComponent(minecraft.player), textStartX, posY + 4, 16777215 | (fadeTime << 24), false);
+            guiGraphics.drawString(minecraft.font, this.getTextComponent(minecraft.player), textStartX, posY + 4, 16777215 | (fadeTime << 24), true);
             if (withSprite) {
 
                 int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
