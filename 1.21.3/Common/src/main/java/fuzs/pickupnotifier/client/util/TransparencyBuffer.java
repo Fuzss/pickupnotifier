@@ -8,7 +8,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.util.ARGB;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30;
 
@@ -27,23 +28,20 @@ public class TransparencyBuffer {
 
     static {
         Window window = Minecraft.getInstance().getWindow();
-        BUFFER_INSTANCE = new TextureTarget(window.getWidth(), window.getHeight(), true, Minecraft.ON_OSX);
-        BUFFER_INSTANCE.setClearColor(0, 0, 0, 0);
+        BUFFER_INSTANCE = new TextureTarget(window.getWidth(), window.getHeight(), true);
+        BUFFER_INSTANCE.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
     }
 
     public static void prepareExtraFramebuffer() {
         // Setup extra framebuffer to draw into
         previousFramebuffer = GlStateManager.getBoundFramebuffer();
-        BUFFER_INSTANCE.clear(Minecraft.ON_OSX);
+        BUFFER_INSTANCE.clear();
         BUFFER_INSTANCE.bindWrite(false);
     }
 
-    public static void preInject(float alpha) {
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
-    }
+    public static void drawExtraFramebuffer(GuiGraphics guiGraphics, float alphaValue) {
 
-    public static void drawExtraFramebuffer(GuiGraphics guiGraphics) {
+        RenderSystem.enableBlend();
         // Restore the original framebuffer
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, previousFramebuffer);
 
@@ -60,45 +58,32 @@ public class TransparencyBuffer {
                 BUFFER_INSTANCE.width,             // width of the texture region
                 -BUFFER_INSTANCE.height,           // height of the texture region
                 BUFFER_INSTANCE.width,             // width of the entire texture
-                BUFFER_INSTANCE.height             // height of the entire texture
-        );
+                BUFFER_INSTANCE.height,             // height of the entire texture
+                ARGB.color(ARGB.as8BitChannel(alphaValue), -1));
     }
 
-    public static void blit(PoseStack poseStack, int x, int y, int width, int height, float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight) {
-        blit(poseStack, x, x + width, y, y + height, 0, uWidth, vHeight, uOffset, vOffset, textureWidth, textureHeight);
+    private static void blit(PoseStack poseStack, int x, int y, int width, int height, int uWidth, int vHeight, float uOffset, float vOffset, int textureWidth, int textureHeight, int color) {
+        innerBlit(poseStack.last().pose(), x,
+                x + width, y,
+                y + height,
+                (uOffset + 0.0F) / (float) textureWidth,
+                (uOffset + (float) uWidth) / (float) textureWidth,
+                (vOffset + 0.0F) / (float) textureHeight, (vOffset + (float) vHeight) / (float) textureHeight, color);
     }
 
-    private static void blit(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
-        innerBlit(poseStack.last().pose(),
-                i,
-                j,
-                k,
-                l,
-                m,
-                (f + 0.0F) / (float) p,
-                (f + (float) n) / (float) p,
-                (g + 0.0F) / (float) q,
-                (g + (float) o) / (float) q
-        );
-    }
-
-    private static void innerBlit(Matrix4f matrix, int x1, int x2, int y1, int y2, int blitOffset, float minU, float maxU, float minV, float maxV) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+    private static void innerBlit(Matrix4f matrix, int x1, int x2, int y1, int y2, float minU, float maxU, float minV, float maxV, int color) {
+        RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
         BufferBuilder bufferBuilder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y1, (float) blitOffset).setUv(minU, minV);
-        bufferBuilder.addVertex(matrix, (float) x1, (float) y2, (float) blitOffset).setUv(minU, maxV);
-        bufferBuilder.addVertex(matrix, (float) x2, (float) y2, (float) blitOffset).setUv(maxU, maxV);
-        bufferBuilder.addVertex(matrix, (float) x2, (float) y1, (float) blitOffset).setUv(maxU, minV);
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(matrix, x1, y1, 0.0F).setColor(color).setUv(minU, minV);
+        bufferBuilder.addVertex(matrix, x1, y2, 0.0F).setColor(color).setUv(minU, maxV);
+        bufferBuilder.addVertex(matrix, x2, y2, 0.0F).setColor(color).setUv(maxU, maxV);
+        bufferBuilder.addVertex(matrix, x2, y1, 0.0F).setColor(color).setUv(maxU, minV);
         BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-    }
-
-    public static void postInject() {
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     public static void resizeDisplay() {
         Window window = Minecraft.getInstance().getWindow();
-        BUFFER_INSTANCE.resize(window.getWidth(), window.getHeight(), Minecraft.ON_OSX);
+        BUFFER_INSTANCE.resize(window.getWidth(), window.getHeight());
     }
 }

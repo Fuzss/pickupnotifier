@@ -1,12 +1,12 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import fuzs.pickupnotifier.client.util.TransparencyBuffer;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Inventory;
@@ -50,24 +50,8 @@ public class ExperienceDisplayEntry extends DisplayEntry {
         float r = (Mth.sin(color) + 1.0F) * 0.5F;
         float g = 1.0F;
         float b = (Mth.sin(color + 4.1887903F) + 1.0F) * 0.1F;
-
-        TransparencyBuffer.prepareExtraFramebuffer();
-
-        RenderSystem.setShaderColor(r, g, b, 1.0F);
-        guiGraphics.blit(EXPERIENCE_ORB_TEXTURES, posX, posY, x, y, 16, 16, 64, 64);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-        TransparencyBuffer.preInject(fadeTime);
-
-        // Align the matrix stack
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(1.0F / scale, 1.0F / scale, 1.0F);
-
-        // Draw the framebuffer texture
-        TransparencyBuffer.drawExtraFramebuffer(guiGraphics);
-        guiGraphics.pose().popPose();
-
-        TransparencyBuffer.postInject();
+        int textureColor = ARGB.colorFromFloat(fadeTime, r, g, b);
+        guiGraphics.blit(RenderType::guiTextured, EXPERIENCE_ORB_TEXTURES, posX, posY, x, y, 16, 16, 16, 16, 64, 64, textureColor);
     }
 
     /**

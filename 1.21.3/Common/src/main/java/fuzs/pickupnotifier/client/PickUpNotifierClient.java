@@ -7,7 +7,7 @@ import fuzs.puzzleslib.api.client.core.v1.ClientModConstructor;
 import fuzs.puzzleslib.api.client.event.v1.ClientTickEvents;
 import fuzs.puzzleslib.api.client.event.v1.entity.player.ClientPlayerCopyCallback;
 import fuzs.puzzleslib.api.client.event.v1.entity.player.ClientPlayerNetworkEvents;
-import fuzs.puzzleslib.api.client.event.v1.gui.RenderGuiCallback;
+import fuzs.puzzleslib.api.client.event.v1.gui.RenderGuiEvents;
 
 public class PickUpNotifierClient implements ClientModConstructor {
 
@@ -18,7 +18,7 @@ public class PickUpNotifierClient implements ClientModConstructor {
 
     private static void registerEventHandlers() {
         ClientTickEvents.END.register(DrawEntriesHandler.INSTANCE::onClientTick);
-        RenderGuiCallback.EVENT.register(DrawEntriesHandler.INSTANCE::onRenderGui);
+        RenderGuiEvents.AFTER.register(DrawEntriesHandler.INSTANCE::onAfterRenderGui);
         ClientPlayerNetworkEvents.LOGGED_OUT.register(DrawEntriesHandler.INSTANCE::onLoggedOut);
         ClientPlayerCopyCallback.EVENT.register(DrawEntriesHandler.INSTANCE::onCopy);
     }

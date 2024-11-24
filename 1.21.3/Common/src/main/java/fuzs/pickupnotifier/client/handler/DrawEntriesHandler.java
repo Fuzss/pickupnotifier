@@ -8,6 +8,7 @@ import fuzs.pickupnotifier.config.ClientConfig;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -55,7 +56,7 @@ public class DrawEntriesHandler {
         }
     }
 
-    public void onRenderGui(Minecraft minecraft, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+    public void onAfterRenderGui(Gui gui, GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 
         if (this.collector.isEmpty()) return;
 
@@ -88,7 +89,7 @@ public class DrawEntriesHandler {
 
             if (mayRender) {
 
-                entryX = position.getX(entry.getEntryWidth(minecraft), screenWidth, posX);
+                entryX = position.getX(entry.getEntryWidth(gui.minecraft), screenWidth, posX);
                 float alpha;
                 if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move) {
 
@@ -98,7 +99,7 @@ public class DrawEntriesHandler {
                     alpha = entry.getRemainingTicksRelative(tickDelta);
                 }
 
-                entry.render(minecraft, guiGraphics, entryX, entryY, alpha, scale);
+                entry.render(gui.minecraft, guiGraphics, entryX, entryY, alpha, scale);
             }
 
             entryY -= entryHeight;

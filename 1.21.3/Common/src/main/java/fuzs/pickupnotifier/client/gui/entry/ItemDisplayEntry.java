@@ -58,23 +58,18 @@ public class ItemDisplayEntry extends DisplayEntry {
     @Override
     protected void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime) {
 
-        TransparencyBuffer.prepareExtraFramebuffer();
+//        TransparencyBuffer.prepareExtraFramebuffer();
         guiGraphics.renderItem(this.stack, posX, posY);
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.sprite()) {
 
             DisplayEntryRenderHelper.renderGuiItemDecorations(guiGraphics, minecraft.font, this.getDisplayAmount(), posX, posY);
         }
 
-        TransparencyBuffer.preInject(fadeTime);
-
-        // Align the matrix stack
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(1.0F / scale, 1.0F / scale, 1.0F);
-
-        // Draw the framebuffer texture
-        TransparencyBuffer.drawExtraFramebuffer(guiGraphics);
-        guiGraphics.pose().popPose();
-
-        TransparencyBuffer.postInject();
+//        // Align the matrix stack
+//        guiGraphics.pose().pushPose();
+//        guiGraphics.pose().scale(1.0F / scale, 1.0F / scale, 1.0F);
+//        // Draw the framebuffer texture
+//        TransparencyBuffer.drawExtraFramebuffer(guiGraphics, fadeTime);
+//        guiGraphics.pose().popPose();
     }
 }
