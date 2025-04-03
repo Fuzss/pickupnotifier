@@ -1,23 +1,27 @@
 package fuzs.pickupnotifier.client.util;
 
 import com.google.common.collect.ImmutableSortedMap;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import org.joml.Matrix4f;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.NavigableMap;
 
 public class DisplayEntryRenderHelper {
-    private static final NavigableMap<Integer, Character> MAP = ImmutableSortedMap.<Integer, Character>naturalOrder().put(1_000, 'K').put(1_000_000, 'M').put(1_000_000_000, 'B').build();
+    private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("tooltip/background");
+    private static final ResourceLocation FRAME_SPRITE = ResourceLocation.withDefaultNamespace("tooltip/frame");
+    private static final NavigableMap<Integer, Character> MAP = ImmutableSortedMap.<Integer, Character>naturalOrder()
+            .put(1_000, 'K')
+            .put(1_000_000, 'M')
+            .put(1_000_000_000, 'B')
+            .build();
 
     private static MutableComponent shortenValue(int value) {
 
@@ -45,56 +49,32 @@ public class DisplayEntryRenderHelper {
         float posX = (xPosition + 17) / scale - font.width(component);
         float posY = (yPosition + font.lineHeight * 2) / scale - font.lineHeight;
         guiGraphics.drawSpecial((MultiBufferSource bufferSource) -> {
-            font.drawInBatch(component, posX, posY, 16777215, true, guiGraphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
+            font.drawInBatch(component,
+                    posX,
+                    posY,
+                    -1,
+                    true,
+                    guiGraphics.pose().last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.NORMAL,
+                    0,
+                    0XF000F0);
         });
         guiGraphics.pose().popPose();
     }
 
-    public static void renderTooltipInternal(GuiGraphics guiGraphics, int posX, int posY, int width, int height, int alpha) {
-
+    /**
+     * @see net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil#renderTooltipBackground(GuiGraphics,
+     *         int, int, int, int, int, ResourceLocation)
+     */
+    public static void renderTooltipBackground(GuiGraphics guiGraphics, int x, int y, int width, int height, int color) {
+        int i = x - 3 - 9;
+        int j = y - 3 - 9;
+        int k = width + 3 + 3 + 18;
+        int l = height + 3 + 3 + 18;
         guiGraphics.pose().pushPose();
-        Tesselator tesselator = Tesselator.getInstance();
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
-        BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f matrix4f = guiGraphics.pose().last().pose();
-        int color = applyAlphaComponent(-267386864, alpha);
-        int blitOffset = 0;
-        fillGradient(matrix4f, bufferBuilder, posX - 3, posY - 4, posX + width + 3, posY - 3, blitOffset, color, color);
-        fillGradient(matrix4f, bufferBuilder, posX - 3, posY + height + 3, posX + width + 3, posY + height + 4, blitOffset, color, color);
-        fillGradient(matrix4f, bufferBuilder, posX - 3, posY - 3, posX + width + 3, posY + height + 3, blitOffset, color, color);
-        fillGradient(matrix4f, bufferBuilder, posX - 4, posY - 3, posX - 3, posY + height + 3, blitOffset, color, color);
-        fillGradient(matrix4f, bufferBuilder, posX + width + 3, posY - 3, posX + width + 4, posY + height + 3, blitOffset, color, color);
-        int colorA = applyAlphaComponent(1347420415, alpha);
-        int colorB = applyAlphaComponent(1344798847, alpha);
-        fillGradient(matrix4f, bufferBuilder, posX - 3, posY - 3 + 1, posX - 3 + 1, posY + height + 3 - 1, blitOffset, colorA, colorB);
-        fillGradient(matrix4f, bufferBuilder, posX + width + 2, posY - 3 + 1, posX + width + 3, posY + height + 3 - 1, blitOffset, colorA, colorB);
-        fillGradient(matrix4f, bufferBuilder, posX - 3, posY - 3, posX + width + 3, posY - 3 + 1, blitOffset, colorA, colorA);
-        fillGradient(matrix4f, bufferBuilder, posX - 3, posY + height + 2, posX + width + 3, posY + height + 3, blitOffset, colorB, colorB);
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-        RenderSystem.disableBlend();
+        guiGraphics.blitSprite(RenderType::guiTextured, BACKGROUND_SPRITE, i, j, k, l, color);
+        guiGraphics.blitSprite(RenderType::guiTextured, FRAME_SPRITE, i, j, k, l, color);
         guiGraphics.pose().popPose();
-    }
-
-    private static int applyAlphaComponent(int color, int alpha) {
-
-        return color & 0xFFFFFF | Math.min(color >> 24 & 0xFF, alpha) << 24;
-    }
-
-    private static void fillGradient(Matrix4f matrix, BufferBuilder builder, int x1, int y1, int x2, int y2, int blitOffset, int colorA, int colorB) {
-        float f = (float)(colorA >> 24 & 0xFF) / 255.0F;
-        float g = (float)(colorA >> 16 & 0xFF) / 255.0F;
-        float h = (float)(colorA >> 8 & 0xFF) / 255.0F;
-        float i = (float)(colorA & 0xFF) / 255.0F;
-        float j = (float)(colorB >> 24 & 0xFF) / 255.0F;
-        float k = (float)(colorB >> 16 & 0xFF) / 255.0F;
-        float l = (float)(colorB >> 8 & 0xFF) / 255.0F;
-        float m = (float)(colorB & 0xFF) / 255.0F;
-        builder.addVertex(matrix, (float)x2, (float)y1, (float)blitOffset).setColor(g, h, i, f);
-        builder.addVertex(matrix, (float)x1, (float)y1, (float)blitOffset).setColor(g, h, i, f);
-        builder.addVertex(matrix, (float)x1, (float)y2, (float)blitOffset).setColor(k, l, m, j);
-        builder.addVertex(matrix, (float)x2, (float)y2, (float)blitOffset).setColor(k, l, m, j);
     }
 }

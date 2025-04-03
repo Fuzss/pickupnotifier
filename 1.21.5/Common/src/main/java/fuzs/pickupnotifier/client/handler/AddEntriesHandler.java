@@ -42,12 +42,13 @@ public class AddEntriesHandler {
         }
     }
 
-    public static void addItemEntry(Minecraft minecraft, ItemStack stack) {
+    public static void addItemEntry(Minecraft minecraft, ItemStack itemStack) {
 
         // called by package froms server
-        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient && PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeItems) {
+        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient &&
+                PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeItems) {
 
-            addItemEntry(minecraft, stack, stack.getCount());
+            addItemEntry(minecraft, itemStack, itemStack.getCount());
         }
     }
 
@@ -75,16 +76,18 @@ public class AddEntriesHandler {
         }
     }
 
-    private static void addItemEntry(Minecraft minecraft, ItemStack stack, int amount) {
+    private static void addItemEntry(Minecraft minecraft, ItemStack itemStack, int amount) {
 
-        if (!stack.isEmpty() && ItemBlacklistManager.INSTANCE.isItemAllowed(minecraft.level.dimension(), stack.getItem())) {
+        if (!itemStack.isEmpty() &&
+                !PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.blacklist.contains(itemStack.getItem())) {
 
-            stack = stack.copy();
+            itemStack = itemStack.copy();
             // remove enchantments from copy as we don't want the glint to show
-            if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries == ClientConfig.CombineEntries.ALWAYS) {
-                stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
+            if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ==
+                    ClientConfig.CombineEntries.ALWAYS) {
+                itemStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
             }
-            addEntry(minecraft, new ItemDisplayEntry(stack, amount));
+            addEntry(minecraft, new ItemDisplayEntry(itemStack, amount));
         }
     }
 
@@ -103,17 +106,23 @@ public class AddEntriesHandler {
 
     private static void addEntry(Minecraft minecraft, DisplayEntry newEntry) {
 
-        if (minecraft.player != null && minecraft.player.getAbilities().instabuild && PickUpNotifier.CONFIG.get(ClientConfig.class).general.disableInCreative) return;
+        if (minecraft.player != null && minecraft.player.getAbilities().instabuild &&
+                PickUpNotifier.CONFIG.get(ClientConfig.class).general.disableInCreative) {
+            return;
+        }
 
-        int scaledHeight = (int) (minecraft.getWindow().getGuiScaledHeight() / (PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F));
-        int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.maxHeight / DisplayEntry.ENTRY_HEIGHT) - 1;
+        int scaledHeight = (int) (minecraft.getWindow().getGuiScaledHeight() /
+                (PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F));
+        int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.maxHeight /
+                DisplayEntry.ENTRY_HEIGHT) - 1;
 
         ClientConfig.CombineEntries combineEntries = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries;
         Optional<DisplayEntry> possibleDuplicate;
         if (combineEntries == ClientConfig.CombineEntries.NEVER) {
             possibleDuplicate = Optional.empty();
         } else {
-            possibleDuplicate = DrawEntriesHandler.INSTANCE.getCollector().findDuplicate(newEntry, combineEntries == ClientConfig.CombineEntries.EXCLUDE_NAMED);
+            possibleDuplicate = DrawEntriesHandler.INSTANCE.getCollector()
+                    .findDuplicate(newEntry, combineEntries == ClientConfig.CombineEntries.EXCLUDE_NAMED);
         }
 
         if (possibleDuplicate.isPresent()) {

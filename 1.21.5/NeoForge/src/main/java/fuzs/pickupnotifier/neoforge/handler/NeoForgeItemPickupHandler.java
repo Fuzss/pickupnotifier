@@ -2,14 +2,16 @@ package fuzs.pickupnotifier.neoforge.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ServerConfig;
-import fuzs.pickupnotifier.network.S2CTakeItemMessage;
-import fuzs.pickupnotifier.network.S2CTakeItemStackMessage;
+import fuzs.pickupnotifier.network.ClientboundTakeItemMessage;
+import fuzs.pickupnotifier.network.ClientboundTakeItemStackMessage;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.TriState;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 
 public class NeoForgeItemPickupHandler {
@@ -25,6 +27,7 @@ public class NeoForgeItemPickupHandler {
     }
 
     public static void onEntityItemPickup$2(final ItemEntityPickupEvent.Pre evt) {
+        if (!(evt.getPlayer() instanceof ServerPlayer serverPlayer)) return;
         ItemEntity itemEntity = evt.getItemEntity();
         Player player = evt.getPlayer();
         ItemStack stack = itemEntity.getItem();
@@ -39,13 +42,16 @@ public class NeoForgeItemPickupHandler {
                     sendTakeMessage = true;
                 }
                 if (sendTakeMessage) {
-                    PickUpNotifier.NETWORK.sendTo((ServerPlayer) player, new S2CTakeItemStackMessage(currentStack).toClientboundMessage());
+                    MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                            new ClientboundTakeItemStackMessage(currentStack));
                 }
             }
             currentStack = ItemStack.EMPTY;
         } else if (PickUpNotifier.CONFIG.get(ServerConfig.class).partialPickUps && !itemEntity.isRemoved()) {
             // requires additional checks as it might actually not be possible for the item to be picked up
-            if (!itemEntity.hasPickUpDelay() && (itemEntity.getOwner() == null || itemEntity.lifespan - itemEntity.getAge() <= 200 || itemEntity.getOwner().equals(player.getUUID()))) {
+            if (!itemEntity.hasPickUpDelay() &&
+                    (itemEntity.getOwner() == null || itemEntity.lifespan - itemEntity.getAge() <= 200 ||
+                            itemEntity.getOwner().equals(player.getUUID()))) {
                 int itemAmount = 0;
                 if (player.getInventory().getFreeSlot() != -1) {
                     itemAmount = stack.getCount();
@@ -56,15 +62,18 @@ public class NeoForgeItemPickupHandler {
                     }
                 }
                 if (itemAmount > 0) {
-                    PickUpNotifier.NETWORK.sendTo((ServerPlayer) player, new S2CTakeItemMessage(itemEntity.getId(), itemAmount).toClientboundMessage());
+                    MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                            new ClientboundTakeItemMessage(itemEntity.getId(), itemAmount));
                 }
             }
         }
     }
 
     public static void onPlayerItemPickup(final ItemEntityPickupEvent.Post evt) {
+        if (!(evt.getPlayer() instanceof ServerPlayer serverPlayer)) return;
         if (!PickUpNotifier.CONFIG.get(ServerConfig.class).partialPickUps && !evt.getItemEntity().isRemoved()) {
-            PickUpNotifier.NETWORK.sendTo((ServerPlayer) evt.getPlayer(), new S2CTakeItemMessage(evt.getItemEntity().getId(), evt.getOriginalStack().getCount()).toClientboundMessage());
+            MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                    new ClientboundTakeItemMessage(evt.getItemEntity().getId(), evt.getOriginalStack().getCount()));
         }
     }
 

@@ -6,8 +6,7 @@
   "mixins": [
   ],
   "client": [
-    "client.ClientPacketListenerMixin",
-    "client.MinecraftMixin"
+    "client.ClientPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

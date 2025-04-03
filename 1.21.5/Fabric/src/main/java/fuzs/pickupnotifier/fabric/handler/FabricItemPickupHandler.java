@@ -2,8 +2,10 @@ package fuzs.pickupnotifier.fabric.handler;
 
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ServerConfig;
-import fuzs.pickupnotifier.network.S2CTakeItemMessage;
+import fuzs.pickupnotifier.network.ClientboundTakeItemMessage;
 import fuzs.puzzleslib.api.event.v1.core.EventResult;
+import fuzs.puzzleslib.api.network.v4.MessageSender;
+import fuzs.puzzleslib.api.network.v4.PlayerSet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,6 +15,8 @@ import net.minecraft.world.item.ItemStack;
 public class FabricItemPickupHandler {
 
     public static EventResult onEntityItemPickup(Player player, ItemEntity item) {
+
+        if (!(player instanceof ServerPlayer serverPlayer)) return EventResult.PASS;
 
         if (PickUpNotifier.CONFIG.get(ServerConfig.class).partialPickUps && !item.isRemoved()) {
 
@@ -35,7 +39,8 @@ public class FabricItemPickupHandler {
 
                 if (itemAmount > 0) {
 
-                    PickUpNotifier.NETWORK.sendTo((ServerPlayer) player, new S2CTakeItemMessage(item.getId(), itemAmount).toClientboundMessage());
+                    MessageSender.broadcast(PlayerSet.ofPlayer(serverPlayer),
+                            new ClientboundTakeItemMessage(item.getId(), itemAmount));
                 }
             }
         }

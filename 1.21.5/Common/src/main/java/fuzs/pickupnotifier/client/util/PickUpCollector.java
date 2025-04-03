@@ -45,5 +45,4 @@ public class PickUpCollector extends ArrayList<DisplayEntry> {
                 .average()
                 .orElse(0.0) * this.size();
     }
-
 }

@@ -5,14 +5,13 @@ import fuzs.pickupnotifier.neoforge.handler.NeoForgeItemPickupHandler;
 import fuzs.puzzleslib.api.core.v1.ModConstructor;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(PickUpNotifier.MOD_ID)
 public class PickUpNotifierNeoForge {
 
-    public PickUpNotifierNeoForge(ModContainer modContainer) {
+    public PickUpNotifierNeoForge() {
         ModConstructor.construct(PickUpNotifier.MOD_ID, PickUpNotifier::new);
         registerEventHandlers(NeoForge.EVENT_BUS);
     }
