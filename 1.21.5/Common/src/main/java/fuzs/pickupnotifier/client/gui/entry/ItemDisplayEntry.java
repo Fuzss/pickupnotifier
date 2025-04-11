@@ -11,49 +11,44 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemDisplayEntry extends DisplayEntry {
-    private final ItemStack stack;
+    private final ItemStack itemStack;
 
-    public ItemDisplayEntry(ItemStack stack, int amount) {
-
-        super(amount, stack.getRarity());
-        this.stack = stack;
+    public ItemDisplayEntry(ItemStack itemStack, int amount) {
+        super(amount, itemStack.getRarity());
+        this.itemStack = itemStack;
     }
 
     @Override
     protected Component getEntryName() {
-
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ==
                 ClientConfig.CombineEntries.ALWAYS) {
-
-            return this.stack.getItem().getName(this.stack);
+            return this.itemStack.getItem().getName(this.itemStack);
+        } else {
+            return this.itemStack.getHoverName();
         }
-
-        return this.stack.getHoverName();
     }
 
     @Override
     public boolean mayMergeWith(DisplayEntry other, boolean excludeNamed) {
-
         return other instanceof ItemDisplayEntry itemDisplayEntry &&
-                this.sameItem(itemDisplayEntry.stack, excludeNamed);
+                this.sameItem(itemDisplayEntry.itemStack, excludeNamed);
     }
 
     private boolean sameItem(ItemStack other, boolean testHoverName) {
-
-        if (this.stack.getItem() == other.getItem()) {
+        if (this.itemStack.getItem() == other.getItem()) {
             if (testHoverName) {
-                return this.stack.getHoverName().equals(other.getHoverName()) &&
-                        this.stack.getRarity().equals(other.getRarity());
+                return this.itemStack.getHoverName().equals(other.getHoverName()) &&
+                        this.itemStack.getRarity().equals(other.getRarity());
             } else {
-                return this.stack.getItem().getName(this.stack).equals(other.getItem().getName(other));
+                return this.itemStack.getItem().getName(this.itemStack).equals(other.getItem().getName(other));
             }
+        } else {
+            return false;
         }
-        return false;
     }
 
     @Override
     protected int getInventoryCount(Inventory inventory) {
-
         return ContainerHelper.clearOrCountMatchingItems(inventory,
                 stack -> this.sameItem(stack, false),
                 Integer.MAX_VALUE,
@@ -62,10 +57,8 @@ public class ItemDisplayEntry extends DisplayEntry {
 
     @Override
     protected void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime) {
-
-        guiGraphics.renderItem(this.stack, posX, posY);
+        guiGraphics.renderItem(this.itemStack, posX, posY);
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.isSprite()) {
-
             DisplayEntryRenderHelper.renderGuiItemDecorations(guiGraphics,
                     minecraft.font,
                     this.getDisplayAmount(),

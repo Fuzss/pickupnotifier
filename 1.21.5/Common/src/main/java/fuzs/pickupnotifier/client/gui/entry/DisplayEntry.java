@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.config.ClientConfig;
+import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -117,7 +118,7 @@ public abstract class DisplayEntry {
 
         if (!PickUpNotifier.CONFIG.get(ClientConfig.class).display.ignoreRarity && this.rarity != Rarity.COMMON) {
 
-            return Style.EMPTY.withColor(this.rarity.color());
+            return ItemHelper.getRarityStyle(this.rarity);
         } else {
 
             return Style.EMPTY.withColor(PickUpNotifier.CONFIG.get(ClientConfig.class).display.textColor);

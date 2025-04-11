@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -44,7 +45,7 @@ public class AddEntriesHandler {
 
     public static void addItemEntry(Minecraft minecraft, ItemStack itemStack) {
 
-        // called by package froms server
+        // called by package from server
         if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient &&
                 PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeItems) {
 
@@ -76,18 +77,21 @@ public class AddEntriesHandler {
         }
     }
 
-    private static void addItemEntry(Minecraft minecraft, ItemStack itemStack, int amount) {
+    private static void addItemEntry(Minecraft minecraft, @Nullable ItemStack itemStack, int amount) {
 
-        if (!itemStack.isEmpty() &&
-                !PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.blacklist.contains(itemStack.getItem())) {
+        // sometimes null, other mods do funny things
+        if (itemStack != null && !itemStack.isEmpty()) {
 
-            itemStack = itemStack.copy();
-            // remove enchantments from copy as we don't want the glint to show
-            if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ==
-                    ClientConfig.CombineEntries.ALWAYS) {
-                itemStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
+            if (!PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.blacklist.contains(itemStack.getItem())) {
+
+                itemStack = itemStack.copy();
+                // remove enchantments from copy as we don't want the glint to show
+                if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ==
+                        ClientConfig.CombineEntries.ALWAYS) {
+                    itemStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, false);
+                }
+                addEntry(minecraft, new ItemDisplayEntry(itemStack, amount));
             }
-            addEntry(minecraft, new ItemDisplayEntry(itemStack, amount));
         }
     }
 
