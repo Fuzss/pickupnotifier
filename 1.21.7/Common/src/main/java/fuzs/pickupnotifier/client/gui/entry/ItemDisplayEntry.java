@@ -3,7 +3,7 @@ package fuzs.pickupnotifier.client.gui.entry;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.config.ClientConfig;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.ContainerHelper;
@@ -20,8 +20,8 @@ public class ItemDisplayEntry extends DisplayEntry {
 
     @Override
     protected Component getEntryName() {
-        if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries ==
-                ClientConfig.CombineEntries.ALWAYS) {
+        if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries
+                == ClientConfig.CombineEntries.ALWAYS) {
             return this.itemStack.getItem().getName(this.itemStack);
         } else {
             return this.itemStack.getHoverName();
@@ -30,15 +30,15 @@ public class ItemDisplayEntry extends DisplayEntry {
 
     @Override
     public boolean mayMergeWith(DisplayEntry other, boolean excludeNamed) {
-        return other instanceof ItemDisplayEntry itemDisplayEntry &&
-                this.sameItem(itemDisplayEntry.itemStack, excludeNamed);
+        return other instanceof ItemDisplayEntry itemDisplayEntry && this.sameItem(itemDisplayEntry.itemStack,
+                excludeNamed);
     }
 
     private boolean sameItem(ItemStack other, boolean testHoverName) {
         if (this.itemStack.getItem() == other.getItem()) {
             if (testHoverName) {
-                return this.itemStack.getHoverName().equals(other.getHoverName()) &&
-                        this.itemStack.getRarity().equals(other.getRarity());
+                return this.itemStack.getHoverName().equals(other.getHoverName()) && this.itemStack.getRarity()
+                        .equals(other.getRarity());
             } else {
                 return this.itemStack.getItem().getName(this.itemStack).equals(other.getItem().getName(other));
             }
@@ -56,14 +56,10 @@ public class ItemDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime) {
+    protected void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float scale, float fadeTime) {
         guiGraphics.renderItem(this.itemStack, posX, posY);
         if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.isSprite()) {
-            DisplayEntryRenderHelper.renderGuiItemDecorations(guiGraphics,
-                    minecraft.font,
-                    this.getDisplayAmount(),
-                    posX,
-                    posY);
+            DisplayEntryRenderHelper.renderGuiItemDecorations(guiGraphics, font, this.getDisplayAmount(), posX, posY);
         }
     }
 }

@@ -5,8 +5,7 @@ import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.config.ClientConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -39,28 +38,17 @@ public class DisplayEntryRenderHelper {
 
         if (count <= 1 && !PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) return;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0.0, 0.0, 200.0F);
+        guiGraphics.pose().pushMatrix();
 
         Component component = shortenValue(count);
         float scale = Math.min(1.0F, 16.0F / font.width(component));
-        guiGraphics.pose().scale(scale, scale, 1.0F);
+        guiGraphics.pose().scale(scale, scale);
 
         float posX = (xPosition + 17) / scale - font.width(component);
         float posY = (yPosition + font.lineHeight * 2) / scale - font.lineHeight;
-        guiGraphics.drawSpecial((MultiBufferSource bufferSource) -> {
-            font.drawInBatch(component,
-                    posX,
-                    posY,
-                    -1,
-                    true,
-                    guiGraphics.pose().last().pose(),
-                    bufferSource,
-                    Font.DisplayMode.NORMAL,
-                    0,
-                    0XF000F0);
-        });
-        guiGraphics.pose().popPose();
+        guiGraphics.drawString(font, component, (int) posX, (int) posY, -1, true);
+
+        guiGraphics.pose().popMatrix();
     }
 
     /**
@@ -72,9 +60,7 @@ public class DisplayEntryRenderHelper {
         int j = y - 3 - 9;
         int k = width + 3 + 3 + 18;
         int l = height + 3 + 3 + 18;
-        guiGraphics.pose().pushPose();
-        guiGraphics.blitSprite(RenderType::guiTextured, BACKGROUND_SPRITE, i, j, k, l, color);
-        guiGraphics.blitSprite(RenderType::guiTextured, FRAME_SPRITE, i, j, k, l, color);
-        guiGraphics.pose().popPose();
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND_SPRITE, i, j, k, l, color);
+        guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, FRAME_SPRITE, i, j, k, l, color);
     }
 }

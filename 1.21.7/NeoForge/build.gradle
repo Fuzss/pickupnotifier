@@ -4,3 +4,9 @@ dependencies {
     // Puzzles Lib
     modApi libs.puzzleslib.neoforge
 }
+
+tasks.withType(net.fabricmc.loom.task.AbstractRunTask).configureEach {
+    doFirst {
+        patchLaunchCfg()
+    }
+}

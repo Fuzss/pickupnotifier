@@ -6,6 +6,7 @@ import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.config.ClientConfig;
 import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -95,8 +96,8 @@ public abstract class DisplayEntry {
             components.add(name);
         }
 
-        if (displayAmount > 1 ||
-                displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
+        if (displayAmount > 1
+                || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
 
             components.add(Component.literal(reverse ? displayAmount + "x" : "x" + displayAmount));
         }
@@ -159,8 +160,8 @@ public abstract class DisplayEntry {
         boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite;
         int textStartX = mirrorPosition || !withSprite ? posX : posX + 16 + TEXT_ITEM_MARGIN;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(scale, scale, 1.0F);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().scale(scale, scale);
 
         this.renderBg(minecraft, guiGraphics, posX, posY, alpha);
 
@@ -177,8 +178,8 @@ public abstract class DisplayEntry {
             if (withSprite) {
 
                 int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
-                this.renderSprite(minecraft,
-                        guiGraphics,
+                this.renderSprite(guiGraphics,
+                        minecraft.font,
                         mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX,
                         posY,
                         scale,
@@ -186,7 +187,7 @@ public abstract class DisplayEntry {
             }
         }
 
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
 
     private void renderBg(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float alpha) {
@@ -214,5 +215,5 @@ public abstract class DisplayEntry {
         }
     }
 
-    protected abstract void renderSprite(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float scale, float fadeTime);
+    protected abstract void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float scale, float fadeTime);
 }
