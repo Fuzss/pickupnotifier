@@ -83,7 +83,7 @@ public class ClientConfig implements ConfigCore {
             callback.accept(builder.comment("Offset on x-axis from screen border.").defineInRange("offset_x", 8, 0, Integer.MAX_VALUE), v -> this.offsetX = v);
             callback.accept(builder.comment("Offset on y-axis from screen border.").defineInRange("offset_y", 4, 0, Integer.MAX_VALUE), v -> this.offsetY = v);
             callback.accept(builder.comment("Percentage of relative screen height entries are allowed to fill at max.").defineInRange("max_height", 0.5, 0.0, 1.0), v -> this.maxHeight = v);
-            callback.accept(builder.comment("Scale of entries. A lower scale will make room for more rows to show. Works together with \"GUI Scale\" option in \"Video Settings\".").defineInRange("scale", 4, 1, 24), v -> this.scale = v);
+            callback.accept(builder.comment("Scale of entries. A lower scale will make room for more rows to show. Works together with \"GUI Scale\" option in \"Video Settings\".").defineInRange("scale", 6, 1, 24), v -> this.scale = v);
         }
     }
 
