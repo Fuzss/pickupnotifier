@@ -8,6 +8,7 @@ import fuzs.pickupnotifier.config.ClientConfig;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -25,17 +26,14 @@ public class DrawEntriesHandler {
     }
 
     public void addHandledEntity(int itemId) {
-
         this.handledEntities.put(itemId, new MutableInt());
     }
 
     public boolean isItemEntityHandled(int itemId) {
-
         return this.handledEntities.containsKey(itemId);
     }
 
     public PickUpCollector getCollector() {
-
         return this.collector;
     }
 
@@ -59,16 +57,17 @@ public class DrawEntriesHandler {
 
         if (this.collector.isEmpty()) return;
 
-        float scale = PickUpNotifier.CONFIG.get(ClientConfig.class).display.scale / 6.0F;
+        Font font = Minecraft.getInstance().font;
+        float scale = PickUpNotifier.CONFIG.get(ClientConfig.class).display.getScale();
         int screenWidth = (int) (guiGraphics.guiWidth() / scale);
         int screenHeight = (int) (guiGraphics.guiHeight() / scale);
         PositionPreset position = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position;
         int posX = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.offsetX / scale);
         int posY = (int) (PickUpNotifier.CONFIG.get(ClientConfig.class).display.offsetY / scale);
         int offset = position.getY(DisplayEntry.ENTRY_HEIGHT, screenHeight, posY);
-        float tickDelta = deltaTracker.getGameTimeDeltaPartialTick(false);
+        float partialTick = deltaTracker.getGameTimeDeltaPartialTick(false);
         int totalFade = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move ?
-                (int) (this.collector.getTotalFade(tickDelta) * DisplayEntry.ENTRY_HEIGHT) : 0;
+                (int) (this.collector.getTotalFade(partialTick) * DisplayEntry.ENTRY_HEIGHT) : 0;
         int entryX;
         int entryY = offset + (position.bottom() ? totalFade : -totalFade);
         int entryHeight = position.bottom() ? DisplayEntry.ENTRY_HEIGHT : -DisplayEntry.ENTRY_HEIGHT;
@@ -89,18 +88,17 @@ public class DrawEntriesHandler {
 
             if (mayRender) {
 
-                Minecraft minecraft = Minecraft.getInstance();
-                entryX = position.getX(entry.getEntryWidth(minecraft), screenWidth, posX);
+                entryX = position.getX(entry.getEntryWidth(font), screenWidth, posX);
                 float alpha;
                 if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.move) {
 
                     alpha = Mth.clamp((float) (entryY - offset) / entryHeight, 0.0F, 1.0F);
                 } else {
 
-                    alpha = entry.getRemainingTicksRelative(tickDelta);
+                    alpha = entry.getRemainingTicksRelative(partialTick);
                 }
 
-                entry.render(minecraft, guiGraphics, entryX, entryY, alpha, scale);
+                entry.render(guiGraphics, font, entryX, entryY, alpha);
             }
 
             entryY -= entryHeight;

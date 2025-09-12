@@ -95,7 +95,7 @@ public class ClientConfig implements ConfigCore {
         public int offsetX;
         public int offsetY;
         public double maxHeight;
-        public int scale;
+        int scale;
         @Config(description = "Where and if to display the amount of items picked up. 'SPRITE' will render the amount on the item sprite like in inventories, 'TEXT' will add a dedicated text including the amount to the item name display.")
         public DisplayAmount displayAmount = DisplayAmount.TEXT;
         @Config(description = "Add the total amount of an item in your inventory to the entry.")
@@ -103,7 +103,7 @@ public class ClientConfig implements ConfigCore {
         @Config(description = "Should the picked up amount be shown when it's just a single item.")
         public boolean displaySingleCount = true;
         @Config(description = "Mode for drawing a background behind entries for better visibility. 'CHAT' is similar to the chat background, 'TOOLTIP' uses the tooltip background rendering instead.")
-        public EntryBackground entryBackground = EntryBackground.NONE;
+        public EntryBackground entryBackground = EntryBackground.CHAT;
         @Config(description = "Add the name of the item to the entry.")
         public boolean displayItemName = true;
 
@@ -131,6 +131,10 @@ public class ClientConfig implements ConfigCore {
             callback.accept(builder.comment(
                             "Scale of entries. A lower scale will make room for more rows to show. Works together with \"GUI Scale\" option in \"Video Settings\".")
                     .defineInRange("scale", 4, 1, 24), v -> this.scale = v);
+        }
+
+        public float getScale() {
+            return this.scale / 6.0F;
         }
     }
 

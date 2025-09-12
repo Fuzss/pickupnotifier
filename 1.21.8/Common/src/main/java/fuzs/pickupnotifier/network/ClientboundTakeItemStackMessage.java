@@ -18,7 +18,7 @@ public record ClientboundTakeItemStackMessage(ItemStack itemStack) implements Cl
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                AddEntriesHandler.addItemEntry(context.client(), ClientboundTakeItemStackMessage.this.itemStack);
+                AddEntriesHandler.addItemEntry(ClientboundTakeItemStackMessage.this.itemStack);
             }
         };
     }

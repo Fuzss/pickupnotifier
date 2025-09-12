@@ -6,7 +6,10 @@
   "mixins": [
   ],
   "client": [
-    "client.ClientPacketListenerMixin"
+    "client.ClientPacketListenerMixin",
+    "client.GuiItemRenderStateMixin",
+    "client.GuiRendererMixin",
+    "client.GuiRenderStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

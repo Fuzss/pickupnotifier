@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Rarity;
 
 public class ExperienceDisplayEntry extends DisplayEntry {
@@ -44,12 +43,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     }
 
     @Override
-    protected int getInventoryCount(Inventory inventory) {
-        return 0;
-    }
-
-    @Override
-    protected void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float scale, float fadeTime) {
+    protected void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float fadeTime) {
         int textureOffset = getXpTexture(this.getDisplayAmount());
         int textureX = textureOffset % 4 * 16;
         int textureY = textureOffset / 4 * 16;

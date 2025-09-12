@@ -8,7 +8,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public record ClientboundTakeItemMessage(int itemId, int amount) implements ClientboundPlayMessage {
-    public static final StreamCodec<ByteBuf, ClientboundTakeItemMessage> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT,
+    public static final StreamCodec<ByteBuf, ClientboundTakeItemMessage> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.VAR_INT,
             ClientboundTakeItemMessage::itemId,
             ByteBufCodecs.VAR_INT,
             ClientboundTakeItemMessage::amount,
@@ -19,7 +20,7 @@ public record ClientboundTakeItemMessage(int itemId, int amount) implements Clie
         return new MessageListener<Context>() {
             @Override
             public void accept(Context context) {
-                AddEntriesHandler.addPickUpEntry(context.client(),
+                AddEntriesHandler.addPickUpEntry(context.level(),
                         ClientboundTakeItemMessage.this.itemId,
                         ClientboundTakeItemMessage.this.amount);
             }

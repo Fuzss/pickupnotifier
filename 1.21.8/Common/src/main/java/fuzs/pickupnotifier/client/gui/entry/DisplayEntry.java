@@ -1,6 +1,5 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
-import com.google.common.collect.Lists;
 import fuzs.pickupnotifier.PickUpNotifier;
 import fuzs.pickupnotifier.client.util.DisplayEntryRenderHelper;
 import fuzs.pickupnotifier.config.ClientConfig;
@@ -8,15 +7,15 @@ import fuzs.puzzleslib.api.item.v2.ItemHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Rarity;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,78 +28,45 @@ public abstract class DisplayEntry {
     private int displayAmount;
     private Component component;
 
-    protected DisplayEntry(int displayAmount, Rarity rarity) {
-
+    public DisplayEntry(int displayAmount, Rarity rarity) {
         this.displayAmount = displayAmount;
         this.rarity = rarity;
         this.resetEntry();
     }
 
-    private static MutableComponent wrapInBrackets(Component toWrap) {
-
-        return Component.literal("(").append(toWrap).append(")");
-    }
-
     public int getDisplayAmount() {
-
         return this.displayAmount;
     }
 
     public boolean mayDiscard() {
-
         return this.remainingTicks <= 0;
     }
 
     public void tick() {
-
         if (this.remainingTicks > 0) {
-
             this.remainingTicks--;
         }
     }
 
     protected abstract Component getEntryName();
 
-    protected abstract int getInventoryCount(Inventory inventory);
-
-    public Component getTextComponent(Player player) {
+    public Component getTextComponent() {
 
         if (this.component == null) {
 
-            int displayAmount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.isText() ?
-                    this.getDisplayAmount() : 0;
-            int inventoryCount = PickUpNotifier.CONFIG.get(ClientConfig.class).display.inventoryCount ?
-                    this.getInventoryCount(player.getInventory()) : 0;
             this.component = Component.empty()
-                    .append(this.createTextComponent(this.getEntryName(),
-                            displayAmount,
-                            inventoryCount,
-                            PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored()))
+                    .append(this.createTextComponent(PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored()))
                     .setStyle(this.getComponentStyle());
         }
 
         return this.component;
     }
 
-    private Component createTextComponent(Component name, int displayAmount, int inventoryCount, boolean reverse) {
+    private Component createTextComponent(boolean reverse) {
 
-        List<Component> components = Lists.newArrayList();
+        List<Component> components = new ArrayList<>();
 
-        if (inventoryCount > 0) {
-
-            components.add(wrapInBrackets(Component.literal(String.valueOf(inventoryCount))));
-        }
-
-        if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayItemName) {
-
-            components.add(name);
-        }
-
-        if (displayAmount > 1
-                || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
-
-            components.add(Component.literal(reverse ? displayAmount + "x" : "x" + displayAmount));
-        }
+        this.appendTextComponents(components, reverse);
 
         if (reverse) {
 
@@ -110,9 +76,26 @@ public abstract class DisplayEntry {
         return components.stream()
                 .reduce(((component1, component2) -> Component.empty()
                         .append(component1)
-                        .append(" ")
+                        .append(CommonComponents.SPACE)
                         .append(component2)))
                 .orElse(Component.empty());
+    }
+
+    @MustBeInvokedByOverriders
+    protected void appendTextComponents(List<Component> components, boolean reverse) {
+        if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayItemName) {
+
+            components.add(this.getEntryName());
+        }
+
+        int displayAmount =
+                PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.isText() ? this.getDisplayAmount() :
+                        0;
+        if (displayAmount > 1
+                || displayAmount == 1 && PickUpNotifier.CONFIG.get(ClientConfig.class).display.displaySingleCount) {
+
+            components.add(Component.literal(reverse ? displayAmount + "x" : "x" + displayAmount));
+        }
     }
 
     private Style getComponentStyle() {
@@ -147,15 +130,16 @@ public abstract class DisplayEntry {
         this.resetEntry();
     }
 
-    public int getEntryWidth(Minecraft minecraft) {
+    public int getEntryWidth(Font font) {
 
-        int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
+        int textWidth = font.width(this.getTextComponent());
         return PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite ?
                 textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) + 16 : textWidth;
     }
 
-    public void render(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float alpha, float scale) {
+    public void render(GuiGraphics guiGraphics, Font font, int posX, int posY, float alpha) {
 
+        float scale = PickUpNotifier.CONFIG.get(ClientConfig.class).display.getScale();
         boolean mirrorPosition = PickUpNotifier.CONFIG.get(ClientConfig.class).display.position.mirrored();
         boolean withSprite = PickUpNotifier.CONFIG.get(ClientConfig.class).display.drawSprite;
         int textStartX = mirrorPosition || !withSprite ? posX : posX + 16 + TEXT_ITEM_MARGIN;
@@ -163,44 +147,39 @@ public abstract class DisplayEntry {
         guiGraphics.pose().pushMatrix();
         guiGraphics.pose().scale(scale, scale);
 
-        this.renderBg(minecraft, guiGraphics, posX, posY, alpha);
+        this.renderBg(guiGraphics, font, posX, posY, alpha);
 
         float fadeTime = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.fadeAway ? 1.0F - alpha : 1.0F;
-        // prevents a bug where names would appear once at the end with full alpha
-        if (fadeTime * 255.0F >= 5.0F) {
+        guiGraphics.drawString(font, this.getTextComponent(), textStartX, posY + 4, ARGB.white(fadeTime), true);
+        if (withSprite) {
 
-            guiGraphics.drawString(minecraft.font,
-                    this.getTextComponent(minecraft.player),
-                    textStartX,
-                    posY + 4,
-                    ARGB.white(fadeTime),
-                    true);
-            if (withSprite) {
-
-                int textWidth = minecraft.font.width(this.getTextComponent(minecraft.player));
-                this.renderSprite(guiGraphics,
-                        minecraft.font,
-                        mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX,
-                        posY,
-                        scale,
-                        fadeTime);
-            }
+            int textWidth = font.width(this.getTextComponent());
+            this.renderSprite(guiGraphics,
+                    font,
+                    mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX,
+                    posY,
+                    fadeTime);
         }
 
         guiGraphics.pose().popMatrix();
     }
 
-    private void renderBg(Minecraft minecraft, GuiGraphics guiGraphics, int posX, int posY, float alpha) {
+    private void renderBg(GuiGraphics guiGraphics, Font font, int posX, int posY, float alpha) {
 
         switch (PickUpNotifier.CONFIG.get(ClientConfig.class).display.entryBackground) {
 
             case CHAT -> {
 
                 int backgroundOpacity = ARGB.color(ARGB.as8BitChannel(Mth.clamp(
-                        minecraft.options.textBackgroundOpacity().get().floatValue() * (1.0F - alpha), 0.0F, 1.0F)), 0);
+                        Minecraft.getInstance().options.textBackgroundOpacity().get().floatValue() * (1.0F - alpha),
+                        0.0F,
+                        1.0F)), 0);
                 int endY = posY + 16;
-                if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.isSprite()) endY += 1;
-                guiGraphics.fill(posX - 3, posY, posX + this.getEntryWidth(minecraft) + 5, endY, backgroundOpacity);
+                if (PickUpNotifier.CONFIG.get(ClientConfig.class).display.displayAmount.isSprite()) {
+                    endY += 1;
+                }
+
+                guiGraphics.fill(posX - 3, posY, posX + this.getEntryWidth(font) + 5, endY, backgroundOpacity);
             }
 
             case TOOLTIP -> {
@@ -208,12 +187,12 @@ public abstract class DisplayEntry {
                 DisplayEntryRenderHelper.renderTooltipBackground(guiGraphics,
                         posX,
                         posY + 3,
-                        this.getEntryWidth(minecraft),
+                        this.getEntryWidth(font),
                         9,
                         ARGB.white(1.0F - alpha));
             }
         }
     }
 
-    protected abstract void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float scale, float fadeTime);
+    protected abstract void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float fadeTime);
 }
