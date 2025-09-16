@@ -7,14 +7,19 @@ import fuzs.puzzleslib.api.core.v1.ModLoaderEnvironment;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig implements ConfigCore {
-    @Config(description = {"Collect partial pick-up entries (when there isn't enough room in your inventory) in the log.", "Might accidentally log items that have not been picked up, therefore it can be disabled."})
+    @Config(description = {
+            "Collect partial pick-up entries (when there isn't enough room in your inventory) in the log.",
+            "Might accidentally log items that have not been picked up, therefore it can be disabled."
+    })
     public boolean partialPickUps = true;
     public boolean backpackCompat;
 
     @Override
     public void addToBuilder(ModConfigSpec.Builder builder, ValueCallback callback) {
         if (ModLoaderEnvironment.INSTANCE.getModLoader().isForgeLike()) {
-            callback.accept(builder.comment("Show entries for items picked up that don't go to the player's inventory. This will enable compatibility with some backpack mods, but might also falsely log items the player never actually receives; depending on the backpack implementation.").define("backpack_integration", true), v -> this.backpackCompat = v);
+            callback.accept(builder.comment(
+                            "Show entries for items picked up that don't go to the player's inventory. This will enable compatibility with some backpack mods, but might also falsely log items the player never actually receives; depending on the backpack implementation.")
+                    .define("backpack_integration", true), v -> this.backpackCompat = v);
         }
     }
 }

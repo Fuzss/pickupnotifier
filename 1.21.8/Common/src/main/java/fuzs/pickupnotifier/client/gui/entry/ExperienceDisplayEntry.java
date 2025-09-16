@@ -1,6 +1,9 @@
 package fuzs.pickupnotifier.client.gui.entry;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import fuzs.pickupnotifier.PickUpNotifier;
+import fuzs.pickupnotifier.config.ClientConfig;
+import fuzs.pickupnotifier.config.CombineEntries;
 import fuzs.puzzleslib.api.core.v1.utility.ResourceLocationHelper;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,40 +17,41 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.item.Rarity;
 
-public class ExperienceDisplayEntry extends DisplayEntry {
+public final class ExperienceDisplayEntry extends DisplayEntry<Component> {
     private static final ResourceLocation EXPERIENCE_ORB_TEXTURES = ResourceLocationHelper.withDefaultNamespace(
             "textures/entity/experience_orb.png");
 
-    private final Component name;
-    private int ageInTicks;
+    private int tickCount;
 
-    public ExperienceDisplayEntry(Component name, int amount) {
-        super(amount, Rarity.UNCOMMON);
-        this.name = name;
+    public ExperienceDisplayEntry(Component name, int displayAmount, int tickCount) {
+        super(name, displayAmount, Rarity.UNCOMMON);
+        this.tickCount = tickCount;
+    }
+
+    @Override
+    protected Component getEntryName(Component component) {
+        return component;
     }
 
     @Override
     public void tick() {
         super.tick();
-        this.ageInTicks++;
+        this.tickCount++;
     }
 
     @Override
-    protected Component getEntryName() {
-        return this.name;
+    public DisplayEntry<?> mergeWith(DisplayEntry<?> otherDisplayEntry) {
+        return new ExperienceDisplayEntry(this.item,
+                this.getDisplayAmount() + otherDisplayEntry.getDisplayAmount(),
+                this.tickCount);
     }
 
     @Override
-    public boolean mayMergeWith(DisplayEntry other, boolean excludeNamed) {
-        return other instanceof ExperienceDisplayEntry;
-    }
-
-    @Override
-    protected void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float fadeTime) {
+    protected void renderSprite(GuiGraphics guiGraphics, Font font, int posX, int posY, float alpha) {
         int textureOffset = getXpTexture(this.getDisplayAmount());
         int textureX = textureOffset % 4 * 16;
         int textureY = textureOffset / 4 * 16;
-        int textureColor = getExperienceOrbColor(this.ageInTicks / 2.0F, ARGB.as8BitChannel(fadeTime));
+        int textureColor = getExperienceOrbColor(this.tickCount / 2.0F, ARGB.as8BitChannel(alpha));
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED,
                 EXPERIENCE_ORB_TEXTURES,
                 posX,
@@ -63,11 +67,28 @@ public class ExperienceDisplayEntry extends DisplayEntry {
                 textureColor);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries
+                != CombineEntries.NEVER) {
+            return obj instanceof ExperienceDisplayEntry;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
+    }
+
     /**
      * @see net.minecraft.client.renderer.entity.ExperienceOrbRenderer#render(ExperienceOrbRenderState, PoseStack,
      *         MultiBufferSource, int)
      */
-    static int getExperienceOrbColor(float ageInTicks, int alpha) {
+    private static int getExperienceOrbColor(float ageInTicks, int alpha) {
         int red = ARGB.as8BitChannel((Mth.sin(ageInTicks) + 1.0F) * 0.5F);
         int green = 255;
         int blue = ARGB.as8BitChannel((Mth.sin(ageInTicks + (Mth.PI * 4.0F / 3.0F)) + 1.0F) * 0.1F);
@@ -77,7 +98,7 @@ public class ExperienceDisplayEntry extends DisplayEntry {
     /**
      * @see ExperienceOrb#getIcon()
      */
-    static int getXpTexture(int displayCount) {
+    private static int getXpTexture(int displayCount) {
         if (displayCount >= 2477) {
             return 10;
         } else if (displayCount >= 1237) {

@@ -15,7 +15,8 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.Iterator;
+import java.util.Map;
 
 public class AddEntriesHandler {
 
@@ -31,7 +32,7 @@ public class AddEntriesHandler {
 
     public static void addPickUpEntry(ClientLevel clientLevel, int entityId, int amount) {
         // called by package from server
-        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient) {
+        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.clientOnly) {
             // items collected on the server-side are added to this list to avoid creating duplicates when the client collects them as well
             DrawEntriesHandler.INSTANCE.addHandledEntity(entityId);
             onEntityPickup(clientLevel, entityId, amount);
@@ -40,7 +41,7 @@ public class AddEntriesHandler {
 
     public static void addItemEntry(ItemStack itemStack) {
         // called by a packet sent from the server
-        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.forceClient
+        if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.clientOnly
                 && PickUpNotifier.CONFIG.get(ClientConfig.class).general.includeItems) {
             addItemEntry(itemStack, itemStack.getCount());
         }
@@ -75,7 +76,7 @@ public class AddEntriesHandler {
         // sometimes null, other mods do funny things
         if (itemStack != null && !itemStack.isEmpty()) {
 
-            if (!PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.blacklist.contains(itemStack.getItem())) {
+            if (!PickUpNotifier.CONFIG.get(ClientConfig.class).general.hiddenItems.contains(itemStack.getItem())) {
 
                 addEntry(new ItemDisplayEntry(itemStack, amount));
             }
@@ -91,12 +92,11 @@ public class AddEntriesHandler {
                 amount = orb.getValue();
             }
 
-            addEntry(new ExperienceDisplayEntry(orb.getName(), amount));
+            addEntry(new ExperienceDisplayEntry(orb.getName(), amount, orb.tickCount));
         }
     }
 
-    private static void addEntry(DisplayEntry displayEntry) {
-
+    private static void addEntry(DisplayEntry<?> displayEntry) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player != null && minecraft.player.getAbilities().instabuild && PickUpNotifier.CONFIG.get(
                 ClientConfig.class).general.disableInCreative) {
@@ -104,27 +104,22 @@ public class AddEntriesHandler {
         }
 
         int scaledHeight = (int) (minecraft.getWindow().getGuiScaledHeight()
-                / (PickUpNotifier.CONFIG.get(ClientConfig.class).display.getScale()));
+                / (PickUpNotifier.CONFIG.get(ClientConfig.class).display.getDisplayScale()));
         int maxSize = (int) (scaledHeight * PickUpNotifier.CONFIG.get(ClientConfig.class).display.maxHeight
-                / DisplayEntry.ENTRY_HEIGHT) - 1;
+                / DisplayEntry.ELEMENT_HEIGHT) - 1;
 
-        ClientConfig.CombineEntries combineEntries = PickUpNotifier.CONFIG.get(ClientConfig.class).behavior.combineEntries;
-        Optional<DisplayEntry> duplicateDisplayEntry;
-        if (combineEntries == ClientConfig.CombineEntries.NEVER) {
-            duplicateDisplayEntry = Optional.empty();
-        } else {
-            duplicateDisplayEntry = DrawEntriesHandler.INSTANCE.getCollector()
-                    .findDuplicate(displayEntry, combineEntries == ClientConfig.CombineEntries.EXCLUDE_NAMED);
+        Map<Object, DisplayEntry<?>> collector = DrawEntriesHandler.INSTANCE.getCollector();
+        DisplayEntry<?> oldDisplayEntry = collector.remove(displayEntry.getKey());
+        if (oldDisplayEntry != null) {
+            displayEntry = displayEntry.mergeWith(oldDisplayEntry);
         }
 
-        if (duplicateDisplayEntry.isPresent()) {
-
-            DisplayEntry duplicate = duplicateDisplayEntry.get();
-            duplicate.mergeWith(displayEntry);
-            DrawEntriesHandler.INSTANCE.getCollector().refresh(duplicate);
-        } else {
-
-            DrawEntriesHandler.INSTANCE.getCollector().add(displayEntry, maxSize);
+        if (!collector.isEmpty() && collector.size() >= maxSize) {
+            Iterator<Map.Entry<Object, DisplayEntry<?>>> iterator = collector.entrySet().iterator();
+            iterator.next();
+            iterator.remove();
         }
+
+        collector.put(displayEntry.getKey(), displayEntry);
     }
 }
