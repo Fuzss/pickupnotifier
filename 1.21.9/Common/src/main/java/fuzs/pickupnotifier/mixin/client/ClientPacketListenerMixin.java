@@ -25,7 +25,7 @@ abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl 
 
     @Inject(method = "handleTakeItemEntity",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V",
+                    target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V",
                     shift = At.Shift.AFTER))
     public void handleTakeItemEntity(ClientboundTakeItemEntityPacket packet, CallbackInfo callback) {
         AddEntriesHandler.onEntityPickup(this.level, packet.getItemId(), packet.getPlayerId(), packet.getAmount());

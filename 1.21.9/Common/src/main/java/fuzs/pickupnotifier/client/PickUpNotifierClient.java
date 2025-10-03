@@ -23,8 +23,8 @@ public class PickUpNotifierClient implements ClientModConstructor {
 
     @Override
     public void onRegisterGuiLayers(GuiLayersContext context) {
-        context.registerGuiLayer(PickUpNotifier.id("pick_up_entries"),
-                GuiLayersContext.DEBUG_OVERLAY,
+        context.registerGuiLayer(GuiLayersContext.STATUS_EFFECTS,
+                PickUpNotifier.id("pick_up_entries"),
                 DrawEntriesHandler.INSTANCE::renderPickUpEntries);
     }
 }
