@@ -142,11 +142,7 @@ public class DrawEntriesHandler {
 
     private static ScreenRectangle getScreenRectangleIntersection(ScreenRectangle originalRectangle, ScreenRectangle elementRectangle) {
         ScreenRectangle screenRectangle = originalRectangle.intersection(elementRectangle);
-        if (screenRectangle != null) {
-            return screenRectangle;
-        } else {
-            return ScreenRectangle.empty();
-        }
+        return screenRectangle != null ? screenRectangle : ScreenRectangle.empty();
     }
 
     public void onPlayerLeave(LocalPlayer player, MultiPlayerGameMode multiPlayerGameMode, Connection connection) {
